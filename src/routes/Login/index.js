@@ -60,8 +60,8 @@ class Login extends React.Component {
     });
   };
   addCookie() {
-    // 这里模拟登陆成功, 将身份信息注册至cookie中, 时限5分钟
-    window.setCookie('isLogin','true',300);
+    // 这里模拟登陆成功, 将身份信息注册至cookie中, 时限30分钟
+    window.setCookie('isLogin','true',1800);
     console.log('isLogin: ' + window.getCookie('isLogin'))
   };
   render() {

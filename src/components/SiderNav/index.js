@@ -6,7 +6,6 @@ class SiderNav extends React.Component {
   render() {
     return (
       <div style={{height: '100vh',overflowY:'auto',overflowX:'hidden'}}>
-        <div style={styles.logo}>这里显示LOGO!</div>
         <CustomMenu menus={menus}/>
       </div>
     )

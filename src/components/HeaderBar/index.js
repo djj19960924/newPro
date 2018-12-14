@@ -7,7 +7,9 @@ class HeaderBar extends React.Component{
   }
   render() {
     return(
-      <div name="HeaderBar">头部</div>
+      <div name="HeaderBar">
+        <div className="logo">BuyersHouse后台管理系统</div>
+      </div>
     )}
 }
 
