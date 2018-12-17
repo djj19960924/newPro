@@ -231,6 +231,8 @@ module.exports = {
       '@src':path.resolve("src"),
       '@img':path.resolve("src/resource/img"),
       '@js':path.resolve("src/resource/js"),
+      '@components':path.resolve("src/resource/components"),
+      '@pages':path.resolve("src/pages"),
     },
     plugins: [
       // Adds support for installing with Plug'n'Play, leading to faster installs and adding

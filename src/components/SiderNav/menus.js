@@ -5,25 +5,31 @@ const menus = [
     key: '/'
   },
   {
-    title: '一级标题',
-    icon: 'home',
-    key: '/home/first',
+    title: '订单',
+    icon: 'file-text',
+    key: '/order',
     subs: [
       {
-        title: '二级标题',
-        icon: 'home',
-        key: '/home/first/second',
-        subs: [
-          {key: '/home/first/second/third1', title: '三级标题', icon: '',},
-          {key: '/home/first/second/third2', title: '三级标题', icon: '',},
-        ]
+        title: '未匹配订单',
+        icon: 'file-text',
+        key: '/order/unmatched'
+      },
+      {
+        title: '已匹配订单',
+        icon: 'file-done',
+        key: '/order/matched'
       }
     ]
   },
   {
+    title: '预约信息',
+    icon: 'smile',
+    key: '/appointment-info',
+  },
+  {
     title: '关于',
     icon: 'info-circle-o',
-    key: '/home/about'
+    key: '/about'
   }
 ]
 

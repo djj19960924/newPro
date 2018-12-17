@@ -33,12 +33,11 @@ class Index extends React.Component {
             trigger={null}
             // 定义侧边栏宽度
             width={180}
-            theme="dark"
-            style={{position: 'fixed', left: 0, top: 64, bottom: 0, width: 180,}}>
+            style={{position: 'fixed', left: 0, top: 64, bottom: 0, width: 180, }}>
             <SiderNav />
           </Sider>
           <Layout>
-            <Header style={{position: 'fixed', left: 0, right: 0, height: 64, backgroundColor: '#fff'}}
+            <Header style={{position: 'fixed', left: 0, right: 0, height: 64, }}
             >
               <HeaderBar />
             </Header>
