@@ -1,11 +1,13 @@
 import React from 'react';
 import md5 from '@js/md5';
 import { Link } from 'react-router-dom';
+import { inject, observer } from 'mobx-react/index'
 import { Form, Icon, Input, Button, Checkbox, } from 'antd';
 import './index.less';
 
 const FormItem = Form.Item;
 
+@inject('appStore') @observer @Form.create()
 class Login extends React.Component {
   constructor(props) {
     super(props);
@@ -113,6 +115,6 @@ class Login extends React.Component {
 }
 
 // 这里注入表单验证, 如无需表单验证或自定义验证内容和时机还有规则, 则不需要添加Form.create(), 具体详见antd文档
-Login = Form.create()(Login);
+// Login = Form.create()(Login);
 
 export default Login;
