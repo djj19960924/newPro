@@ -31,7 +31,9 @@ class Login extends React.Component {
         // 密码需要传输md5加密后的数据
         console.log(md5(this.props.form.getFieldValue('password')));
         this.addCookie();
-        this.props.history.push('/');
+        // 登陆以后进入的页面
+        // this.props.history.push('/');
+        this.props.history.push('/appointment-info');
         // 判断是否需要前端方法保存当前登录账号, 如需要, 则将账号信息保存进cookie
         if (this.props.form.getFieldValue('remember')) {
           // 设置默认账号名保存7天

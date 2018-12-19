@@ -1,9 +1,9 @@
 const menus = [
-  {
-    title: '首页',
-    icon: 'home',
-    key: '/'
-  },
+  // {
+  //   title: '首页',
+  //   icon: 'home',
+  //   key: '/'
+  // },
   {
     title: '订单',
     icon: 'file-text',

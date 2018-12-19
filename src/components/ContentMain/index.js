@@ -27,7 +27,10 @@ class ContentMain extends React.Component{
           <Route exact path="/order/matched" component={orderMatched} />
           <Route exact path="/appointment-info" component={appointmentInfo} />
           <Route exact path="/about" component={about} />
-          <PrivateRoute exact path="/" component={Home} />
+          <PrivateRoute exact path="/appointment-info" component={Home} />
+          {/*<PrivateRoute exact path="/" component={Home} />*/}
+          {/*这里可以配置404 not found 页面*/}
+          {/*<Route path="/" component={page404} />*/}
         </Switch>
       </div>
     )}
