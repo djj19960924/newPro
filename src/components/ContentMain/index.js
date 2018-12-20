@@ -11,7 +11,7 @@ import orderUnmatched from '@pages/Order/unmatched/';
 // 预约
 import appointmentInfo from '@pages/appointmentInfo/';
 // 关于
-import about from '@pages/about/';
+// import about from '@pages/about/';
 
 @withRouter
 class ContentMain extends React.Component{
@@ -26,8 +26,7 @@ class ContentMain extends React.Component{
           <Route exact path="/order/unmatched" component={orderUnmatched} />
           <Route exact path="/order/matched" component={orderMatched} />
           <Route exact path="/appointment-info" component={appointmentInfo} />
-          <Route exact path="/about" component={about} />
-          <PrivateRoute exact path="/appointment-info" component={Home} />
+          {/*<Route exact path="/about" component={about} />*/}
           {/*<PrivateRoute exact path="/" component={Home} />*/}
           {/*这里可以配置404 not found 页面*/}
           {/*<Route path="/" component={page404} />*/}

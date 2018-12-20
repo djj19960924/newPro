@@ -26,11 +26,11 @@ const menus = [
     icon: 'smile',
     key: '/appointment-info',
   },
-  {
-    title: '关于',
-    icon: 'info-circle-o',
-    key: '/about'
-  }
+  // {
+  //   title: '关于',
+  //   icon: 'info-circle-o',
+  //   key: '/about'
+  // }
 ]
 
 export default menus;

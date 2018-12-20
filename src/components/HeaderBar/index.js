@@ -9,6 +9,7 @@ class HeaderBar extends React.Component{
   constructor(props) {
     super(props);
     this.state = {
+      // 这里保存当前用户名
       userName: 'admin',
       message: 3,
     };
@@ -30,7 +31,7 @@ class HeaderBar extends React.Component{
         <div className="userInfo">
           <ul>
             {/*简单判断剩余消息信息*/}
-            <li className="message" onClick={this.clearMessage.bind(this)}>
+            <li className={this.state.message ? 'message hasMessage' : 'message'} onClick={this.clearMessage.bind(this)}>
               {this.state.message ? '有 ' : '暂无'}
               <span style={{color:'red'}}>{this.state.message ? this.state.message : ''}</span>
               {this.state.message ? ' 条' : ''}消息
