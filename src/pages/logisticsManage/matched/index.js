@@ -14,9 +14,8 @@ class orderMatched extends React.Component{
     fetch("http://api.maishoumiji.com/box/getUploadBoxOrder",{
       method:"GET",
       headers:{'Content-Type': 'application/x-www-form-urlencoded'},
-    }).then(response=>response.json()).then((res)=>{
-      this.setState({dataSource:res.boxOrderList})
-      // console.log(res.boxOrderList);
+    }).then(response=>response.json()).then(r=>{
+      this.setState({dataSource:r})
     })
   }
 

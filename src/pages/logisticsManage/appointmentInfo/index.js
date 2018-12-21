@@ -19,7 +19,7 @@ class appointmentInfo extends React.Component{
     fetch("http://api.maishoumiji.com/appointment/getAppointmentList",{
       method:"GET",
       headers:{'Content-Type': 'application/x-www-form-urlencoded'},
-    }).then(r => r.json()).then((r)=>{
+    }).then(r => r.json()).then(r=>{
       this.setState({
         dataSource: r,
       });
@@ -30,7 +30,7 @@ class appointmentInfo extends React.Component{
     this.allInformation()
   }
   airport (){
-    fetch("http://api.maishoumiji.com//appointment/getAppointmentByisFlight",{
+    fetch("http://api.maishoumiji.com/appointment/getAppointmentByisFlight",{
       method:"GET",
       headers:{'Content-Type': 'application/x-www-form-urlencoded'},
     }).then(response=>response.json()).then(r=>{

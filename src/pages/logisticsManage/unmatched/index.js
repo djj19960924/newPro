@@ -5,15 +5,6 @@ import XLSX$Consts from 'xlsx';
 import columns from './columns';
 import './index.less';
 
-const rowSelection = {
-  onChange: (selectedRowKeys, selectedRows) => {
-    // console.log( selectedRowKeys,  selectedRows);
-  },
-  getCheckboxProps: record => ({
-    disabled: record.name === 'Disabled User', // Column configuration not to be checked
-    name: record.name,
-  }),
-};
 class orderUnmatched extends React.Component{
   constructor(props) {
     super(props);
@@ -27,7 +18,6 @@ class orderUnmatched extends React.Component{
       headers:{'Content-Type': 'application/x-www-form-urlencoded'},
     }).then(response=>response.json()).then((res)=>{
       this.setState({dataSource:res.boxOrderList})
-      // console.log(res.boxOrderList);
     })
   }
   upload (){
