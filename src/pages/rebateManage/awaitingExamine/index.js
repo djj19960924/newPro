@@ -1,12 +1,13 @@
 import React from 'react';
-import { Select } from 'antd';
+import { Form, Icon, Input, Button, Checkbox, message, Select, DatePicker, } from 'antd';
 import ImageViewer from '@components/imageViewer/main';
-import { Form, Icon, Input, Button, Checkbox, message, } from 'antd';
 import { inject, observer } from 'mobx-react/index';
 
 import './index.less';
 
+const FormItem = Form.Item;
 const Option = Select.Option;
+
 let shopList = [];
 const testList = [];
 for (let l = 0; l<50; l++) {
@@ -63,6 +64,10 @@ class awaitingExamine extends React.Component{
       console.warn(r)
     })
   }
+  handleSubmit() {
+    console.log('提交!')
+    console.log(this.props.form.getFieldsValue())
+  }
   render() {
     let { showImageViewer, imgSrc, } = this.state;
     return (
@@ -87,7 +92,50 @@ class awaitingExamine extends React.Component{
             />
           </div>
           <div className="containerBody containerForm">
-
+            <Form onSubmit={this.handleSubmit.bind(this)} className="examineForm">
+              <FormItem>
+                <span>商场: {}</span>
+                <span>团号: {}</span>
+              </FormItem>
+              <FormItem>
+                <span>消费金额: </span>
+                <Input style={{ width: 120 }}
+                />
+                <span>属性: </span>
+                <Select style={{ width: 120 }}
+                        defaultValue="SG"
+                >
+                  <Option key="SG" >SG</Option>
+                  <Option key="MG" >MG</Option>
+                </Select>
+              </FormItem>
+              <FormItem>
+                <span>品牌: </span>
+                <Select style={{ width: 240 }}
+                        placeholder="请输入编码/品牌查询"
+                >
+                  {/*这里根据获取品牌数组遍历结果*/}
+                </Select>
+              </FormItem>
+              <FormItem>
+                <span>选择日期: </span>
+                <DatePicker style={{ width: 120 }}
+                />
+                <span>返点率: </span>
+                <Input defaultValue={15/*这里默认显示当天返点率*/}
+                       style={{ width: 120 }}
+                />
+              </FormItem>
+              <FormItem>
+                <Button type="primary"
+                        htmlType="submit"
+                        className="examineFormButton"
+                        style={{marginTop: '10px'}}
+                >
+                  提交!
+                </Button>
+              </FormItem>
+            </Form>
           </div>
         </div>
 
