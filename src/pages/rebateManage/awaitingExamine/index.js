@@ -123,8 +123,9 @@ class awaitingExamine extends React.Component{
                 />
                 <span>返点率: </span>
                 <Input defaultValue={15/*这里默认显示当天返点率*/}
-                       style={{ width: 120 }}
+                       style={{ width: 50 }}
                 />
+                <span> %</span>
               </FormItem>
               <FormItem>
                 <Button type="primary"

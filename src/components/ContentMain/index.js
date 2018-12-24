@@ -1,6 +1,5 @@
 import React from 'react';
 import { withRouter, Switch, Route, } from 'react-router-dom';
-import PrivateRoute from '../PrivateRoute';
 
 // 这里引用各个组件内容, 内容为方便管理, 统一写入pages页面
 // 主页
@@ -13,7 +12,10 @@ import appointmentInfo from '@pages/logisticsManage/appointmentInfo/';
 // 关于
 // import about from '@pages/about/';
 // 返点
+import adoptExaminePaid from '@pages/rebateManage/adoptExaminePaid/';
+import adoptExamineUnpaid from '@pages/rebateManage/adoptExamineUnpaid/';
 import awaitingExamine from '@pages/rebateManage/awaitingExamine/';
+import rejectExamine from '@pages/rebateManage/rejectExamine/';
 
 @withRouter
 class ContentMain extends React.Component{
@@ -29,11 +31,10 @@ class ContentMain extends React.Component{
           <Route exact path="/logistics-manage/matched" component={orderMatched} />
           <Route exact path="/logistics-manage/appointment-info" component={appointmentInfo} />
           {window.isTest && <Route exact path="/rebate-manage/awaiting-examine" component={awaitingExamine} />}
-          {/*<Route exact path="/rebate-manage/adopt-examine-unpaid" component={Home} />*/}
-          {/*<Route exact path="/rebate-manage/adopt-examine-paid" component={Home} />*/}
-          {/*<Route exact path="/rebate-manage/reject-examine" component={Home} />*/}
+          {window.isTest && <Route exact path="/rebate-manage/adopt-examine-unpaid" component={adoptExamineUnpaid} />}
+          {window.isTest && <Route exact path="/rebate-manage/adopt-examine-paid" component={adoptExaminePaid} />}
+          {window.isTest && <Route exact path="/rebate-manage/reject-examine" component={rejectExamine} />}
           {/*<Route exact path="/about" component={about} />*/}
-          {/*<PrivateRoute exact path="/" component={Home} />*/}
           {/*这里可以配置404 not found 页面*/}
           {/*<Route path="/" component={page404} />*/}
         </Switch>
