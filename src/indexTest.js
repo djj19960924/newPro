@@ -20,6 +20,7 @@ import 'antd/dist/antd.less';
 
 import App from './App';
 
+window.theUrl = 'http://192.168.3.32:8088';
 window.isTest = true;
 
 ReactDOM.render(

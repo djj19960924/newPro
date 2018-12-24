@@ -2,6 +2,12 @@
   width: 100%;
   height: 100%;
   background-color: #fff;
+  overflow: auto;
+
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button{
+    -webkit-appearance: none !important;
+  }
 
   .shopSelect {
     width: 100%;
@@ -14,9 +20,26 @@
     }
   }
 
+  .noTicket {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 24px;
+
+    .iconSmile{
+      color: #52c41a;
+      margin-right: 10px;
+    }
+
+    .iconShop{
+      color: #1890ff;
+      margin-right: 10px;
+    }
+  }
+
   .container {
     margin: 0 20px;
-    width: calc(100% - 40px);
+    //width: calc(100% - 40px);
+    width: 800px;
     height: 400px;
 
     .containerBody {
@@ -38,12 +61,23 @@
 
     .containerForm {
       width: calc(100% - 400px);
+      min-width: 400px;
       height: 500px;
       border-left: none;
       padding: 10px;
 
       .examineForm{
         // 表单样式
+
+        .ant-btn-danger{
+          color: #fff;
+          background-color: #ea494b;
+          border: 1px #ea494b solid;
+
+          &:hover{
+            background-color: #ff4d4f;
+          }
+        }
       }
     }
   }

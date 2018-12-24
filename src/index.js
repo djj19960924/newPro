@@ -20,6 +20,8 @@ import 'antd/dist/antd.less';
 
 import App from './App';
 
+window.theUrl = 'http://api.maishoumiji.com';
+
 ReactDOM.render(
   <HashRouter>
     <LocaleProvider locale={zh_CN}>

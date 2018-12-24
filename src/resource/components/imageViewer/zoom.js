@@ -4,8 +4,8 @@ const zoom = (onWheelEvent, dom) => {
   let imageModalWidth = parseInt(dom.style.width);
   let modalLeft = parseInt(dom.style.left);
 
-  // 计算缩放后的大小 每一次滚轮 100px
-  let calcWidth = imageModalWidth - e.deltaY;
+  // 计算缩放后的大小 每一次滚轮 50px
+  let calcWidth = imageModalWidth - e.deltaY / 2 ;
 
   // 限制最小 width = 400
   if (calcWidth <= 300) {
