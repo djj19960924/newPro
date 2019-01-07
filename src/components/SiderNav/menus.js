@@ -21,6 +21,18 @@ const menus = [
       },
     ]
   },
+  {
+    title: '返点管理',
+    icon: 'pay-circle',
+    key: '/rebate-manage',
+    subs: [
+      {
+        title: '待审核',
+        icon: 'file-unknown',
+        key: '/rebate-manage/awaiting-examine',
+      }
+    ]
+  },
 ]
 
 export default menus;

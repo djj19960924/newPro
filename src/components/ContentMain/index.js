@@ -30,7 +30,7 @@ class ContentMain extends React.Component{
           <Route exact path="/logistics-manage/unmatched" component={orderUnmatched} />
           <Route exact path="/logistics-manage/matched" component={orderMatched} />
           <Route exact path="/logistics-manage/appointment-info" component={appointmentInfo} />
-          {window.isTest && <Route exact path="/rebate-manage/awaiting-examine" component={awaitingExamine} />}
+          <Route exact path="/rebate-manage/awaiting-examine" component={awaitingExamine} />
           {window.isTest && <Route exact path="/rebate-manage/adopt-examine-unpaid" component={adoptExamineUnpaid} />}
           {window.isTest && <Route exact path="/rebate-manage/adopt-examine-paid" component={adoptExaminePaid} />}
           {window.isTest && <Route exact path="/rebate-manage/reject-examine" component={rejectExamine} />}
