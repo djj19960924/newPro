@@ -101,7 +101,7 @@ class adoptExamineUnpaid extends React.Component{
       dataIndex: 'returningMoney2',
       key: 'returningMoney2',
       render: (text, record) => (  //塞入内容
-        <div className={"ellipsis"} >{record.returningMoney*0.99}</div>
+        <div className={"ellipsis"} >{(record.returningMoney*0.99).toFixed(2)}</div>
       ),
     },{
       title: '操作',
