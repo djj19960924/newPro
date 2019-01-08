@@ -11,7 +11,7 @@ class orderMatched extends React.Component{
     };
   }
   componentWillMount() {
-    fetch("http://api.maishoumiji.com/box/getUploadBoxOrder",{
+    fetch(window.apiUrl+"/box/getUploadBoxOrder",{
       method:"GET",
       headers:{'Content-Type': 'application/x-www-form-urlencoded'},
     }).then(response=>response.json()).then(r=>{

@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button,Table,Icon,message} from 'antd';
+import {Button,Table,Icon,message, Pagination,} from 'antd';
 import './index.less'
 
 class adoptExamineUnpaid extends React.Component{
@@ -8,7 +8,6 @@ class adoptExamineUnpaid extends React.Component{
     this.state = {
       dataSource:[],
       remarks:'unShow',
-      payment:null,
       mask:'unShow',
       returningMoney:null,
       unionId:null,
@@ -20,29 +19,67 @@ class adoptExamineUnpaid extends React.Component{
       alipayName: null,
       alipayNo: null,
       returnedMoney: null,
-      returningMoney2:null
+      returningMoney2:null,
+      payment: 2,
+      pageNum: 1,
+      pageSize: 10,
+      pageTotal: null,
     };
   }
   componentWillMount() {
-    this.unPaid(2);
+    this.getProgramUserNotPayList();
   }
-  unPaid(payment) {
-    fetch(window.theUrl + '/programUser/getProgramUserNotPayList',{
+  // 获取列表
+  getProgramUserNotPayList(payment=this.state.payment,pageNum=this.state.pageNum,pageSize=this.state.pageSize) {
+    fetch(window.fandianUrl + '/programUser/getProgramUserNotPayList',{
       method:"post",
       headers:{'Content-Type': 'application/x-www-form-urlencoded'},
-      body:'payment='+payment
+      body:`payment=${payment}&pageNum=${pageNum}&pageSize=${pageSize}`
     }).then(response=>response.json()).then((res)=>{
-      this.setState({dataSource:res.data,payment:payment})
+      this.setState({
+        dataSource: res.data.list,
+        pageTotal: res.data.total,
+        pageSize: pageSize,
+        pageNum: pageNum,
+        payment: payment
+      })
     })
   }
-  notSetUp() {
+  // 调用获取列表事件
+  unPaid(payment) {
+    this.getProgramUserNotPayList(payment,1,10)
+  }
+  notSetUp(pageNum=this.state.pageNum,pageSize=this.state.pageSize) {
     fetch(window.theUrl + '/programUser/getProgramUserNoPayment',{
       method:"post",
       headers:{'Content-Type': 'application/x-www-form-urlencoded'},
-      body:'payment='
+      body:`payment=&pageNum=${pageNum}&pageSize=${pageSize}`
     }).then(response=>response.json()).then((res)=>{
-      this.setState({dataSource:res.data,payment:null})
+      this.setState({
+        dataSource:res.data.list,
+        pageTotal: res.data.total,
+        pageSize: pageSize,
+        pageNum: pageNum,
+        payment: null
+      })
     })
+  }
+  // 改变每页尺寸
+  changePageSize(pageNum,pageSize) {
+    // console.log(pageNum,pageSize)
+    if (this.state.payment===null) {
+      this.notSetUp(pageNum,pageSize)
+    } else {
+      this.getProgramUserNotPayList(this.state.payment,pageNum,pageSize)
+    }
+  }
+  // 翻页事件
+  changePage(pageNum,pageSize) {
+    if (this.state.payment===null) {
+      this.notSetUp(pageNum,pageSize)
+    } else {
+      this.getProgramUserNotPayList(this.state.payment,pageNum,pageSize)
+    }
   }
   makeMoney(payment,returningMoney,unionId) {
     this.setState({payment:payment,remarks:'showRemark',mask:'mask',returningMoney:returningMoney*0.99,unionId:unionId})
@@ -52,14 +89,16 @@ class adoptExamineUnpaid extends React.Component{
       body:'unionId='+unionId
     }).then(res=>res.json()).then((res)=>{
       if(res.status===10000){
-        this.setState({userName: res.data.userName,
+        this.setState({
+          userName: res.data.userName,
           cardNo: res.data.cardNo,
           openingBank: res.data.openingBank,
           wechatNo: res.data.wechatNo,
           alipayName: res.data.alipayName,
           alipayNo: res.data.alipayNo,
           returnedMoney: res.data.returnedMoney,
-          returningMoney2:res.data.returningMoney})
+          returningMoney2:res.data.returningMoney
+        })
       }
     })
   }
@@ -79,7 +118,7 @@ class adoptExamineUnpaid extends React.Component{
       if(res.status===10000){
         message.info('确认打款成功');
         this.setState({remarks:'unShow',mask:'unShow'});
-        this.unPaid(this.state.payment)
+        this.getProgramUserNotPayList(this.state.payment)
       }
     })
   }
@@ -117,7 +156,7 @@ class adoptExamineUnpaid extends React.Component{
           <div className={this.state.payment===2 ? 'choose':""} onClick={this.unPaid.bind(this,2)}>提现到支付宝</div>
           <div className={this.state.payment===1 ? 'choose':""} onClick={this.unPaid.bind(this,1)}>提现到银行卡</div>
           <div className={this.state.payment===3 ? 'choose':""} onClick={this.unPaid.bind(this,3)}>提现到微信</div>
-          <div className={this.state.payment==null ? 'choose':""} onClick={this.notSetUp.bind(this)}>未设置提现方式</div>
+          <div className={this.state.payment==null ? 'choose':""} onClick={this.notSetUp.bind(this,1,10)}>未设置提现方式</div>
         </div>
 
         <Table  id="table"
@@ -126,6 +165,19 @@ class adoptExamineUnpaid extends React.Component{
                 dataSource={this.state.dataSource}
                 bordered
                 rowKey={(record, index) => `id:${record.boxCode}${index}`}
+                pagination={false}
+        />
+        <Pagination className="tablePagination"
+                    total={this.state.pageTotal}
+                    // total={50}
+                    pageSize={this.state.pageSize}
+                    current={this.state.pageNum}
+                    showTotal={(total, range) => `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`}
+                    style={{float:'right',marginRight:'20px'}}
+                    onChange={this.changePage.bind(this)}
+                    showSizeChanger
+                    pageSizeOptions={['10','20','30','40']}
+                    onShowSizeChange={this.changePageSize.bind(this)}
         />
         <div className={this.state.mask} />
         <div className={this.state.remarks }>

@@ -13,7 +13,7 @@ class orderUnmatched extends React.Component{
     };
   }
   componentWillMount() {
-    fetch("http://api.maishoumiji.com/box/getBoxOrderList",{
+    fetch(window.apiUrl+"/box/getBoxOrderList",{
       method:"GET",
       headers:{'Content-Type': 'application/x-www-form-urlencoded'},
     }).then(response=>response.json()).then((res)=>{
@@ -21,7 +21,7 @@ class orderUnmatched extends React.Component{
     })
   }
   upload (){
-    fetch("http://api.maishoumiji.com/box/uploadBoxOrder",{
+    fetch(window.apiUrl+"/box/uploadBoxOrder",{
       method:"GET",
       headers:{'Content-Type': 'application/x-www-form-urlencoded'}
     }).then(response=>response.json()).then((res)=>{

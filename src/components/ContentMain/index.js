@@ -31,8 +31,8 @@ class ContentMain extends React.Component{
           <Route exact path="/logistics-manage/matched" component={orderMatched} />
           <Route exact path="/logistics-manage/appointment-info" component={appointmentInfo} />
           <Route exact path="/rebate-manage/awaiting-examine" component={awaitingExamine} />
-          {window.isTest && <Route exact path="/rebate-manage/adopt-examine-unpaid" component={adoptExamineUnpaid} />}
-          {window.isTest && <Route exact path="/rebate-manage/adopt-examine-paid" component={adoptExaminePaid} />}
+          <Route exact path="/rebate-manage/adopt-examine-unpaid" component={adoptExamineUnpaid} />
+          <Route exact path="/rebate-manage/adopt-examine-paid" component={adoptExaminePaid} />
           {window.isTest && <Route exact path="/rebate-manage/reject-examine" component={rejectExamine} />}
           {/*<Route exact path="/about" component={about} />*/}
           {/*这里可以配置404 not found 页面*/}

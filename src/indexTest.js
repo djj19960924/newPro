@@ -20,8 +20,10 @@ import 'antd/dist/antd.less';
 
 import App from './App';
 
- window.theUrl = 'http://192.168.3.32:8000';
-//window.theUrl = 'http://testapi.maishoumiji.com';
+// window.theUrl = 'http://192.168.3.32:8000';
+// window.theUrl = 'http://testapi.maishoumiji.com';
+window.apiUrl = 'http://api.maishoumiji.com';
+window.fandianUrl = 'http://fandian.maishoumiji.com';
 window.isTest = true;
 
 ReactDOM.render(

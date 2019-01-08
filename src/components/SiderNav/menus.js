@@ -30,6 +30,16 @@ const menus = [
         title: '待审核',
         icon: 'file-unknown',
         key: '/rebate-manage/awaiting-examine',
+      },
+      {
+        title: '通过-未返款',
+        icon: 'meh',
+        key: '/rebate-manage/adopt-examine-unpaid',
+      },
+      {
+        title: '通过-已返款',
+        icon: 'smile',
+        key: '/rebate-manage/adopt-examine-paid',
       }
     ]
   },

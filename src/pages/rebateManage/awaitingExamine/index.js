@@ -68,7 +68,7 @@ class awaitingExamine extends React.Component {
   }
 
   componentWillMount() {
-    fetch(window.theUrl + '/mall/getMallList', {
+    fetch(window.fandianUrl + '/mall/getMallList', {
       method: 'POST'
     }).then(r => r.json()).then(r => {
       // console.log(r)
@@ -111,7 +111,7 @@ class awaitingExamine extends React.Component {
   selectShop(val, option) {
     // val即商场名, option.key即商场ID
     // console.log(val, option.key)
-    fetch(window.theUrl + '/brand/getBrandList', {
+    fetch(window.fandianUrl + '/brand/getBrandList', {
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       // 这里给出搜索的页码与当前页数
@@ -135,7 +135,7 @@ class awaitingExamine extends React.Component {
   }
   // 根据商场名称获取小票接口
   getTicketList(f, val = this.state.currentShop) {
-    fetch(window.theUrl + '/recipt/getReciptByMallName', {
+    fetch(window.fandianUrl + '/recipt/getReciptByMallName', {
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       // 这里给出搜索的页码与当前页数
@@ -171,7 +171,7 @@ class awaitingExamine extends React.Component {
       brandName: name,
       rebateDate: date
     };
-    fetch(window.theUrl + '/rebate/getRebateByDate', {
+    fetch(window.fandianUrl + '/rebate/getRebateByDate', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(data),
@@ -318,7 +318,7 @@ class awaitingExamine extends React.Component {
           reciptMoney: the.reciptMoney,
           unionId: the.ticketList[the.currentTicketId].unionId,
         };
-        fetch(window.theUrl + '/recipt/checkReciptAllow', {
+        fetch(window.fandianUrl + '/recipt/checkReciptAllow', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(data),
@@ -367,7 +367,7 @@ class awaitingExamine extends React.Component {
         reciptId:this.state.ticketList[this.state.currentTicketId].reciptId,
         note:this.state.reason
       }
-      fetch(window.theUrl+'/recipt/checkReciptRejected',{
+      fetch(window.fandianUrl+'/recipt/checkReciptRejected',{
         method: 'post',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(reject),
