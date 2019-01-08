@@ -50,7 +50,7 @@ class adoptExamineUnpaid extends React.Component{
     this.getProgramUserNotPayList(payment,1,10)
   }
   notSetUp(pageNum=this.state.pageNum,pageSize=this.state.pageSize) {
-    fetch(window.theUrl + '/programUser/getProgramUserNoPayment',{
+    fetch(window.fandianUrl + '/programUser/getProgramUserNoPayment',{
       method:"post",
       headers:{'Content-Type': 'application/x-www-form-urlencoded'},
       body:`payment=&pageNum=${pageNum}&pageSize=${pageSize}`
@@ -82,8 +82,8 @@ class adoptExamineUnpaid extends React.Component{
     }
   }
   makeMoney(payment,returningMoney,unionId) {
-    this.setState({payment:payment,remarks:'showRemark',mask:'mask',returningMoney:returningMoney*0.99,unionId:unionId})
-    fetch(window.theUrl + '/programUser/getProgramUserByUnionId',{
+    this.setState({payment:payment,remarks:'showRemark',mask:'mask',returningMoney:(returningMoney*0.99).toFixed(2),unionId:unionId})
+    fetch(window.fandianUrl + '/programUser/getProgramUserByUnionId',{
       method:'post',
       headers:{'Content-Type': 'application/x-www-form-urlencoded'},
       body:'unionId='+unionId
@@ -97,7 +97,7 @@ class adoptExamineUnpaid extends React.Component{
           alipayName: res.data.alipayName,
           alipayNo: res.data.alipayNo,
           returnedMoney: res.data.returnedMoney,
-          returningMoney2:res.data.returningMoney
+          returningMoney2:(res.data.returningMoney).toFixed(2)
         })
       }
     })
@@ -109,7 +109,7 @@ class adoptExamineUnpaid extends React.Component{
       returningMoney: this.state.returningMoney2,
       unionId: this.state.unionId
     };
-    fetch(window.theUrl+'/programUser/updatePayAndReciptByUnionId',{
+    fetch(window.fandianUrl+'/programUser/updatePayAndReciptByUnionId',{
       method:'post',
       headers:{'Content-Type': 'application/json'},
       body:JSON.stringify(data),
