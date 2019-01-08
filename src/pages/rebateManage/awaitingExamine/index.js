@@ -421,7 +421,7 @@ class awaitingExamine extends React.Component {
               >
                 <Input style={{width: 150, marginLeft: 10, marginRight: 20, color: '#555'}}
                        disabled
-                       defaultValue={currentShop}
+                       value={currentShop}
                 />
                 <span>团号：</span>
                 {getFieldDecorator('teamNo', {
