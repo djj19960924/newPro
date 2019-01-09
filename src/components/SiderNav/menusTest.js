@@ -32,6 +32,11 @@ const menus = [
     key: '/rebate-manage',
     subs: [
       {
+        title: '设置返点',
+        icon:'edit',
+        key: '/rebate-manage/set-rebate'
+      },
+      {
         title: '待审核',
         icon: 'file-unknown',
         key: '/rebate-manage/awaiting-examine',
