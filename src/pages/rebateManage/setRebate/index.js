@@ -1,16 +1,24 @@
 import React from 'react';
-import {Select, Button, Table, message, Form } from 'antd';
+import {Select, Button, Table, message, Pagination, } from 'antd';
+import moment from 'moment';
 import './index.less';
 
-const tableDataList = [{}];
-const FormItem = Form.Item;
 const Option = Select.Option;
 
 class setRebate extends React.Component{
   constructor(props) {
     super(props);
     this.state = {
+      // 分页相关
+      pageSize: 20,
+      pageNum: 1,
+      pageTotal: null,
+      // 商场列表
       shopList: [],
+      // 当前选择的商场
+      currentShop: '',
+      // 品牌列表
+      tableDataList: [],
     };
   }
   // 加载商场列表
@@ -19,17 +27,13 @@ class setRebate extends React.Component{
       method: 'POST'
     }).then(r => r.json()).then(r => {
       if (r.retcode.status === '10000') {
-        // message.success(r.retcode.msg)
         let dataList = [];
         for (let i of r.data) {
-          // console.log(i)
           dataList.push(<Option key={i.mallId} value={i.mallName}>{i.mallName}</Option>)
         }
         this.setState({
           shopList: dataList
         })
-        // 成功静默处理
-        // message.success(`${r.retcode.msg},状态码为:${r.retcode.status}`)
       } else {
         message.error(`${r.retcode.msg},状态码为:${r.retcode.status}`)
       }
@@ -37,48 +41,70 @@ class setRebate extends React.Component{
   }
   // 选择商场触发
   selectShop(shopName,target) {
-    // console.log(shopName,target);
+    let {pageSize} = this.state;
+    this.selectAllRebateByMallName(1,pageSize,shopName)
+  }
+  // 根据商场获取品牌列表
+  selectAllRebateByMallName(pageNum=this.state.pageNum,pageSize=this.state.pageSize,shopName=this.state.currentShop) {
     fetch(window.fandianUrl + '/rebate/selectAllRebateByMallName', {
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       // 这里给出搜索的页码与当前页数
-      body: `mallName=${shopName}`,
+      body: `mallName=${shopName}&pageSize=${pageSize}&pageNum=${pageNum}`,
     }).then(r => r.json()).then(r => {
-      console.log(r)
-      if (r.retcode.status === 10000) {
-        console.log(r.data)
+      // console.log(r)
+      if (r.status === 10000) {
         this.setState({
-
+          currentShop: shopName,
+          pageTotal: r.data.total,
+          pageSize: r.data.pageSize,
+          pageNum: r.data.pageNum,
+          tableDataList: r.data.list,
         })
       }
     })
   }
+  // 分页操作
+  changePage(pageNum,pageSize) {
+    // console.log(pageNum,pageSize)
+    this.selectAllRebateByMallName(pageNum,pageSize)
+  }
+  changePageSize(pageNum,pageSize) {
+    // console.log(pageNum,pageSize)
+    this.selectAllRebateByMallName(pageNum,pageSize)
+  }
   // 打开编辑弹窗
-  openEdit() {
-    console.log('edit')
+  openEdit(q) {
+    console.log('edit',q)
   }
   // 打开新增弹窗
   openCreate() {
     console.log('create')
   }
   render() {
+    // 表单标题
     const columns=[
-      {title: '商场', dataIndex: '商场', key: '商场'},
-      {title: '品牌', dataIndex: '品牌', key: '品牌'},
-      {title: '商品码', dataIndex: '商品码', key: '商品码'},
-      {title: '最近更新时间', dataIndex: '最近更新时间', key: '最近更新时间'},
-      {title: '返点率', dataIndex: '返点率', key: '返点率'},
-      {title: '操作', dataIndex: '操作',
-        key: '操作',
+      {title: '商场', dataIndex: 'mallName', key: 'mallName', width: 160},
+      {title: '品牌', dataIndex: 'brandName', key: 'brandName', },
+      {title: '商品码', dataIndex: 'productCode', key: 'productCode', width: 80},
+      {title: '最近更新时间', dataIndex: 'updateTime', key: 'updateTime', width: 200,
+      render: (text, record) => (
+          <div>{moment(record.updateTime).format('YYYY-MM-DD hh:mm:ss')}</div>
+      )
+      },
+      {title: '返点率', dataIndex: 'rebateRate', key: 'rebateRate', width: 100},
+      {title: '操作', dataIndex: '操作', key: '操作', width: 150,
         render: (text, record) => (
-          <div><Button type="primary"
-                       style={{'margin':0}}
-                       onClick={this.openEdit.bind(this)}
-          >编辑</Button></div>
+          <div>
+            <Button type="primary"
+                    style={{'margin':0}}
+                    onClick={this.openEdit.bind(this,record)}
+            >编辑</Button>
+          </div>
         ),
       }
     ];
-    const {shopList, } = this.state;
+    const {shopList, tableDataList, pageTotal, pageSize, pageNum, } = this.state;
     return (
       <div className="setRebate">
         <div className="shopSelect">
@@ -91,7 +117,7 @@ class setRebate extends React.Component{
           </Select>
         </div>
         <div className="btnLine">
-          <Button type="primary"
+          <Button className="createNew" type="primary"
                   onClick={this.openCreate.bind(this)}
           >新增品牌</Button>
         </div>
@@ -100,7 +126,19 @@ class setRebate extends React.Component{
                columns={columns}
                pagination={false}
                bordered
+               scroll={{ y: 600 }}
                rowKey={(record, index) => `id_${index}`}
+        />
+        <Pagination className="tablePagination"
+                    total={pageTotal}
+                    pageSize={pageSize}
+                    current={pageNum}
+                    showTotal={(total, range) => `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`}
+                    style={{float:'right',marginRight:'20px',marginTop:'10px'}}
+                    onChange={this.changePage.bind(this)}
+                    showSizeChanger
+                    pageSizeOptions={['10','20','30','40']}
+                    onShowSizeChange={this.changePageSize.bind(this)}
         />
       </div>
     )

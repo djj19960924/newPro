@@ -135,10 +135,12 @@ class adoptExamineUnpaid extends React.Component{
       title: '申请金额',
       dataIndex: 'returningMoney',
       key: 'returningMoney',
+      width: 150,
     }, {
       title: '应付金额',
       dataIndex: 'returningMoney2',
       key: 'returningMoney2',
+      width: 150,
       render: (text, record) => (  //塞入内容
         <div className={"ellipsis"} >{(record.returningMoney*0.99).toFixed(2)}</div>
       ),
@@ -146,6 +148,7 @@ class adoptExamineUnpaid extends React.Component{
       title: '操作',
       dataIndex: 'operation',
       key: 'operation',
+      width: 100,
       render: (text, record) => (  //塞入内容
         <div className={record.payment ? "ellipsis":'unShow'} ><Button type="primary" onClick={this.makeMoney.bind(this,record.payment,record.returningMoney,record.unionId)} style={{'margin':0}}>打款</Button></div>
       ),
@@ -164,6 +167,7 @@ class adoptExamineUnpaid extends React.Component{
                 columns={columns}
                 dataSource={this.state.dataSource}
                 bordered
+                scroll={{ y: 600 }}
                 rowKey={(record, index) => `id:${record.boxCode}${index}`}
                 pagination={false}
         />
@@ -173,7 +177,7 @@ class adoptExamineUnpaid extends React.Component{
                     pageSize={this.state.pageSize}
                     current={this.state.pageNum}
                     showTotal={(total, range) => `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`}
-                    style={{float:'right',marginRight:'20px'}}
+                    style={{float:'right',marginRight:'20px',marginTop:'10px'}}
                     onChange={this.changePage.bind(this)}
                     showSizeChanger
                     pageSizeOptions={['10','20','30','40']}

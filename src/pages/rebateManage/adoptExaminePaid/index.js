@@ -73,6 +73,7 @@ class adoptExaminePaid extends React.Component{
                columns={columns}
                pagination={false}
                bordered
+               scroll={{ y: 600 }}
                rowKey={(record, index) => `id_${index}`}
         />
         <Pagination className="tablePagination"
@@ -80,7 +81,7 @@ class adoptExaminePaid extends React.Component{
                     pageSize={this.state.pageSize}
                     current={this.state.pageNum}
                     showTotal={(total, range) => `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`}
-                    style={{float:'right',marginRight:'20px'}}
+                    style={{float:'right',marginRight:'20px',marginTop:'10px'}}
                     onChange={this.changePage.bind(this)}
                     showSizeChanger
                     pageSizeOptions={['10','20','30','40']}
