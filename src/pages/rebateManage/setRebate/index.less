@@ -1,4 +1,4 @@
-.setRebate{
+.setRebate {
   width: 100%;
   height: 100%;
   background-color: #fff;
@@ -16,14 +16,28 @@
     }
   }
 
-  .btnLine{
+  .noShop {
+    margin: 20px 0;
+    text-align: center;
+    font-size: 24px;
+    //position: absolute;
+    //top: 0;
+    //left: 350px;
 
-    .createNew{
+    .iconShop{
+      color: #1890ff;
+      margin-right: 10px;
+    }
+  }
+
+  .btnLine {
+
+    .createNew {
       margin-left: 20px;
     }
   }
 
-  .tableList{
+  .tableList {
     margin: 16px 10px;
 
     th {
@@ -38,7 +52,13 @@
       text-align: center;
       vertical-align: middle;
     }
-
   }
+}
 
+.modalWrap {
+  // 去除input type为number时的上下箭头
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button{
+    -webkit-appearance: none !important;
+  }
 }

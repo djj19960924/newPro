@@ -228,17 +228,23 @@ class awaitingExamine extends React.Component {
     })
   }
 
-  // 自定义表单验证返点率, 在输入结束以后使用callback异步验证
+  // 自定义表单验证返点率, 同时修正正确的显示值
   rebateRateValidator(rule, val, callback) {
-    // if (val === '') {
-    //   callback('请输入返点率!');
-    // }
-    if (parseInt(val) >= 0 && parseInt(val) <= 99) {
-      callback();
-      this.props.form.setFieldsValue({rebateRate: parseInt(val)});
-      document.querySelector('#rebateRate').value = parseInt(val);
+    let rebateRate = parseFloat(document.querySelector('#rebateRate').value);
+    let thisRule = /^\d+(\.\d{0,1})?$/;
+    if (thisRule.test(val)) {
+      if (parseFloat(val) >= 0 && parseFloat(val) <= 99.9) {
+        callback();
+        this.props.form.setFieldsValue({rebateRate: parseFloat(val)});
+        document.querySelector('#rebateRate').value = rebateRate;
+      } else {
+        callback('返点率范围在0到100以内')
+      }
+    } else if (val === '') {
+      this.props.form.setFieldsValue({rebateRate: 0});
+      document.querySelector('#rebateRate').value = 0;
     } else {
-      callback('返点率为0到99之间整数!')
+      callback('返点率最多可输入小数点后一位')
     }
   }
 
@@ -533,7 +539,7 @@ class awaitingExamine extends React.Component {
                   ],
                   initialValue: 0
                 })(
-                  <Input style={{width: 50}}
+                  <Input style={{width: 60}}
                          type="number"
                          id="rebateRate"
                          onChange={this.changeRebateRate.bind(this)}
