@@ -130,6 +130,7 @@ class setRebate extends React.Component{
     resetFields();
     // 判断是否已选商场
     if (!!currentShop) setFieldsValue({'mallName': currentShop});
+    this.selectAllRebateByMallName();
   }
   // 品牌名称验证
   brandNameValidator(rule, val, callback) {
@@ -209,9 +210,13 @@ class setRebate extends React.Component{
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(dataList),
         }).then(r=>r.json()).then(r=>{
-          message.success(`${ modalType==='create' ? '新增' : '编辑' }成功!`)
-          // 关闭弹窗
-          this.closeModal();
+          if (r.status===10000) {
+            message.success(r.msg)
+            // 关闭弹窗
+            this.closeModal();
+          } else {
+            message.error(`${r.msg},状态码${r.status}`)
+          }
         });
       }
     })
