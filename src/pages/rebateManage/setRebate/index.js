@@ -221,14 +221,14 @@ class setRebate extends React.Component{
     const columns=[
       {title: '商场', dataIndex: 'mallName', key: 'mallName', width: 160},
       {title: '品牌', dataIndex: 'brandName', key: 'brandName', },
-      {title: '商品码', dataIndex: 'productCode', key: 'productCode', width: 80},
+      {title: '商品码', dataIndex: 'productCode', key: 'productCode', width: 200},
       {title: '最近更新时间', dataIndex: 'updateTime', key: 'updateTime', width: 200,
       render: (text, record) => (
           <div>{moment(record.updateTime).format('YYYY-MM-DD hh:mm:ss')}</div>
       )
       },
       {title: '返点率', dataIndex: 'rebateRate', key: 'rebateRate', width: 100},
-      {title: '操作', dataIndex: '操作', key: '操作', width: 150,
+      {title: '操作', dataIndex: '操作', key: '操作', width: 100, fixed: 'right',
         render: (text, record) => (
           <div>
             <Button type="primary"
@@ -265,7 +265,7 @@ class setRebate extends React.Component{
                columns={columns}
                pagination={false}
                bordered
-               scroll={{ y: 600 }}
+               scroll={{ y: 600, x: 1000 }}
                rowKey={(record, index) => `id_${index}`}
                locale={{
                  emptyText: <div className="noShop">
