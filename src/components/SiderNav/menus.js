@@ -40,6 +40,11 @@ const menus = [
         title: '通过-已返款',
         icon: 'smile',
         key: '/rebate-manage/adopt-examine-paid',
+      },
+      {
+        title: '驳回',
+        icon: 'smile',
+        key: '/rebate-manage/reject-examine',
       }
     ]
   },

@@ -34,7 +34,7 @@ class ContentMain extends React.Component{
           <Route exact path="/rebate-manage/awaiting-examine" component={awaitingExamine} />
           <Route exact path="/rebate-manage/adopt-examine-unpaid" component={adoptExamineUnpaid} />
           <Route exact path="/rebate-manage/adopt-examine-paid" component={adoptExaminePaid} />
-          {window.isTest && <Route exact path="/rebate-manage/reject-examine" component={rejectExamine} />}
+          <Route exact path="/rebate-manage/reject-examine" component={rejectExamine} />
           {window.isTest && <Route exact path="/rebate-manage/set-rebate" component={setRebate} />}
           {/*<Route exact path="/about" component={about} />*/}
           {/*这里可以配置404 not found 页面*/}
