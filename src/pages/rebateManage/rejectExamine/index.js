@@ -45,6 +45,7 @@ class rejectExamine extends React.Component{
         message.error(`${r.retcode.msg},状态码为:${r.retcode.status}`)
       }
     });
+    this.rejectByMall('新世界明洞店');
   }
   // 监听选择商店事件
   selectShop(val, option) {
@@ -141,11 +142,11 @@ class rejectExamine extends React.Component{
     ];
     return (
       <div className="rejectExamine">
-        审核驳回
         <div className="shopSelect">
           <span>所属商场: </span>
           <Select className="selectShops"
                   placeholder="请选择商场"
+                  defaultValue='新世界明洞店'
                   onChange={this.selectShop.bind(this)}
           >
             {this.state.shopList}
