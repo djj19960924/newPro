@@ -82,6 +82,22 @@ class rejectExamine extends React.Component{
   removeMask() {
     this.setState({mask: 'unShow',pictureUrl:'',ticketUrl:'unShow'})
   }
+  //时间转化
+  formatDate(inputTime) {
+    var date = new Date(inputTime);
+    var y = date.getFullYear();
+    var m = date.getMonth() + 1;
+    m = m < 10 ? ('0' + m) : m;
+    var d = date.getDate();
+    d = d < 10 ? ('0' + d) : d;
+    var h = date.getHours();
+    h = h < 10 ? ('0' + h) : h;
+    var minute = date.getMinutes();
+    var second = date.getSeconds();
+    minute = minute < 10 ? ('0' + minute) : minute;
+    second = second < 10 ? ('0' + second) : second;
+    return y + '-' + m + '-' + d + ' ' + h + ':' + minute + ':' + second;
+  }
   render() {
     const columns=[
       {
@@ -94,8 +110,19 @@ class rejectExamine extends React.Component{
         key: 'teamNo',
       }, {
         title: '提交时间',
+        dataIndex: 'createTime',
+        key: 'createTime',
+        render: (text, record) => (  //塞入内容
+          <div className="ellipsis">{this.formatDate(record.createTime)}</div>
+        ),
+      },
+      , {
+        title: '处理时间',
         dataIndex: 'updateTime',
-        key: 'updateTime'
+        key: 'updateTime',
+        render: (text, record) => (  //塞入内容
+          <div className="ellipsis">{this.formatDate(record.updateTime)}</div>
+        ),
       }, {
         title: '备注',
         dataIndex: 'note',
