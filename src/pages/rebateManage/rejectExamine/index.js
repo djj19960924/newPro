@@ -96,6 +96,13 @@ class rejectExamine extends React.Component{
         title: '提交时间',
         dataIndex: 'updateTime',
         key: 'updateTime'
+      }, {
+        title: '备注',
+        dataIndex: 'note',
+        key: 'note',
+        render: (text, record) => (  //塞入内容
+          <div className="ellipsis">{record.note==0 ? '小票不清晰':(record.note==1 ? '团号不正确': (record.note==2 ? '小票重复':'其他'))}</div>
+        ),
       },{
         title: '查看',
         dataIndex: 'pictureUrl',
