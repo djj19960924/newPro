@@ -28,12 +28,10 @@ class rejectExamine extends React.Component{
     fetch(window.fandianUrl + '/mall/getMallList', {
       method: 'POST'
     }).then(r => r.json()).then(r => {
-      // console.log(r)
       if (r.retcode.status === '10000') {
         // message.success(r.retcode.msg)
         let dataList = [];
         for (let i of r.data) {
-          // console.log(i)
           dataList.push(<Option key={i.mallId} value={i.mallName}>{i.mallName}</Option>)
         }
         this.setState({
@@ -62,7 +60,6 @@ class rejectExamine extends React.Component{
       body: 'mallName=' + val+'&pageNum='+pageNum+'&pageSize='+pageSize,
     }).then(r => r.json()).then(r => {
       if (r.retcode.status === '10000') {
-        console.log(r);
         this.setState({dataSource: r.data.list,  pageTotal: r.data.total,mallName:val});
       }
     })

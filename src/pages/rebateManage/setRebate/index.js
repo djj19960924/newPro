@@ -368,6 +368,7 @@ class setRebate extends React.Component{
                   // {required: true, message: '请输入商品码!'},
                   {validator: this.productCodeValidator.bind(this)}
                 ],
+                initialValue: ''
               })(
                   <Input style={{width: 180}}
                          id="productCode"

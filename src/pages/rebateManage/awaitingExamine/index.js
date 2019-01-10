@@ -63,6 +63,8 @@ class awaitingExamine extends React.Component {
       reason: null,
       // 图片预览宽高自适应
       previewImageWH: 'width',
+      // 汇率
+      defaultExchangeRate: null,
     };
     window.awaitingExamine = this;
   }
@@ -88,6 +90,16 @@ class awaitingExamine extends React.Component {
         message.error(`${r.retcode.msg},状态码为:${r.retcode.status}`)
       }
     });
+    fetch(window.fandianUrl + '/recipt/getExchangeRateByDate', {
+      method: 'POST'
+    }).then(r => r.json()).then(r => {
+      // console.log(r.result.rate)
+      if (r.success === '1') {
+        this.setState({
+          defaultExchangeRate: parseFloat(r.result.rate).toFixed(4)
+        })
+      }
+    })
   }
 
   //渲染完成以后修正图片预览样式
@@ -130,7 +142,7 @@ class awaitingExamine extends React.Component {
           brandList: dataList,
         })
       }
-    })
+    });
     this.getTicketList(this,val);
   }
   // 根据商场名称获取小票接口
@@ -251,7 +263,7 @@ class awaitingExamine extends React.Component {
   // 自定义表单验证汇率, 同时修正正确的显示值
   exchangeRateValidator(rule, val, callback) {
     let exchangeRate = parseFloat(document.querySelector('#exchangeRate').value);
-    let thisRule = /^\d+(\.\d{0,2})?$/;
+    let thisRule = /^\d+(\.\d{0,4})?$/;
     if (thisRule.test(val)) {
       if (parseFloat(val) < 999) {
         this.props.form.setFieldsValue({exchangeRate: parseFloat(val)});
@@ -263,9 +275,8 @@ class awaitingExamine extends React.Component {
     } else if (val === '') {
       this.props.form.setFieldsValue({exchangeRate: 0});
       document.querySelector('#exchangeRate').value = 0;
-      // callback('请输入汇率')
     } else {
-      callback('汇率最多可输入小数点后两位')
+      callback('汇率最多可输入小数点后四位')
     }
   }
 
@@ -387,8 +398,7 @@ class awaitingExamine extends React.Component {
     }
   }
   render() {
-    let {showImageViewer, shopList, currentShop, hasTicket, brandList, ticketList, currentTicketId, reciptMoney,                    previewImageWH, ticketTotal,
-    } = this.state;
+    let {showImageViewer, shopList, currentShop, hasTicket, brandList, ticketList, currentTicketId, reciptMoney, defaultExchangeRate, previewImageWH, ticketTotal, } = this.state;
     const {getFieldDecorator} = this.props.form;
     return (
       <div className="awaitingExamine">
@@ -517,7 +527,7 @@ class awaitingExamine extends React.Component {
                     {required: true,},
                     {validator: this.exchangeRateValidator.bind(this)}
                   ],
-                  initialValue: 0
+                  initialValue: defaultExchangeRate ? defaultExchangeRate : 0
                 })(
                   <Input style={{width: 90}}
                          type="number"
