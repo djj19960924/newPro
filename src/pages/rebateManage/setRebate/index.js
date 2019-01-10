@@ -168,7 +168,7 @@ class setRebate extends React.Component{
       } else {
         callback('商品码不能超过20位')
       }
-    } else if (val === '') {
+    } else if (val === '' || val === null) {
       callback()
     } else {
       callback('商品码为字母和数字组合')
