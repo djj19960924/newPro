@@ -24,6 +24,7 @@ import App from './App';
 // window.theUrl = 'http://testapi.maishoumiji.com';
 window.apiUrl = 'http://api.maishoumiji.com';
 window.fandianUrl = 'http://fandian.maishoumiji.com';
+window.testUrl = 'http://testapi.maishoumiji.com';
 window.isTest = true;
 
 ReactDOM.render(
