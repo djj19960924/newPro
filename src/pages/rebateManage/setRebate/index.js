@@ -168,7 +168,7 @@ class setRebate extends React.Component{
       } else {
         callback('商品码不能超过20位')
       }
-    } else if (val === '' || val === null) {
+    } else if (val === '') {
       callback()
     } else {
       callback('商品码为字母和数字组合')
@@ -189,6 +189,7 @@ class setRebate extends React.Component{
     } else if (val === '') {
       this.props.form.setFieldsValue({rebateRate: 0});
       document.querySelector('#rebateRate').value = 0;
+      callback()
     } else {
       callback('返点率最多保留一位小数')
     }
