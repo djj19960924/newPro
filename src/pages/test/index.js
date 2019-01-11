@@ -72,7 +72,7 @@ class test extends React.Component {
 
     // 多文件格式new
     for (let i in this.state.fileList) {
-      formData.append(`file${i+1}`,this.state.fileList[i]);
+      formData.append(`file${parseInt(i)+1}`,this.state.fileList[i]);
     }
 
     // 多文件格式old
