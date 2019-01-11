@@ -485,14 +485,14 @@ class awaitingExamine extends React.Component {
                        disabled
                        value={currentShop}
                 />
-                <span>团号：</span>
-                {getFieldDecorator('teamNo', {
-                  initialValue: (currentTicketId >= ticketList.length || ticketList.length === 0) ? '' : ticketList[currentTicketId].teamNo
-                })(
-                  <Input style={{width: 80, marginLeft: 10, color: '#555'}}
-                         disabled
-                  />
-                )}
+                {/*<span>团号：</span>*/}
+                {/*{getFieldDecorator('teamNo', {*/}
+                  {/*initialValue: (currentTicketId >= ticketList.length || ticketList.length === 0) ? '' : ticketList[currentTicketId].teamNo*/}
+                {/*})(*/}
+                  {/*<Input style={{width: 80, marginLeft: 10, color: '#555'}}*/}
+                         {/*disabled*/}
+                  {/*/>*/}
+                {/*)}*/}
               </FormItem>
               <FormItem label="消费金额 ($)"
                         colon
@@ -630,7 +630,7 @@ class awaitingExamine extends React.Component {
           </div>
           <RadioGroup className='allReasons' onChange={this.onRadioChange.bind(this)} value={this.state.reason}>
             <Radio value={0}>小票不清晰</Radio>
-            <Radio value={1}>团号不正确</Radio>
+            {/*<Radio value={1}>团号不正确</Radio>*/}
             <Radio value={2}>小票重复</Radio>
             <Radio value={3}>其他</Radio>
           </RadioGroup>

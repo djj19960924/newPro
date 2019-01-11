@@ -126,10 +126,6 @@ class rejectExamine extends React.Component{
         dataIndex: 'mallName',
         key: 'mallName',
       }, {
-        title: '团号',
-        dataIndex: 'teamNo',
-        key: 'teamNo',
-      }, {
         title: '提交时间',
         dataIndex: 'createTime',
         key: 'createTime',
