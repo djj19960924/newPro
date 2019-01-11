@@ -7,7 +7,7 @@ const  countryList=[
     id: 1,
     nationName: '日本'
   },{
-    id: 3,
+    id: 2,
     nationName: '中国'
   }
 ];
