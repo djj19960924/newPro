@@ -1,19 +1,24 @@
 import React from 'react';
-import {Radio, Table, Pagination, Button, } from 'antd';
+import {Radio, Table, Pagination, Button, Link, } from 'antd';
 
 import './index.less';
 
-class dataBase extends React.Component{
+class commoditiesDataBase extends React.Component{
   constructor(props) {
     super(props);
     this.state = {};
+  }
+  // 跳转
+  toCE() {
+    // 使用query传值
+    this.props.history.push({ pathname : '/commodities-manage/commodities-database/create-and-edit' ,query : { test: 'isTest'} });
   }
   render() {
     const columns = [], RadioButton = Radio.Button, RadioGroup = Radio.Group;
     return (
       <div className="dataBase">
         <div className="btnLine">
-          <Button type="primary">新增商品</Button>
+          <Button type="primary" onClick={this.toCE.bind(this)}>新增商品</Button>
           <Button type="primary">excel导入</Button>
           <Button type="primary">excel导出</Button>
         </div>
@@ -50,4 +55,4 @@ class dataBase extends React.Component{
   }
 }
 
-export default dataBase;
+export default commoditiesDataBase;

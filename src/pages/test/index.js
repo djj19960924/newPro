@@ -62,7 +62,7 @@ class test extends React.Component {
   }
   // 自定义上传
   uploadFunction() {
-    let formData = new FormData();
+    let formData = new FormData(),fileList = [];
 
     // 单文件格式
     // let file;
@@ -72,11 +72,14 @@ class test extends React.Component {
 
     // 多文件格式
     for (let i in this.state.fileList) {
-      formData.append(`file${parseInt(i)+1}`,this.state.fileList[i].originFileObj);
+      // formData.append(`file${parseInt(i)+1}`,this.state.fileList[i].originFileObj);
+      formData.append(`files[${i}]`,this.state.fileList[i].originFileObj);
+      fileList.push(this.state.fileList[i].originFileObj)
     }
+    console.log(fileList)
+    // debugger
 
-
-    fetch(`http://192.168.3.25:8000/skuUpimg/headImgUpload`,{
+    fetch(`${window.testUrl}/skuUpimg/headImgUpload`,{
       method: 'POST',
       body: formData,
     }).then(r=>r.json()).then(r=>{
