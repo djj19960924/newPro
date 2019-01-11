@@ -70,24 +70,14 @@ class test extends React.Component {
     // formData.append('files',file);
     // console.log(formData.get('files'));
 
-    // 多文件格式new
+    // 多文件格式
     for (let i in this.state.fileList) {
-      formData.append(`file${parseInt(i)+1}`,this.state.fileList[i]);
+      formData.append(`file${parseInt(i)+1}`,this.state.fileList[i].originFileObj);
     }
 
-    // 多文件格式old
-    // let fileList = [];
-    // for (let i of this.state.fileList) {
-    //   fileList.push(i.originFileObj)
-    //   // file = i.thumbUrl;
-    // };
-    // formData.append('MultipartFile',fileList);
-    // console.log(formData.get('MultipartFile'));
 
     fetch(`http://192.168.3.25:8000/skuUpimg/headImgUpload`,{
       method: 'POST',
-      // headers: {'Content-Type': 'multipart/form-data'},
-      // body: ``,
       body: formData,
     }).then(r=>r.json()).then(r=>{
       console.log(r)
