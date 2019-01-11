@@ -1,12 +1,20 @@
 import React from 'react';
-import {Select,Table,message,Pagination,Button} from 'antd';
+import {Select,Table,message,Pagination,Button,Icon} from 'antd';
+import countryList from '@js/country';
 import './index.less';
 
 const Option = Select.Option;
+
 class rejectExamine extends React.Component{
   constructor(props) {
     super(props);
     this.state = {
+      //选择的国家
+      country:'',
+      //国家列表
+      countries: [],
+      //选择的商场
+      shop:undefined,
       // 商场列表
       shopList: [],
       pageNum: 1,
@@ -25,8 +33,23 @@ class rejectExamine extends React.Component{
     };
   }
   componentWillMount() {
+    let countries = [];
+    for (let i of countryList) {
+      countries.push(<Option key={i.id} value={i.nationName}>{i.nationName}</Option>)
+    }
+    this.setState({
+      countries: countries
+    })
+
+  }
+  // 监听选择国家事件
+  selectCountry(val, option) {
+    this.setState({country:val})
+    this.setState({country:val,dataSource: [],  pageTotal: null,mallName:'',shop:undefined});
     fetch(window.fandianUrl + '/mall/getMallList', {
-      method: 'POST'
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body:'nationName='+val
     }).then(r => r.json()).then(r => {
       if (r.retcode.status === '10000') {
         // message.success(r.retcode.msg)
@@ -43,10 +66,10 @@ class rejectExamine extends React.Component{
         message.error(`${r.retcode.msg},状态码为:${r.retcode.status}`)
       }
     });
-    this.rejectByMall('新世界明洞店');
   }
   // 监听选择商店事件
   selectShop(val, option) {
+    this.setState({shop:val})
     // val即商场名, option.key即商场ID
     // console.log(val, option.key)
     this.rejectByMall(val);
@@ -140,10 +163,19 @@ class rejectExamine extends React.Component{
     return (
       <div className="rejectExamine">
         <div className="shopSelect">
+          <span>所属国家: </span>
+          <Select className="selectShops"
+                  placeholder="请选择国家"
+                  onChange={this.selectCountry.bind(this)}
+          >
+            {this.state.countries}
+          </Select>
+        </div>
+        <div className="shopSelect">
           <span>所属商场: </span>
           <Select className="selectShops"
                   placeholder="请选择商场"
-                  defaultValue='新世界明洞店'
+                  value={this.state.shop}
                   onChange={this.selectShop.bind(this)}
           >
             {this.state.shopList}
@@ -156,6 +188,12 @@ class rejectExamine extends React.Component{
                 bordered
                 rowKey={(record, index) => `id:${record.boxCode}${index}`}
                 pagination={false}
+                locale={{
+                  emptyText: <div className="noShop">
+                    {!this.state.country && <div className="noShopDiv"><Icon type="shop" className="iconShop"/><span>请选择国家</span></div>}
+                    {this.state.country && !this.state.shop && <div className="noShopDiv"><Icon type="shop" className="iconShop"/><span>请选择商场</span></div>}
+                  </div>,
+                }}
         />
         <Pagination className="tablePagination"
                     total={this.state.pageTotal}

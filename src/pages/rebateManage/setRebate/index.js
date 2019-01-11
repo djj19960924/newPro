@@ -3,7 +3,7 @@ import {Select, Button, Table, message, Pagination, Form, Modal, Input, Icon, } 
 import moment from 'moment';
 import {inject, observer} from 'mobx-react/index';
 import './index.less';
-
+import countryList from '@js/country';
 const FormItem = Form.Item;
 const Option = Select.Option;
 
@@ -26,10 +26,14 @@ class setRebate extends React.Component{
       pageSize: 20,
       pageNum: 1,
       pageTotal: 0,
+      //选择的国家
+      country:'',
+      //国家列表
+      countries: [],
       // 商场列表
       shopList: [],
       // 当前选择的商场
-      currentShop: '',
+      currentShop: undefined,
       // 品牌列表
       tableDataList: [],
       // 弹窗标题
@@ -42,12 +46,27 @@ class setRebate extends React.Component{
       modalEditData: {},
     };
   }
-  // 加载商场列表
+  // 加载国家列表
   componentWillMount() {
+    let countries = [];
+    for (let i of countryList) {
+      countries.push(<Option key={i.id} value={i.nationName}>{i.nationName}</Option>)
+    }
+    this.setState({
+      countries: countries
+    })
+  }
+  // 监听选择国家事件
+  selectCountry(val, option) {
+    this.setState({country:val})
+    this.setState({country:val,tableDataList: [],  pageTotal: null,mallName:'',currentShop:undefined});
     fetch(window.fandianUrl + '/mall/getMallList', {
-      method: 'POST'
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body:'nationName='+val
     }).then(r => r.json()).then(r => {
       if (r.retcode.status === '10000') {
+        // message.success(r.retcode.msg)
         let dataList = [];
         for (let i of r.data) {
           dataList.push(<Option key={i.mallId} value={i.mallName}>{i.mallName}</Option>)
@@ -55,10 +74,12 @@ class setRebate extends React.Component{
         this.setState({
           shopList: dataList
         })
+        // 成功静默处理
+        // message.success(`${r.retcode.msg},状态码为:${r.retcode.status}`)
       } else {
         message.error(`${r.retcode.msg},状态码为:${r.retcode.status}`)
       }
-    })
+    });
   }
   // 选择商场触发
   selectShop(shopName,target) {
@@ -245,14 +266,24 @@ class setRebate extends React.Component{
         ),
       }
     ];
-    const {shopList, currentShop, tableDataList, pageTotal, pageSize, pageNum, modalTitle, modalVisible, modalType,  } = this.state;
+    const {shopList, currentShop, country,tableDataList, pageTotal, pageSize, pageNum, modalTitle, modalVisible, modalType,  } = this.state;
     const {getFieldDecorator} = this.props.form;
     return (
       <div className="setRebate">
         <div className="shopSelect">
+          <span>所属国家: </span>
+          <Select className="selectShops"
+                  placeholder="请选择国家"
+                  onChange={this.selectCountry.bind(this)}
+          >
+            {this.state.countries}
+          </Select>
+        </div>
+        <div className="shopSelect">
           <span>所属商场: </span>
           <Select className="selectShops"
                   placeholder="请选择商场"
+                  value={currentShop}
                   onChange={this.selectShop.bind(this)}
           >
             {shopList}
@@ -275,7 +306,8 @@ class setRebate extends React.Component{
                rowKey={(record, index) => `id_${index}`}
                locale={{
                  emptyText: <div className="noShop">
-                   {!currentShop && <div className="noShopDiv"><Icon type="shop" className="iconShop"/><span>请选择商场</span></div>}
+                   {!country && <div className="noShopDiv"><Icon type="shop" className="iconShop"/><span>请选择国家</span></div>}
+                   {country && !currentShop && <div className="noShopDiv"><Icon type="shop" className="iconShop"/><span>请选择商场</span></div>}
                  </div>,
                }}
         />

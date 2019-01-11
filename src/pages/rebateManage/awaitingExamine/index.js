@@ -3,7 +3,7 @@ import {Button, DatePicker, Form, Icon, Input, message, Select, Radio, notificat
 import moment from 'moment';
 import ImageViewer from '@components/imageViewer/main';
 import {inject, observer} from 'mobx-react/index';
-
+import countryList from '@js/country';
 import './index.less';
 
 const FormItem = Form.Item;
@@ -29,10 +29,16 @@ class awaitingExamine extends React.Component {
       showImageViewer: false,
       // 当前图片地址
       // imgSrc: require('@img/avatar.png'),
+      //选择的国家
+      country:'',
+      //国家列表
+      countries: [],
+      //选择的商场
+      shop:undefined,
       // 商场列表
       shopList: [],
       // 当前所选商场
-      currentShop: '',
+      currentShop: undefined,
       // 消费金额
       totalMoney: null,
       // 是否有剩余的小票
@@ -70,26 +76,13 @@ class awaitingExamine extends React.Component {
   }
 
   componentWillMount() {
-    fetch(window.fandianUrl + '/mall/getMallList', {
-      method: 'POST'
-    }).then(r => r.json()).then(r => {
-      // console.log(r)
-      if (r.retcode.status === '10000') {
-        // message.success(r.retcode.msg)
-        let dataList = [];
-        for (let i of r.data) {
-          // console.log(i)
-          dataList.push(<Option key={i.mallId} value={i.mallName}>{i.mallName}</Option>)
-        }
-        this.setState({
-          shopList: dataList
-        })
-        // 成功静默处理
-        // message.success(`${r.retcode.msg},状态码为:${r.retcode.status}`)
-      } else {
-        message.error(`${r.retcode.msg},状态码为:${r.retcode.status}`)
-      }
-    });
+    let countries = [];
+    for (let i of countryList) {
+      countries.push(<Option key={i.id} value={i.nationName}>{i.nationName}</Option>)
+    }
+    this.setState({
+      countries: countries
+    })
     fetch(window.fandianUrl + '/recipt/getExchangeRateByDate', {
       method: 'POST'
     }).then(r => r.json()).then(r => {
@@ -118,7 +111,34 @@ class awaitingExamine extends React.Component {
       }
     };
   }
-
+// 监听选择国家事件
+  selectCountry(val, option) {
+    this.setState({country:val,  pageTotal: null,mallName:'', ticketList:[],
+      hasTicket: false,
+      currentShop: undefined,
+      currentTicketId: 0,
+      ticketTotal: 0});
+    fetch(window.fandianUrl + '/mall/getMallList', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body:'nationName='+val
+    }).then(r => r.json()).then(r => {
+      if (r.retcode.status === '10000') {
+        // message.success(r.retcode.msg)
+        let dataList = [];
+        for (let i of r.data) {
+          dataList.push(<Option key={i.mallId} value={i.mallName}>{i.mallName}</Option>)
+        }
+        this.setState({
+          shopList: dataList
+        })
+        // 成功静默处理
+        // message.success(`${r.retcode.msg},状态码为:${r.retcode.status}`)
+      } else {
+        message.error(`${r.retcode.msg},状态码为:${r.retcode.status}`)
+      }
+    });
+  }
   // 监听选择商店事件
   selectShop(val, option) {
     // val即商场名, option.key即商场ID
@@ -398,14 +418,24 @@ class awaitingExamine extends React.Component {
     }
   }
   render() {
-    let {showImageViewer, shopList, currentShop, hasTicket, brandList, ticketList, currentTicketId, reciptMoney, defaultExchangeRate, previewImageWH, ticketTotal, } = this.state;
+    let {showImageViewer, shopList, currentShop, hasTicket, brandList, ticketList, currentTicketId, reciptMoney, defaultExchangeRate, previewImageWH, ticketTotal, country} = this.state;
     const {getFieldDecorator} = this.props.form;
     return (
       <div className="awaitingExamine">
         <div className="shopSelect">
+          <span>所属国家: </span>
+          <Select className="selectShops"
+                  placeholder="请选择国家"
+                  onChange={this.selectCountry.bind(this)}
+          >
+            {this.state.countries}
+          </Select>
+        </div>
+        <div className="shopSelect">
           <span>所属商场: </span>
           <Select className="selectShops"
                   placeholder="请选择商场"
+                  value={currentShop}
                   onChange={this.selectShop.bind(this)}
           >
             {shopList}
@@ -414,7 +444,8 @@ class awaitingExamine extends React.Component {
         </div>
         <div className="noTicket" style={{display: (hasTicket ? 'none' : 'block')}}>
           {currentShop && <div><Icon type="smile" className="iconSmile"/><span>当前商场没有小票</span></div>}
-          {!currentShop && <div><Icon type="shop" className="iconShop"/><span>请选择商场</span></div>}
+          {!country && <div><Icon type="shop" className="iconShop"/><span>请选择国家</span></div>}
+          {country &&!currentShop && <div><Icon type="shop" className="iconShop"/><span>请选择商场</span></div>}
         </div>
         <div className="container" style={{display: (hasTicket ? 'block' : 'none')}}>
           <div className="containerBody containerImage">

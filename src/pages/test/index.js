@@ -65,21 +65,21 @@ class test extends React.Component {
     let formData = new FormData();
 
     // 单文件格式
-    // let file;
-    // file = this.state.fileList[0].originFileObj;
-    // formData.append('files',file);
-    // console.log(formData.get('files'));
+    let file;
+    file = this.state.fileList[0].originFileObj;
+    formData.append('files',file);
+    console.log(formData.get('files'));
 
     // 多文件格式
-    let fileList = [];
-    for (let i of this.state.fileList) {
-      fileList.push(i.originFileObj)
-      // file = i.thumbUrl;
-    };
-    formData.append('MultipartFile',fileList);
-    console.log(formData.get('MultipartFile'));
+    // let fileList = [];
+    // for (let i of this.state.fileList) {
+    //   fileList.push(i.originFileObj)
+    //   // file = i.thumbUrl;
+    // };
+    // formData.append('MultipartFile',fileList);
+    // console.log(formData.get('MultipartFile'));
 
-    fetch(`${window.testUrl}/skuUpimg/headImgUpload`,{
+    fetch(`http://192.168.3.25:8000/skuUpimg/headImgUpload`,{
       method: 'POST',
       // headers: {'Content-Type': 'multipart/form-data'},
       // body: ``,
