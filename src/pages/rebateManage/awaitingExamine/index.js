@@ -82,7 +82,7 @@ class awaitingExamine extends React.Component {
     }
     this.setState({
       countries: countries
-    })
+    });
     fetch(window.fandianUrl + '/recipt/getExchangeRateByDate', {
       method: 'POST'
     }).then(r => r.json()).then(r => {
@@ -185,6 +185,14 @@ class awaitingExamine extends React.Component {
           reason:null
         });
       }
+      // 首次选择表单给予默认值
+      this.props.form.setFieldsValue({
+        teamNo: r.data.pageInfo.list[0].teamNo,
+        consumeMoney: r.data.pageInfo.list[0].consumeMoney,
+        reciptAttribute: r.data.pageInfo.list[0].reciptAttribute,
+        exchangeRate: r.data.pageInfo.list[0].exchangeRate,
+        rebateRate: r.data.pageInfo.list[0].rebateRate,
+      })
     });
   }
 
@@ -340,6 +348,8 @@ class awaitingExamine extends React.Component {
   handleSubmit() {
     //.log(this.props.form.getFieldsValue());
     this.props.form.validateFields((err, val) => {
+      console.log(!err);
+      console.log(val);
       let the = this.state;
       if (!err) {
         let data = {
@@ -461,7 +471,10 @@ class awaitingExamine extends React.Component {
             />
           </div>
           <div className="containerBody containerForm">
-            <Form onSubmit={this.handleSubmit.bind(this)} className="examineForm" id='myForm'>
+            <Form className="examineForm"
+                  id='myForm'
+                  onSubmit={this.handleSubmit.bind(this)}
+            >
               <FormItem label="商场"
                         colon
                         labelCol={{span: 3}}
@@ -594,6 +607,7 @@ class awaitingExamine extends React.Component {
                         htmlType="submit"
                         className="examineFormButton"
                         style={{marginTop: '15px',marginLeft: '10px'}}
+                        // onClick={this.handleSubmit.bind(this)}
                 >
                   通过
                 </Button>
