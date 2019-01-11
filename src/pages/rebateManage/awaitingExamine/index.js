@@ -186,13 +186,15 @@ class awaitingExamine extends React.Component {
         });
       }
       // 首次选择表单给予默认值
-      this.props.form.setFieldsValue({
-        teamNo: r.data.pageInfo.list[0].teamNo,
-        consumeMoney: r.data.pageInfo.list[0].consumeMoney,
-        reciptAttribute: r.data.pageInfo.list[0].reciptAttribute,
-        exchangeRate: r.data.pageInfo.list[0].exchangeRate,
-        rebateRate: r.data.pageInfo.list[0].rebateRate,
-      })
+      if (!!r.data.pageInfo.total) {
+        this.props.form.setFieldsValue({
+          teamNo: r.data.pageInfo.list[0].teamNo,
+          consumeMoney: r.data.pageInfo.list[0].consumeMoney,
+          reciptAttribute: r.data.pageInfo.list[0].reciptAttribute,
+          exchangeRate: r.data.pageInfo.list[0].exchangeRate,
+          rebateRate: r.data.pageInfo.list[0].rebateRate,
+        })
+      }
     });
   }
 
