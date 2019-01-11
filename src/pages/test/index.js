@@ -65,12 +65,17 @@ class test extends React.Component {
     let formData = new FormData();
 
     // 单文件格式
-    let file;
-    file = this.state.fileList[0].originFileObj;
-    formData.append('files',file);
-    console.log(formData.get('files'));
+    // let file;
+    // file = this.state.fileList[0].originFileObj;
+    // formData.append('files',file);
+    // console.log(formData.get('files'));
 
-    // 多文件格式
+    // 多文件格式new
+    for (let i in this.state.fileList) {
+      formData.append(`file${i+1}`,this.state.fileList[i]);
+    }
+
+    // 多文件格式old
     // let fileList = [];
     // for (let i of this.state.fileList) {
     //   fileList.push(i.originFileObj)
