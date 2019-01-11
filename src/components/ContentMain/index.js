@@ -17,6 +17,11 @@ import adoptExamineUnpaid from '@pages/rebateManage/adoptExamineUnpaid/';
 import awaitingExamine from '@pages/rebateManage/awaitingExamine/';
 import rejectExamine from '@pages/rebateManage/rejectExamine/';
 import setRebate from '@pages/rebateManage/setRebate/';
+// 商品管理
+import dataBase from '@pages/commoditiesManage/commoditiesDatabase/';
+
+// 测试页面
+import test from '@pages/test/';
 
 @withRouter
 class ContentMain extends React.Component{
@@ -36,6 +41,8 @@ class ContentMain extends React.Component{
           <Route exact path="/rebate-manage/adopt-examine-paid" component={adoptExaminePaid} />
           <Route exact path="/rebate-manage/reject-examine" component={rejectExamine} />
           <Route exact path="/rebate-manage/set-rebate" component={setRebate} />
+          {window.isTest && <Route exact path="/commodities-manage/commodities-database" component={dataBase} />}
+          {window.isTest && <Route exact path="/test" component={test} />}
           {/*<Route exact path="/about" component={about} />*/}
           {/*这里可以配置404 not found 页面*/}
           {/*<Route path="/" component={page404} />*/}
