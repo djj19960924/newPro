@@ -244,7 +244,7 @@ class awaitingExamine extends React.Component {
   // 修正返点金额
   changeReciptMoney() {
     let totalMoney = parseFloat(document.querySelector('#totalMoney').value);
-    let rebateRate = parseInt(document.querySelector('#rebateRate').value);
+    let rebateRate = parseFloat(document.querySelector('#rebateRate').value);
     let exchangeRate = parseFloat(document.querySelector('#exchangeRate').value);
     this.setState({
       reciptMoney: (!!totalMoney && !!rebateRate && !!exchangeRate) ? parseFloat((totalMoney * rebateRate / 100 * exchangeRate).toFixed(2)) : '0'
