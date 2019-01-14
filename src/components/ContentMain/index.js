@@ -9,8 +9,6 @@ import orderMatched from '@pages/logisticsManage/matched/';
 import orderUnmatched from '@pages/logisticsManage/unmatched/';
 // 预约
 import appointmentInfo from '@pages/logisticsManage/appointmentInfo/';
-// 关于
-// import about from '@pages/about/';
 // 返点
 import adoptExaminePaid from '@pages/rebateManage/adoptExaminePaid/';
 import adoptExamineUnpaid from '@pages/rebateManage/adoptExamineUnpaid/';
@@ -21,6 +19,10 @@ import setRebate from '@pages/rebateManage/setRebate/';
 import commoditiesDataBase from '@pages/commoditiesManage/commoditiesDatabase/';
 import commoditiesCreateAndEdit from '@pages/commoditiesManage/commoditiesDatabase/commoditiesCreateAndEdit/';
 
+// 404页面
+import page404 from '@pages/system/page404/'
+// 关于
+// import about from '@pages/about/';
 // 测试页面
 import test from '@pages/test/';
 
@@ -47,7 +49,7 @@ class ContentMain extends React.Component{
           {window.isTest && <Route exact path="/test" component={test} />}
           {/*<Route exact path="/about" component={about} />*/}
           {/*这里可以配置404 not found 页面*/}
-          {/*<Route path="/" component={page404} />*/}
+          <Route path="/" component={page404} />
         </Switch>
       </div>
     )}
