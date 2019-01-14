@@ -70,7 +70,7 @@ class awaitingExamine extends React.Component {
       // 图片预览宽高自适应
       previewImageWH: 'width',
       // 汇率
-      defaultExchangeRate: null,
+      defaultExchangeRate: 1,
     };
     window.awaitingExamine = this;
   }
@@ -83,14 +83,15 @@ class awaitingExamine extends React.Component {
     this.setState({
       countries: countries
     });
+    // 获取当日对美元汇率
     fetch(window.fandianUrl + '/recipt/getExchangeRateByDate', {
       method: 'POST'
     }).then(r => r.json()).then(r => {
       // console.log(r.result.rate)
       if (r.success === '1') {
         this.setState({
-          defaultExchangeRate: parseFloat(r.result.rate).toFixed(4)
-        })
+          defaultExchangeRate: parseFloat(parseFloat(r.result.rate).toFixed(4))
+        });
       }
     })
   }
@@ -181,20 +182,20 @@ class awaitingExamine extends React.Component {
           currentShop: val,
           currentTicketId: 0,
           ticketTotal: r.data.pageInfo.total,
-          remarks:'unShow',
-          reason:null
+          remarks: 'unShow',
+          reason: null
         });
       }
       // 首次选择表单给予默认值
-      if (!!r.data.pageInfo.total) {
-        this.props.form.setFieldsValue({
-          teamNo: r.data.pageInfo.list[0].teamNo,
-          consumeMoney: r.data.pageInfo.list[0].consumeMoney,
-          reciptAttribute: r.data.pageInfo.list[0].reciptAttribute,
-          exchangeRate: r.data.pageInfo.list[0].exchangeRate,
-          rebateRate: r.data.pageInfo.list[0].rebateRate,
-        })
-      }
+      // if (!!r.data.pageInfo.total) {
+      //   this.props.form.setFieldsValue({
+      //     teamNo: r.data.pageInfo.list[0].teamNo,
+      //     // consumeMoney: r.data.pageInfo.list[0].consumeMoney,
+      //     // reciptAttribute: r.data.pageInfo.list[0].reciptAttribute,
+      //     // exchangeRate: r.data.pageInfo.list[0].exchangeRate,
+      //     // rebateRate: r.data.pageInfo.list[0].rebateRate,
+      //   })
+      // }
     });
   }
 
@@ -475,7 +476,7 @@ class awaitingExamine extends React.Component {
           <div className="containerBody containerForm">
             <Form className="examineForm"
                   id='myForm'
-                  onSubmit={this.handleSubmit.bind(this)}
+                  // onSubmit={this.handleSubmit.bind(this)}
             >
               <FormItem label="商场"
                         colon
@@ -501,7 +502,7 @@ class awaitingExamine extends React.Component {
               >
                 {getFieldDecorator('totalMoney', {
                   rules: [{required: true, message: '请输入消费金额!'}],
-                  // initialValue: '0'
+                  initialValue: ''
                 })(
                   <Input style={{width: 130,}}
                          type="number"
@@ -535,6 +536,7 @@ class awaitingExamine extends React.Component {
               >
                 {getFieldDecorator('currentBrand', {
                   rules: [{required: true, message: '请输入品牌!'}],
+                  // initialValue: ''
                 })(
                   <Select style={{width: 240}}
                           placeholder="请输入编码/品牌查询"
@@ -573,7 +575,7 @@ class awaitingExamine extends React.Component {
                     {required: true,},
                     {validator: this.exchangeRateValidator.bind(this)}
                   ],
-                  initialValue: defaultExchangeRate ? defaultExchangeRate : 0
+                  initialValue: defaultExchangeRate
                 })(
                   <Input style={{width: 90}}
                          type="number"
@@ -609,7 +611,7 @@ class awaitingExamine extends React.Component {
                         htmlType="submit"
                         className="examineFormButton"
                         style={{marginTop: '15px',marginLeft: '10px'}}
-                        // onClick={this.handleSubmit.bind(this)}
+                        onClick={this.handleSubmit.bind(this)}
                 >
                   通过
                 </Button>
