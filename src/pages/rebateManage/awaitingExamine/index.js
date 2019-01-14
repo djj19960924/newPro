@@ -378,7 +378,15 @@ class awaitingExamine extends React.Component {
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(data),
         }).then(r => r.json()).then(r => {
-          this.hasSubmit();
+          if(r.retcode.status=='10002'){
+            message.error(r.retcode.msg);
+          }
+          if(r.retcode.status=='10001'){
+            message.error(r.retcode.msg);
+          }
+          if(r.retcode.status=='10000'){
+            this.hasSubmit();
+          }
         })
       }
     });
@@ -497,14 +505,14 @@ class awaitingExamine extends React.Component {
                        value={currentShop}
                 />
               </FormItem>
-              <FormItem label="团号或凭证号"
+              <FormItem label="请输入凭证号"
                         colon
                         labelCol={{span: 6}}
                         wrapperCol={{span: 8}}
               >
                 {getFieldDecorator('teamNo', {
                   initialValue: '',
-                  rules: [{required: true, message: '请输入团号或凭证号!'}],
+                  rules: [{required: true, message: '请输入凭证号!'}],
                 })(
                   <Input style={{width: 80, marginLeft: 10, color: '#555'}}
                   />
@@ -647,7 +655,7 @@ class awaitingExamine extends React.Component {
           </div>
           <RadioGroup className='allReasons' onChange={this.onRadioChange.bind(this)} value={this.state.reason}>
             <Radio value={0}>小票不清晰</Radio>
-            <Radio value={1}>团号或凭证号不正确</Radio>
+            <Radio value={1}>凭证号不正确</Radio>
             <Radio value={2}>小票重复</Radio>
             <Radio value={3}>其他</Radio>
           </RadioGroup>
