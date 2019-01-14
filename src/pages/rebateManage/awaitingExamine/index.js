@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, DatePicker, Form, Icon, Input, message, Select, Radio, notification, } from 'antd';
+import {Button, DatePicker, Form, Icon, Input, message, Select, Radio, notification,} from 'antd';
 import moment from 'moment';
 import ImageViewer from '@components/imageViewer/main';
 import {inject, observer} from 'mobx-react/index';
@@ -30,11 +30,11 @@ class awaitingExamine extends React.Component {
       // 当前图片地址
       // imgSrc: require('@img/avatar.png'),
       //选择的国家
-      country:'',
+      country: '',
       //国家列表
       countries: [],
       //选择的商场
-      shop:undefined,
+      shop: undefined,
       // 商场列表
       shopList: [],
       // 当前所选商场
@@ -101,28 +101,31 @@ class awaitingExamine extends React.Component {
     // 这里使用onload属性, 等待图片资源加载完成以后执行
     document.getElementsByClassName('previewImage')[0].onload = function () {
       let pI = document.getElementsByClassName('previewImage')[0];
-      if ((pI.width / pI.height) < (2/3)) {
+      if ((pI.width / pI.height) < (2 / 3)) {
         window.awaitingExamine.setState({
           previewImageWH: 'height'
         })
-      } else if ((pI.width / pI.height) >= (2/3)) {
+      } else if ((pI.width / pI.height) >= (2 / 3)) {
         window.awaitingExamine.setState({
           previewImageWH: 'width'
         })
       }
     };
   }
+
 // 监听选择国家事件
   selectCountry(val, option) {
-    this.setState({country:val,  pageTotal: null,mallName:'', ticketList:[],
+    this.setState({
+      country: val, pageTotal: null, mallName: '', ticketList: [],
       hasTicket: false,
       currentShop: undefined,
       currentTicketId: 0,
-      ticketTotal: 0});
+      ticketTotal: 0
+    });
     fetch(window.fandianUrl + '/mall/getMallList', {
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body:'nationName='+val
+      body: 'nationName=' + val
     }).then(r => r.json()).then(r => {
       if (r.retcode.status === '10000') {
         // message.success(r.retcode.msg)
@@ -140,6 +143,7 @@ class awaitingExamine extends React.Component {
       }
     });
   }
+
   // 监听选择商店事件
   selectShop(val, option) {
     // val即商场名, option.key即商场ID
@@ -164,8 +168,9 @@ class awaitingExamine extends React.Component {
         })
       }
     });
-    this.getTicketList(this,val);
+    this.getTicketList(this, val);
   }
+
   // 根据商场名称获取小票接口
   getTicketList(f, val = this.state.currentShop) {
     fetch(window.fandianUrl + '/recipt/getReciptByMallName', {
@@ -378,6 +383,7 @@ class awaitingExamine extends React.Component {
       }
     });
   }
+
   // 提交结束以后切换小票逻辑
   hasSubmit() {
     let the = this.state;
@@ -390,46 +396,50 @@ class awaitingExamine extends React.Component {
       this.setState({
         currentTicketId: the.currentTicketId + 1,
         // 清空驳回列表
-        remarks:'unShow',
-        reason:null
+        remarks: 'unShow',
+        reason: null
       })
     }
   }
 
   // 驳回申请
   rejected() {
-    this.setState({remarks:'showRemark'})
+    this.setState({remarks: 'showRemark'})
   }
+
   // 关闭驳回
   closeReject() {
-    this.setState({remarks:'unShow'})
+    this.setState({remarks: 'unShow'})
   }
+
   // 选择驳回原因
   onRadioChange(e) {
     this.setState({
       reason: e.target.value,
     });
   }
+
   //驳回备注确定
   openNotification() {
-    if(this.state.reason!==null){
-      let reject={
-        reciptId:this.state.ticketList[this.state.currentTicketId].reciptId,
-        note:this.state.reason
+    if (this.state.reason !== null) {
+      let reject = {
+        reciptId: this.state.ticketList[this.state.currentTicketId].reciptId,
+        note: this.state.reason
       }
-      fetch(window.fandianUrl+'/recipt/checkReciptRejected',{
+      fetch(window.fandianUrl + '/recipt/checkReciptRejected', {
         method: 'post',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(reject),
-      }).then(res=>res.json()).then(res=>{
+      }).then(res => res.json()).then(res => {
         this.hasSubmit()
       })
-    }else if(this.state.reason===null) {
+    } else if (this.state.reason === null) {
       notification['warning']({
         message: '请选择驳回原因'
       });
     }
   }
+
   render() {
     let {showImageViewer, shopList, currentShop, hasTicket, brandList, ticketList, currentTicketId, reciptMoney, defaultExchangeRate, previewImageWH, ticketTotal, country} = this.state;
     const {getFieldDecorator} = this.props.form;
@@ -458,7 +468,7 @@ class awaitingExamine extends React.Component {
         <div className="noTicket" style={{display: (hasTicket ? 'none' : 'block')}}>
           {currentShop && <div><Icon type="smile" className="iconSmile"/><span>当前商场没有小票</span></div>}
           {!country && <div><Icon type="shop" className="iconShop"/><span>请选择国家</span></div>}
-          {country &&!currentShop && <div><Icon type="shop" className="iconShop"/><span>请选择商场</span></div>}
+          {country && !currentShop && <div><Icon type="shop" className="iconShop"/><span>请选择商场</span></div>}
         </div>
         <div className="container" style={{display: (hasTicket ? 'block' : 'none')}}>
           <div className="containerBody containerImage">
@@ -476,7 +486,7 @@ class awaitingExamine extends React.Component {
           <div className="containerBody containerForm">
             <Form className="examineForm"
                   id='myForm'
-                  // onSubmit={this.handleSubmit.bind(this)}
+              // onSubmit={this.handleSubmit.bind(this)}
             >
               <FormItem label="商场"
                         colon
@@ -486,14 +496,19 @@ class awaitingExamine extends React.Component {
                        disabled
                        value={currentShop}
                 />
-                {/*<span>团号：</span>*/}
-                {/*{getFieldDecorator('teamNo', {*/}
-                  {/*initialValue: (currentTicketId >= ticketList.length || ticketList.length === 0) ? '' : ticketList[currentTicketId].teamNo*/}
-                {/*})(*/}
-                  {/*<Input style={{width: 80, marginLeft: 10, color: '#555'}}*/}
-                         {/*disabled*/}
-                  {/*/>*/}
-                {/*)}*/}
+              </FormItem>
+              <FormItem label="团号或凭证号"
+                        colon
+                        labelCol={{span: 6}}
+                        wrapperCol={{span: 8}}
+              >
+                {getFieldDecorator('teamNo', {
+                  initialValue: '',
+                  rules: [{required: true, message: '请输入团号或凭证号!'}],
+                })(
+                  <Input style={{width: 80, marginLeft: 10, color: '#555'}}
+                  />
+                )}
               </FormItem>
               <FormItem label="消费金额 ($)"
                         colon
@@ -610,7 +625,7 @@ class awaitingExamine extends React.Component {
                 <Button type="primary"
                         htmlType="submit"
                         className="examineFormButton"
-                        style={{marginTop: '15px',marginLeft: '10px'}}
+                        style={{marginTop: '15px', marginLeft: '10px'}}
                         onClick={this.handleSubmit.bind(this)}
                 >
                   通过
@@ -632,11 +647,11 @@ class awaitingExamine extends React.Component {
           </div>
           <RadioGroup className='allReasons' onChange={this.onRadioChange.bind(this)} value={this.state.reason}>
             <Radio value={0}>小票不清晰</Radio>
-            {/*<Radio value={1}>团号不正确</Radio>*/}
+            <Radio value={1}>团号或凭证号不正确</Radio>
             <Radio value={2}>小票重复</Radio>
             <Radio value={3}>其他</Radio>
           </RadioGroup>
-          <Button type="primary"  onClick={this.openNotification.bind(this)}>确定</Button>
+          <Button type="primary" onClick={this.openNotification.bind(this)}>确定</Button>
         </div>
 
         {showImageViewer &&
