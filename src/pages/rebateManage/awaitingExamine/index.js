@@ -70,7 +70,7 @@ class awaitingExamine extends React.Component {
       // 图片预览宽高自适应
       previewImageWH: 'width',
       // 汇率
-      defaultExchangeRate: 1,
+      defaultExchangeRate: '',
     };
     window.awaitingExamine = this;
   }
@@ -84,16 +84,16 @@ class awaitingExamine extends React.Component {
       countries: countries
     });
     // 获取当日对美元汇率
-    fetch(window.fandianUrl + '/recipt/getExchangeRateByDate', {
-      method: 'POST'
-    }).then(r => r.json()).then(r => {
-      // console.log(r.result.rate)
-      if (r.success === '1') {
-        this.setState({
-          defaultExchangeRate: parseFloat(parseFloat(r.result.rate).toFixed(4))
-        });
-      }
-    })
+    // fetch(window.fandianUrl + '/recipt/getExchangeRateByDate', {
+    //   method: 'POST'
+    // }).then(r => r.json()).then(r => {
+    //   // console.log(r.result.rate)
+    //   if (r.success === '1') {
+    //     this.setState({
+    //       defaultExchangeRate: parseFloat(parseFloat(r.result.rate).toFixed(4))
+    //     });
+    //   }
+    // })
   }
 
   //渲染完成以后修正图片预览样式
@@ -373,21 +373,25 @@ class awaitingExamine extends React.Component {
           reciptMoney: the.reciptMoney,
           unionId: the.ticketList[the.currentTicketId].unionId,
         };
-        fetch(window.fandianUrl + '/recipt/checkReciptAllow', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(data),
-        }).then(r => r.json()).then(r => {
-          if(r.retcode.status=='10002'){
-            message.error(r.retcode.msg);
-          }
-          if(r.retcode.status=='10001'){
-            message.error(r.retcode.msg);
-          }
-          if(r.retcode.status=='10000'){
-            this.hasSubmit();
-          }
-        })
+        if( val.exchangeRate==0){
+          message.error('汇率不能为零')
+        }else{
+          fetch(window.fandianUrl + '/recipt/checkReciptAllow', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data),
+          }).then(r => r.json()).then(r => {
+            if(r.retcode.status=='10002'){
+              message.error(r.retcode.msg);
+            }
+            if(r.retcode.status=='10001'){
+              message.error(r.retcode.msg);
+            }
+            if(r.retcode.status=='10000'){
+              this.hasSubmit();
+            }
+          })
+        }
       }
     });
   }
