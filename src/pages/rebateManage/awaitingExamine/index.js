@@ -518,7 +518,7 @@ class awaitingExamine extends React.Component {
                   />
                 )}
               </FormItem>
-              <FormItem label="消费金额 ($)"
+              <FormItem label={"消费金额"+'('+(!!ticketList.length ? (ticketList[currentTicketId].nationName=='韩国' ? '韩元':(ticketList[currentTicketId].nationName=='日本' ? '日元':'人民币')):'')+')'}
                         colon
                         labelCol={{span: 6}}
                         wrapperCol={{span: 8}}
