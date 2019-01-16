@@ -20,11 +20,11 @@ import 'antd/dist/antd.less';
 
 import App from './App';
 
-window.apiUrl = 'http://api.maishoumiji.com';
-window.fandianUrl = 'http://fandian.maishoumiji.com';
+// window.apiUrl = 'http://api.maishoumiji.com';
+// window.fandianUrl = 'http://fandian.maishoumiji.com';
 
 // 发布测试环境时修改
-// window.apiUrl = window.fandianUrl = 'http://testapi.maishoumiji.com';
+window.apiUrl = window.fandianUrl = 'http://testapi.maishoumiji.com';
 
 ReactDOM.render(
   <HashRouter>
