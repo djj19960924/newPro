@@ -166,15 +166,13 @@ class awaitingExamine extends React.Component {
         this.setState({
           brandList: dataList,
         });
-        if (dataList.length === 1) {
-          this.props.form.setFieldsValue({
-            currentBrand: dataList[0].props.value
-          });
-          this.setState({
-            currentBrandName: dataList[0].props.name
-          });
-          this.getRebateRate(dataList[0],dataList[0].props.name,undefined,val)
-        }
+        this.props.form.setFieldsValue({
+          currentBrand: dataList[0].props.value
+        });
+        this.setState({
+          currentBrandName: dataList[0].props.name
+        });
+        this.getRebateRate(dataList[0],dataList[0].props.name,undefined,val)
       }
     });
     this.getTicketList(this, val);
@@ -410,15 +408,13 @@ class awaitingExamine extends React.Component {
         reason: null
       });
     }
-    if (the.brandList.length === 1) {
-      this.props.form.setFieldsValue({
-        currentBrand: the.brandList[0].props.value
-      });
-      this.setState({
-        currentBrandName: the.brandList[0].props.name
-      });
-      this.getRebateRate(the.brandList[0],the.brandList[0].props.name)
-    }
+    this.props.form.setFieldsValue({
+      currentBrand: the.brandList[0].props.value
+    });
+    this.setState({
+      currentBrandName: the.brandList[0].props.name
+    });
+    this.getRebateRate(the.brandList[0],the.brandList[0].props.name)
   }
 
   // 驳回申请
