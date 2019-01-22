@@ -87,7 +87,6 @@ class awaitingExamine extends React.Component {
     // fetch(window.fandianUrl + '/recipt/getExchangeRateByDate', {
     //   method: 'POST'
     // }).then(r => r.json()).then(r => {
-    //   // console.log(r.result.rate)
     //   if (r.success === '1') {
     //     this.setState({
     //       defaultExchangeRate: parseFloat(parseFloat(r.result.rate).toFixed(4))
@@ -116,7 +115,10 @@ class awaitingExamine extends React.Component {
 // 监听选择国家事件
   selectCountry(val, option) {
     this.setState({
-      country: val, pageTotal: null, mallName: '', ticketList: [],
+      country: val,
+      pageTotal: null,
+      mallName: '',
+      ticketList: [],
       hasTicket: false,
       currentShop: undefined,
       currentTicketId: 0,
@@ -147,7 +149,6 @@ class awaitingExamine extends React.Component {
   // 监听选择商店事件
   selectShop(val, option) {
     // val即商场名, option.key即商场ID
-    // console.log(val, option.key)
     fetch(window.fandianUrl + '/brand/getBrandList', {
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -157,7 +158,6 @@ class awaitingExamine extends React.Component {
       if (r.retcode.status === '10000') {
         let dataList = [];
         for (let i of r.data) {
-          // console.log(i)
           // 这里的value会作为选择框的搜索字段, 所以需求同时可以根据Id或者Name查询, 则在value值中同时插入Id和Name
           // 但是注意最终传值时不要取value
           dataList.push(<Option key={i.brandId} name={i.brandName}
@@ -165,7 +165,16 @@ class awaitingExamine extends React.Component {
         }
         this.setState({
           brandList: dataList,
-        })
+        });
+        if (dataList.length === 1) {
+          this.props.form.setFieldsValue({
+            currentBrand: dataList[0].props.value
+          });
+          this.setState({
+            currentBrandName: dataList[0].props.name
+          });
+          this.getRebateRate(dataList[0],dataList[0].props.name,undefined,val)
+        }
       }
     });
     this.getTicketList(this, val);
@@ -179,7 +188,6 @@ class awaitingExamine extends React.Component {
       // 这里给出搜索的页码与当前页数
       body: 'mallName=' + val + '&pageNum=1&pageSize=20',
     }).then(r => r.json()).then(r => {
-      //console.log(r);
       if (r.retcode.status === '10000') {
         f.setState({
           ticketList: r.data.pageInfo.list,
@@ -190,17 +198,9 @@ class awaitingExamine extends React.Component {
           remarks: 'unShow',
           reason: null
         });
+      } else {
+        message.error(`错误码:${r.retcode.status} ${r.retcode.msg}`)
       }
-      // 首次选择表单给予默认值
-      // if (!!r.data.pageInfo.total) {
-      //   this.props.form.setFieldsValue({
-      //     teamNo: r.data.pageInfo.list[0].teamNo,
-      //     // consumeMoney: r.data.pageInfo.list[0].consumeMoney,
-      //     // reciptAttribute: r.data.pageInfo.list[0].reciptAttribute,
-      //     // exchangeRate: r.data.pageInfo.list[0].exchangeRate,
-      //     // rebateRate: r.data.pageInfo.list[0].rebateRate,
-      //   })
-      // }
     });
   }
 
@@ -213,9 +213,9 @@ class awaitingExamine extends React.Component {
   }
 
   // 获取当日返点率
-  getRebateRate(val, name, date = this.state.ticketDate) {
+  getRebateRate(val, name, date = this.state.ticketDate, mallName = this.state.currentShop) {
     let data = {
-      mallName: this.state.currentShop,
+      mallName: mallName,
       brandName: name,
       rebateDate: date
     };
@@ -224,7 +224,6 @@ class awaitingExamine extends React.Component {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(data),
     }).then(r => r.json()).then(r => {
-      // console.log('获取当日返点率')
       this.props.form.setFieldsValue({
         rebateRate: r.data ? r.data.rebateRate : 0
       });
@@ -236,7 +235,7 @@ class awaitingExamine extends React.Component {
   changeTicketDate(date) {
     this.setState({
       ticketDate: moment(date).format('YYYY-MM-DD')
-    })
+    });
     if (!!this.state.currentBrandName) {
       this.getRebateRate(this.props.form.getFieldValue('currentBrand'), this.state.currentBrandName, moment(date).format('YYYY-MM-DD'))
     }
@@ -354,10 +353,9 @@ class awaitingExamine extends React.Component {
 
   // 通过 - 提交表单
   handleSubmit() {
+    const { country, } = this.state;
     //.log(this.props.form.getFieldsValue());
     this.props.form.validateFields((err, val) => {
-      console.log(!err);
-      console.log(val);
       let the = this.state;
       if (!err) {
         let data = {
@@ -365,7 +363,6 @@ class awaitingExamine extends React.Component {
           mallName: the.currentShop,
           teamNo: val.teamNo,
           consumeMoney: val.totalMoney,
-          reciptAttribute: val.reciptAttribute,
           brandName: the.currentBrandName,
           consumeDate: moment(val.ticketDate).format('YYYY-MM-DD'),
           exchangeRate: val.exchangeRate,
@@ -373,6 +370,7 @@ class awaitingExamine extends React.Component {
           reciptMoney: the.reciptMoney,
           unionId: the.ticketList[the.currentTicketId].unionId,
         };
+        if (country === '韩国') data.reciptAttribute= val.reciptAttribute;
         if( val.exchangeRate==0){
           message.error('汇率不能为零')
         }else{
@@ -410,7 +408,16 @@ class awaitingExamine extends React.Component {
         // 清空驳回列表
         remarks: 'unShow',
         reason: null
-      })
+      });
+    }
+    if (the.brandList.length === 1) {
+      this.props.form.setFieldsValue({
+        currentBrand: the.brandList[0].props.value
+      });
+      this.setState({
+        currentBrandName: the.brandList[0].props.name
+      });
+      this.getRebateRate(the.brandList[0],the.brandList[0].props.name)
     }
   }
 
@@ -540,7 +547,7 @@ class awaitingExamine extends React.Component {
                   />
                 )}
               </FormItem>
-              <FormItem label="属性"
+              {country === '韩国' && <FormItem label="属性"
                         colon
                         labelCol={{span: 3}}
               >
@@ -555,7 +562,7 @@ class awaitingExamine extends React.Component {
                     <Option key="MG">MG</Option>
                   </Select>
                 )}
-              </FormItem>
+              </FormItem>}
               <FormItem label="品牌"
                         colon
                         labelCol={{span: 3}}
