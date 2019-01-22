@@ -1,5 +1,10 @@
 const menus = [
   {
+    title: '首页',
+    icon: 'home',
+    key: '/'
+  },
+  {
     title: '物流管理',
     icon: 'rocket',
     key: '/logistics-manage',

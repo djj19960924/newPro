@@ -9,8 +9,18 @@ class Home extends React.Component{
 
   render() {
     return (
-      <div className="Home">
-        首页!
+      <div className="Home"
+           style={{width: '100%',
+             height: '100%',
+             backgroundColor: '#fff',
+             fontSize: '48px',
+             textAlign: 'center',
+           }}
+      >
+        <p style={{paddingTop: 260,
+          margin: 0
+        }}
+        >欢迎使用BuyersHouse后台管理系统!</p>
       </div>
     )
   }

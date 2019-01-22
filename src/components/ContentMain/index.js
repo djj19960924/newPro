@@ -18,6 +18,7 @@ import setRebate from '@pages/rebateManage/setRebate/';
 // 商品管理
 import commoditiesDataBase from '@pages/commoditiesManage/commoditiesDatabase/';
 import commoditiesCreateAndEdit from '@pages/commoditiesManage/commoditiesDatabase/commoditiesCreateAndEdit/';
+import commoditiesImgList from '@pages/commoditiesManage/commoditiesDatabase/commoditiesImgList/';
 
 // 404页面
 import page404 from '@pages/system/page404/'
@@ -46,10 +47,12 @@ class ContentMain extends React.Component{
           <Route exact path="/rebate-manage/set-rebate" component={setRebate} />
           {window.isTest && <Route exact path="/commodities-manage/commodities-database" component={commoditiesDataBase} />}
           {window.isTest && <Route exact path="/commodities-manage/commodities-database/create-and-edit" component={commoditiesCreateAndEdit} />}
+          {window.isTest && <Route exact path="/commodities-manage/commodities-database/commodities-img-list" component={commoditiesImgList} />}
           {window.isTest && <Route exact path="/test" component={test} />}
           {/*<Route exact path="/about" component={about} />*/}
+          <Route exact path="/" component={Home} />
           {/*这里可以配置404 not found 页面*/}
-          <Route path="/" component={page404} />
+          <Route component={page404} />
         </Switch>
       </div>
     )}
