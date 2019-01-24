@@ -48,38 +48,62 @@ class commoditiesImgList extends React.Component {
       skuId: skuId
     });
 
-    if (!!localStorage.imgList) {
-      let imgList = localStorage.imgList.split(',');
-      const dataList = [];
-      for (let v of imgList) {
-        dataList.push(`//${v.split('//')[1]}`)
-      }
-      this.setState({
-        imgList: dataList
-      });
-    } else {
-      fetch(`${window.fandianUrl}/sku/selectEditSkuBySkuId`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body:`skuId=${skuId}`,
-      }).then(r => r.json()).then(r => {
-        if (r.status === 10000) {
-          // 成功
-          // 将图片地址保存在本地缓存
-          const d = r.data;
-          localStorage.imgList = d.imgList;
-          const dataList = [];
-          for (let v of d.imgList) {
+    if (type === 'edit') {
+      // 如果类型为编辑, 则读取本地数据缓存, 将图片转入 upload 组件
+      if (!!localStorage.imgList) {
+        let imgList = JSON.parse(localStorage.imgList).imgList;
+        const dataList = [];
+        if (Array.isArray(imgList)) {
+          for (let v of imgList) {
             dataList.push(`//${v.split('//')[1]}`)
           }
-          this.setState({
-            imgList: dataList
-          });
         } else {
-          // 错误,并返回错误码
-          message.error(`${r.msg} 错误码:${r.status}`);
+          // d.imgList为空时, 值恒定为null, 这里不做处理, 直接赋值空数组
         }
-      })
+        this.setState({ imgList: dataList },() => { this.makeImgToFile() });
+      } else {
+        fetch(`${window.apiUrl}/sku/selectEditSkuBySkuId`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          body:`skuId=${skuId}`,
+        }).then(r => r.json()).then(r => {
+          if (r.status === 10000) {
+            // 成功
+            // 将图片地址保存在本地缓存
+            const d = r.data;
+            localStorage.imgList = JSON.stringify({imgList: d.imgList});
+            const dataList = [];
+            if (Array.isArray(d.imgList)) {
+              for (let v of d.imgList) {
+                dataList.push(`//${v.split('//')[1]}`)
+              }
+            } else {
+              // d.imgList为空时, 值恒定为null, 这里不做处理, 直接赋值空数组
+            }
+            this.setState({ imgList: dataList },() => { this.makeImgToFile() });
+          } else {
+            // 错误,并返回错误码
+            message.error(`${r.msg} 错误码:${r.status}`);
+          }
+        })
+      }
+    } else if (type === 'create') {
+      // 如果类型为创建, 则将上传的图片所返回的图片地址, 保存在本地数据库, 传入创建商品页面
+      if (!!localStorage.newImgList) {
+        const imgList = JSON.parse(localStorage.newImgList).imgList;
+        const dataList = [];
+        if (Array.isArray(imgList)) {
+          for (let v of imgList) {
+            dataList.push(`//${v.split('//')[1]}`)
+          }
+        } else {
+          // d.imgList为空时, 值恒定为null, 这里不做处理, 直接赋值空数组
+        }
+        this.setState({ imgList: dataList },() => { this.makeImgToFile() });
+      }
+    } else {
+      message.error('错误的商品处理类型, 即将返回商品库页面!');
+      this.props.history.push('/commodities-manage/commodities-database');
     }
   }
   // 组件渲染值完成以后触发
@@ -91,42 +115,72 @@ class commoditiesImgList extends React.Component {
   }
   // img图片转file
   makeImgToFile() {
-    // 异步加载图片, 参数挂载在 window 中
-    // img初始化设置, 这里放开头部验证, 防止canvas转码出现跨域问题
-    // 这里将数据放入 window.dlImg
+    // 异步加载图片, img初始化设置, 这里放开头部验证, 防止canvas转码出现跨域问题
     // ***重要*** 需要图片所在的服务端已经做好跨域配置
-    window.dlImg = {};
-    window.dlImg.theImg = new Image();
-    window.dlImg.theImg.crossOrigin = "*";
+    let theImg = new Image();
+    theImg.crossOrigin = "*";
     // canvas初始化设置
-    window.dlImg.dlImgCanvas = document.createElement("canvas");
-    window.dlImg.dIC = window.dlImg.dlImgCanvas.getContext('2d');
+    let dlImgCanvas = document.createElement("canvas");
+    let dIC = dlImgCanvas.getContext('2d');
     // 初始化图片列表长度
-    window.dlImg.imgList = this.state.imgList;
-    window.dlImg.iL = window.dlImg.imgList.length;
-    window.dlImg.i = 0;
-    // 初次赋予 img 图片地址链接
-    window.dlImg.theImg.src = `//${this.state.imgList[window.dlImg.i].split('//')[1]}`;
-    // 利用onload是在图片加载完成以后触发的机制, 制作异步循环
-    window.dlImg.theImg.onload = (e) => {
-      // 指向该img标签
-      // console.log(e.path[0]);
-      if (window.dlImg.i < window.dlImg.iL) {
-        window.dlImg.dIC.drawImage(window.dlImg.theImg, 0, 0);
-        let file = this.dataURLtoFile(window.dlImg.dlImgCanvas.toDataURL("image/jpeg"),'网络图片.jpg');
-        console.log(file);
-        window.dlImg.i = window.dlImg.i + 1;
-        console.log(window.dlImg.i);
-        // 对 imgList 判空防止代码报错
-        window.dlImg.theImg.src = `//${ window.dlImg.imgList[window.dlImg.i] ?
-          window.dlImg.imgList[window.dlImg.i].split('//')[1] : ''
-          }`;
+    let imgList;
+    imgList = this.state.imgList;
+    if (imgList.length > 0) {
+      let iL = imgList.length, i = 0;
+      // 初次赋予 img 图片地址链接
+      theImg.src = `//${imgList[i].split('//')[1]}`;
+      // 显示 loading
+      this.setState({isLoading: true, loadingTxt: '图片加载中...'});
+      // 利用onload是在图片加载完成以后触发的机制, 制作异步循环
+      theImg.onload = (e) => {
+        // 指向该img标签
+        // console.log(e.path[0]);
+        if (i < iL) {
+          // 这里撑开 canvas 标签的宽高, 以适应下载的 img 图像大小
+          dlImgCanvas.width = theImg.width;
+          dlImgCanvas.height = theImg.height;
+          // 这里将 img 绘制到 canvas 上, 并利用 canvas 生成 base64 码, 然后转化为 file 格式
+          dIC.drawImage(theImg, 0, 0);
+          let src = e.path[0].src.split('.'),srcType;
+          if (src[src.length-1] === 'jpg' || src[src.length-1] === 'jpeg') {
+            srcType = 'image/jpeg'
+          } else if (src[src.length-1] === 'png') {
+            srcType = 'image/png'
+          }
+          let file = this.dataURLtoFile(dlImgCanvas.toDataURL(srcType),`图片.${src[src.length-1]}`);
+          let dataList = [];
+          for (let v of this.state.fileList) {
+            dataList.push(v)
+          }
+          let uploadFile = {
+            thumbUrl: dlImgCanvas.toDataURL(srcType),
+            uid: `upload-download-${i}`,
+            originFileObj: file,
+            lastModified: file.lastModified,
+            lastModifiedDate: file.lastModifiedDate,
+            name: file.name,
+            percent: file.percent,
+            size: file.size,
+            type: file.type,
+          };
+          dataList.push(uploadFile);
+          i = i + 1;
+          // 赋值, 并关闭 loading
+          this.setState({fileList: dataList,isLoading: false, loadingTxt: 'Loading...'});
+          // 这里防止在最后一次赋值以后, 多做一次对 img 的 src 的操作
+          if (i < iL) {
+            // 对 imgList 判空防止代码报错
+            theImg.src = `//${ imgList[i] ? imgList[i].split('//')[1] : '' }`;
+            // 显示 loading
+            this.setState({isLoading: true, loadingTxt: '图片加载中...'});
+          }
+        }
+      };
+      theImg.onerror = (e) => {
+        // 指向该img标签
+        // console.log(e.path[0]);
+        message.error('图片加载出错')
       }
-    };
-    window.dlImg.theImg.onerror = (e) => {
-      // 指向该img标签
-      // console.log(e.path[0]);
-      message.error('图片加载出错')
     }
   }
   // 查看图片
@@ -146,7 +200,7 @@ class commoditiesImgList extends React.Component {
   imageChange(f) {
     // 这里用于恢复 isFileTooLarge 状态
     this.state.isFileTooLarge = false;
-    const dataList = [];
+    let dataList = [];
     for (let i of f.fileList) {
       // 这里对 this.state 进行直接赋值, 是实时操作的, 且不会触发 render 的渲染
       // 这里的 size 单位为b, 需要进行数值操作
@@ -188,10 +242,9 @@ class commoditiesImgList extends React.Component {
   }
   // 打开摄像头弹窗
   openCamera() {
-    this.setState(
-      { cameraModalVisible: true },
-      // () => {this.getMedia()}
-    )
+    this.setState({
+      cameraModalVisible: true
+    })
   }
   // 关闭摄像头弹窗
   closeCamera() {
@@ -285,7 +338,7 @@ class commoditiesImgList extends React.Component {
     }
   }
   // 自定义上传图片
-  uploadFunction() {
+  uploadFunction(type,skuId) {
     // 打开loading
     this.setState({
       isLoading: true,
@@ -311,12 +364,62 @@ class commoditiesImgList extends React.Component {
           loadingTxt: 'Loading...'
         });
         // 这里获取返回的imgUrl
-        console.log(r)
-        // 图片上传成功以后调取表单上传接口
+        if (r.code === 2000) {
+          // 图片上传成功以后根据类型判断下一步行为
+          if (type === 'create') {
+            // localStorage 只能存储字符串, 但是可以自动将数组转化为由 ',' 分割的 string
+            message.success('图片上传成功, 请继续填写信息以完成商品录入');
+            localStorage.newImgList = JSON.stringify({imgList:r.imgList});
+            this.props.history.push(`/commodities-manage/commodities-database/create-and-edit?type=${type}&skuId=${skuId}`);
+          } else if (type === 'edit') {
+            this.editSkuImg(type,skuId,r);
+          }
+        } else {
+          message.error(`${r.msg} 错误码为:${r.code}`)
+        }
+      }).catch(r => {
+        message.error('图片上传接口调取失败!');
+        // 关闭loading
+        this.setState({ isLoading: false, loadingTxt: 'Loading...' });
       })
     } else {
-      message.error('至少选择一张商品图片')
+      // 关闭loading
+      this.setState({ isLoading: false, loadingTxt: 'Loading...' });
+      if (type === 'create') {
+        localStorage.newImgList = JSON.stringify({imgList:[]});
+      } else if (type === 'edit') {
+        this.editSkuImg(type,skuId,{imgList:[]});
+      }
+      this.props.history.push(`/commodities-manage/commodities-database/create-and-edit?type=${type}&skuId=${skuId}`);
     }
+  }
+  // 修改sku图片地址
+  editSkuImg(type,skuId,r) {
+    fetch(`${window.testUrl}/sku/editSkuImg`,{
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        skuId: skuId,
+        newImgList: r.imgList
+      }),
+    }).then(r=>r.json()).then(r=>{
+      if (r.status === 10000) {
+        // 修改成功
+        message.success(`${r.msg}`);
+        // 返回上一页面
+        this.props.history.push(`/commodities-manage/commodities-database/create-and-edit?type=${type}&skuId=${skuId}`);
+      } else {
+        message.error(`${r.msg} 错误码为:${r.status}`)
+      }
+    }).catch(r=>{
+      message.error('图片修改接口调取失败!')
+    })
+  }
+  // 保存按钮
+  submit() {
+    // 判断类型, 保存以后跳转回上一个页面
+    const { type, skuId, } = this.state;
+    this.uploadFunction(type,skuId)
   }
   // 上传前控制 - 禁用自动上传
   beforeUploadFunction(file,fileList) {
@@ -340,7 +443,7 @@ class commoditiesImgList extends React.Component {
     );
     return (
       <div className="commoditiesImgList">
-        图片修改功能
+        <p className="titleName">图片修改</p>
 
         {/*loading遮罩层*/}
         {isLoading && <div className="loading">
@@ -350,7 +453,9 @@ class commoditiesImgList extends React.Component {
         </div>}
 
         {/*上传图片/拍照模块*/}
-        <div style={{overflow:'hidden'}}>
+        <div style={{overflow:'hidden'}}
+             className="imgEdit"
+        >
           <Upload fileList={fileList}
                      supportServerRender
                      beforeUpload={this.beforeUploadFunction.bind(this)}
@@ -359,7 +464,8 @@ class commoditiesImgList extends React.Component {
                      // 预览类型
                      listType="picture-card"
                      // 接受上传的文件类型 允许(jpg,jpeg,png,gif)
-                     accept="image/jpeg,image/png,image/gif"
+                     // "image/jpeg,image/png,image/gif"
+                     accept="image/jpeg,image/png"
                      onPreview={this.imagePreview.bind(this)}
                      onChange={this.imageChange.bind(this)}
         >
@@ -435,9 +541,11 @@ class commoditiesImgList extends React.Component {
 
         <div className="btnLine">
           <Button type="primary"
+                  onClick={this.submit.bind(this)}
           >保存</Button>
           <Button type="primary"
                   onClick={this.backTo.bind(this)}
+                  style={{marginLeft: 10}}
           >返回</Button>
         </div>
 

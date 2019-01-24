@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Form, Select, Input, InputNumber, Upload, message, Icon, Modal, } from 'antd';
+import { Button, Form, Select, Input, InputNumber, message, Icon, Modal, } from 'antd';
 import {inject, observer} from 'mobx-react/index';
 
 import './index.less';
@@ -25,10 +25,20 @@ class commoditiesCreateAndEdit extends React.Component {
       previewImage: '',
       // 预览图片宽高比
       previewImageWH: [],
-      // 货币类型
+      // 商品进货价货币类型
       currencyType: 0,
+      // 商品原价货币类型
+      originalType: 0,
+      // 品类列表
+      categoryList: [],
+      // 获取的品类以及库存单位列表
+      productCategoryList: [],
+      // 单位名称
+      unitName: '(根据品类获取)',
       // 行邮税号
       postcode: '',
+      // 单位
+      modelNumber: '',
       // Loading状态
       isLoading: false,
       // Loading提示文字
@@ -47,12 +57,35 @@ class commoditiesCreateAndEdit extends React.Component {
     // setTimeout(() => {
     //   message.destroy()
     // },3000);
+    // 获取所有品类列表,以及数量单位
+    fetch(`${window.apiUrl}/sku/getAllProductCategory`, {
+      method: 'POST'
+    }).then(r => r.json()).then(r => {
+      if (r.status === 10000) {
+        let dataList = [];
+        for (let i in r.data) {
+          // 这里的value会作为选择框的搜索字段, 所以需求同时可以根据Id或者Name查询, 则在value值中同时插入Id和Name
+          // 但是注意最终传值时不要取value
+          dataList.push(<Option value={r.data[i].name} key={r.data[i].id}>{r.data[i].name}</Option>)
+        }
+        this.setState({categoryList: dataList, productCategoryList: r.data});
+      } else {
+        // 错误,并返回错误码
+        message.error(`${r.msg} 错误码:${r.status}`);
+      }
+    });
+    // 根据 type 判断行为
     if (type === 'create') {
       this.setState({
         titleName: '录入',
         type: type,
         skuId: skuId,
       });
+      if (!!localStorage.newImgList) {
+        this.setState({
+          imgList: JSON.parse(localStorage.newImgList).imgList
+        },()=>{this.showImg()})
+      }
     } else if (type === 'edit') {
       // 打开loading
       this.setState({
@@ -60,9 +93,9 @@ class commoditiesCreateAndEdit extends React.Component {
         isLoading: true,
         loadingTxt: '数据加载中, 请稍后...',
         type: type,
-        skuId: skuId,
+        skuId: parseInt(skuId),
       });
-      fetch(`${window.fandianUrl}/sku/selectEditSkuBySkuId`, {
+      fetch(`${window.apiUrl}/sku/selectEditSkuBySkuId`, {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body:`skuId=${skuId}`,
@@ -74,16 +107,27 @@ class commoditiesCreateAndEdit extends React.Component {
         });
         if (r.status === 10000) {
           // 成功
-          // 将图片地址保存在本地缓存
           const d = r.data;
-          localStorage.imgList = d.imgList;
+          // 将图片地址保存在本地缓存
+          localStorage.imgList = JSON.stringify({imgList: d.imgList});
           const dataList = [];
-          for (let v of d.imgList) {
-            dataList.push(`//${v.split('//')[1]}`)
+          if (Array.isArray(d.imgList)) {
+            for (let v of d.imgList) {
+              dataList.push(`//${v.split('//')[1]}`)
+            }
+          } else {
+            // d.imgList为空时, 值恒定为null, 这里不做处理, 直接赋值空数组
           }
+          // 图片存入 state 供读取使用
           this.setState({
-            imgList: dataList
+            imgList: dataList,
+            postcode: d.postcode
           });
+          // 获取单位
+          let pCL = this.state.productCategoryList;
+          for (let i in pCL) {
+            if (pCL[i].name === d.category) this.setState({unitName:pCL[i].modelNumber,modelNumber:r.data.modelNumber});
+          }
           // 这里设置表单默认值
           this.props.form.setFieldsValue({
             skuCode: d.skuCode, category: d.category, name: d.name, grossWeight: d.grossWeight, costPrice:d.costPrice, currencyType: d.currencyType, brand: d.brand, sugPostway: d.sugPostway, specificationType: d.specificationType, stock: d.stock, sugPrice: d.sugPrice, recordPrice: d.recordPrice, taxRate: d.taxRate, purchaseArea: d.purchaseArea
@@ -100,6 +144,10 @@ class commoditiesCreateAndEdit extends React.Component {
   }
   // 渲染成功触发
   componentDidUpdate(prevProps, prevState, snapshot) {
+    this.showImg();
+  }
+  // 渲染预览图片时间
+  showImg() {
     const { imgList, } = this.state;
     for (let i in imgList) {
       let item = document.getElementById(`goodsImg_${i}`);
@@ -119,6 +167,7 @@ class commoditiesCreateAndEdit extends React.Component {
         });
       };
       item.onerror = (e) => {
+        message.error('图片加载失败')
         // 图片如果未加载出, 也放开显示, 标出图片未加载的默认样式
         let pI = document.getElementById(`goodsImg_${i}`);
         pI.style.visibility = `visible`;
@@ -138,6 +187,18 @@ class commoditiesCreateAndEdit extends React.Component {
       previewVisible: false,
     })
   }
+  // 改变品类触发
+  changeCategory(name,e) {
+    const { productCategoryList, } = this.state;
+    this.setState({
+      postcode: productCategoryList[e.key].taxNumber,
+      unitName: productCategoryList[e.key].modelNumber,
+      modelNumber: productCategoryList[e.key].modelNumber,
+    });
+    this.props.form.setFieldsValue({
+      specificationType: productCategoryList[e.key].specification,
+    })
+  }
   // 返回上一个界面
   backTo() {
     // this.props.history.goBack()
@@ -147,37 +208,64 @@ class commoditiesCreateAndEdit extends React.Component {
   // 进入编辑图片界面
   gotoEditImg() {
     const { type, skuId } = this.state;
+    localStorage.skuInfo = JSON.stringify(this.props.form.getFieldsValue());
     this.props.history.push(`/commodities-manage/commodities-database/commodities-img-list?type=${type}&skuId=${skuId}`);
-  }
-  // 改变行邮税号
-  changePostcode(v) {
-    this.setState({
-      postcode: v.target.value
-    })
   }
   // 提交按钮
   submit() {
-    // if (!this.state.isFileListChanged) {
-    // fetch() 上传图片
-    // .then(message.destory();message.success('图片上传成功');message.loading('表单上传中');
-    // this.submitForm()
-    // )} 上传表单
-    // else {
-    // this.submitForm()
-    // }
+    const { type, } = this.state;
+    this.submitForm(type);
   }
   // 上传表单
-  submitForm() {
-    // fetch()
-  }
-  // 测试用function
-  test() {
-    console.log(this.state);
-    console.log(this.props.form.getFieldsValue())
+  submitForm(type) {
+    const { skuId, currencyType, postcode, imgList, originalType, modelNumber, } = this.state;
+    this.props.form.validateFields((err, val) => {
+      let the = this.state;
+      if (!err) {
+        // 重置数据
+        let data = {};
+        data = this.props.form.getFieldsValue();
+        data.currencyType = currencyType;
+        data.originalType = originalType;
+        if (this.props.form.getFieldsValue().sugPostway === 1) {
+          data.postcode = postcode;
+          data.modelNumber = modelNumber;
+        }
+        for (let i in data) {
+          // InputNumber 将输入框删除时, 值为 undefined , Input 删除时, 值为 ''
+          // 该两项值为空时, 强制转为 null , 用于保存删空修改
+          if (data[i] === undefined || data[i] === '') data[i] = null;
+        }
+        let skuUrl;
+        if (type === 'create') {
+          // 新增
+          data.imgList = imgList;
+          skuUrl = `/sku/uploadSku`;
+        } else if (type === 'edit') {
+          // 修改
+          data.skuId = skuId;
+          skuUrl = `/sku/editSku`;
+        }
+        fetch(`${window.apiUrl}${skuUrl}`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(data),
+        }).then(r => r.json()).then(r => {
+          if (r.status === 10000) {
+            message.success(`${r.msg}`);
+            this.backTo();
+          } else {
+            message.error(`${r.msg} 错误码:${r.status}`);
+          }
+        });
+        console.log(`上传参数: `);
+        console.log(data)
+      }
+    })
   }
   render() {
-    const {getFieldDecorator} = this.props.form;
-    const { titleName, currencyType, postcode, isLoading, loadingTxt, imgList, previewVisible, previewImage, previewImageWH, } = this.state;
+    const { getFieldDecorator } = this.props.form;
+    const { titleName, currencyType, postcode, isLoading, loadingTxt, imgList, previewVisible, previewImage, previewImageWH, categoryList, unitName, originalType, modelNumber, } = this.state;
     return (
       <div className="commoditiesCreateAndEdit">
         {/*loading遮罩层*/}
@@ -227,7 +315,7 @@ class commoditiesCreateAndEdit extends React.Component {
             {/*商品照片*/}
             <FormItem colon
                       // label="商品照片(1-3张)"
-                      label={<span className="ant-form-item-required">商品照片(1-3张)</span>}
+                      label="商品照片(最多3张)"
                       labelCol={{span: 4}}
                       wrapperCol={{span: 20}}
                       className="imgList"
@@ -275,11 +363,56 @@ class commoditiesCreateAndEdit extends React.Component {
                   {required: true, message: '请输入重量!'},
                 ],
               })(
-                <Input style={{width: 180}}
-                       placeholder="请输入重量"
-                       type="number"
+                <InputNumber style={{width: 180}}
+                             placeholder="请输入重量"
+                             min={0}
                 />
               )}
+            </FormItem>
+
+            {/*数量 / 库存*/}
+            <FormItem label="数量 / 库存"
+                      colon
+                      labelCol={{span: 4}}
+                      wrapperCol={{span: 15}}
+            >
+              {getFieldDecorator('stock')(
+                <InputNumber style={{width: 180}}
+                             placeholder="请输入数量"
+                             min={0}
+                />
+              )}
+              <span style={{marginLeft: 10}}>单位: {unitName}</span>
+              <span style={{marginLeft: 10}}>(选填)</span>
+            </FormItem>
+
+            {/*税率*/}
+            <FormItem label="税率"
+                      colon
+                      labelCol={{span: 4}}
+                      wrapperCol={{span: 15}}
+            >
+              {getFieldDecorator('taxRate')(
+                <InputNumber style={{width: 180}}
+                             placeholder="请输入税率"
+                             min={0}
+                />
+              )}
+              <span style={{marginLeft: 10}}>(未备案则先不填写)</span>
+            </FormItem>
+
+            {/*采购地*/}
+            <FormItem label="采购地"
+                      colon
+                      labelCol={{span: 4}}
+                      wrapperCol={{span: 15}}
+            >
+              {getFieldDecorator('purchaseArea')(
+                <Input style={{width: 180}}
+                       placeholder="请输入采购地"
+                />
+              )}
+              <span style={{marginLeft: 10}}>(选填)</span>
             </FormItem>
 
             {/*成本价 / 采购价*/}
@@ -293,9 +426,9 @@ class commoditiesCreateAndEdit extends React.Component {
                   {required: true, message: '请输入成本价/采购价!'},
                 ],
               })(
-                <Input style={{width: 180}}
-                       placeholder="请输入成本价/采购价"
-                       type="number"
+                <InputNumber style={{width: 180}}
+                             placeholder="请输入成本价/采购价"
+                             min={0}
                 />
               )}
               {/*选择货币类型*/}
@@ -315,102 +448,33 @@ class commoditiesCreateAndEdit extends React.Component {
               </Select>
             </FormItem>
 
-            {/*选择商品品牌*/}
-            <FormItem label="商品品牌"
+            {/*商品原价*/}
+            <FormItem label="商品原价"
                       colon
                       labelCol={{span: 4}}
                       wrapperCol={{span: 15}}
             >
-              {getFieldDecorator('brand', {
-                rules: [
-                  {required: true, message: '请输入商品品牌!'},
-                ],
-              })(
-                <Input style={{width: 180}}
-                       placeholder="请输入商品品牌"
+              {getFieldDecorator('originalPrice')(
+                <InputNumber style={{width: 180}}
+                             placeholder="请输入商品原价"
+                             min={0}
                 />
               )}
-            </FormItem>
-
-            {/*选择商品品类*/}
-            <FormItem label="品类"
-                      colon
-                      labelCol={{span: 4}}
-                      wrapperCol={{span: 15}}
-            >
-              {getFieldDecorator('category', {
-                rules: [
-                  {required: true, message: '请输入品类!'},
-                ],
-              })(
-                <Input style={{width: 180}}
-                       placeholder="请输入品类"
-                />
-              )}
-              <span style={{marginLeft: 10,color: 'rgba(0,0,0,.85)'}}>行邮税号 : </span>
-              <Input style={{width: 180}}
-                     placeholder="请输入行邮税号"
-                     value={postcode}
-                     onChange={this.changePostcode.bind(this)}
-              />
-            </FormItem>
-
-            {/*建议行邮方式*/}
-            <FormItem label="建议行邮方式"
-                      colon
-                      labelCol={{span: 4}}
-                      wrapperCol={{span: 15}}
-            >
-              {getFieldDecorator('sugPostway')(
-                <Input style={{width: 180}}
-                       placeholder="请输入建议行邮方式"
-                />
-              )}
-              <span style={{marginLeft: 10}}>(选填)</span>
-            </FormItem>
-
-            {/*规格型号*/}
-            <FormItem label="规格型号"
-                      colon
-                      labelCol={{span: 4}}
-                      wrapperCol={{span: 15}}
-            >
-              {getFieldDecorator('specificationType')(
-                <Input style={{width: 180}}
-                       placeholder="请输入规格型号"
-                />
-              )}
-              <span style={{marginLeft: 10}}>(选填)</span>
-            </FormItem>
-
-            {/*数量 / 库存*/}
-            <FormItem label="数量 / 库存"
-                      colon
-                      labelCol={{span: 4}}
-                      wrapperCol={{span: 15}}
-            >
-              {getFieldDecorator('stock')(
-                <Input style={{width: 180}}
-                       placeholder="请输入数量"
-                       type="number"
-                />
-              )}
-              <span style={{marginLeft: 10}}>(选填)</span>
-            </FormItem>
-
-            {/*建议ETK申报价*/}
-            <FormItem label="建议ETK申报价"
-                      colon
-                      labelCol={{span: 4}}
-                      wrapperCol={{span: 15}}
-            >
-              {getFieldDecorator('sugPrice')(
-                <Input style={{width: 180}}
-                       placeholder="请输入建议ETK申报价"
-                       type="number"
-                />
-              )}
-              <span style={{marginLeft: 10}}>(选填)</span>
+              {/*选择货币类型*/}
+              <Select className="originalType"
+                      style={{width: 100,marginLeft: 10}}
+                // 当存在 defaultValue 时, 则无需 placeholder
+                      defaultValue={0}
+                      Value={originalType}
+                      onChange={(v) => this.setState({currencyType: v})}
+              >
+                <Option value={0}>人民币</Option>
+                <Option value={1}>美元</Option>
+                <Option value={2}>欧元</Option>
+                <Option value={3}>日元</Option>
+                <Option value={4}>韩币</Option>
+                <Option value={5}>港币</Option>
+              </Select>
             </FormItem>
 
             {/*备案价*/}
@@ -420,55 +484,142 @@ class commoditiesCreateAndEdit extends React.Component {
                       wrapperCol={{span: 15}}
             >
               {getFieldDecorator('recordPrice')(
-                <Input style={{width: 180}}
-                       placeholder="请输入备案价"
-                       type="number"
+                <InputNumber style={{width: 180}}
+                             placeholder="请输入备案价"
+                             min={0}
                 />
               )}
+              <span style={{marginLeft: 10}}>(¥)人民币</span>
               <span style={{marginLeft: 10}}>(未备案则先不填写)</span>
             </FormItem>
 
-            {/*税率*/}
-            <FormItem label="税率"
+            {/*选择商品品牌*/}
+            <FormItem label="商品品牌"
                       colon
                       labelCol={{span: 4}}
                       wrapperCol={{span: 15}}
             >
-              {getFieldDecorator('taxRate')(
+              {getFieldDecorator('brand')(
                 <Input style={{width: 180}}
-                       placeholder="税率"
-                       type="number"
+                       placeholder="请输入商品品牌"
                 />
               )}
-              <span style={{marginLeft: 10}}>(未备案则先不填写)</span>
+              <span style={{marginLeft: 10}}>(选填)</span>
             </FormItem>
 
-            {/*采购地*/}
-            <FormItem label="采购地"
+            {/*选择商品品牌*/}
+            <FormItem label="海关编码"
                       colon
                       labelCol={{span: 4}}
                       wrapperCol={{span: 15}}
             >
-              {getFieldDecorator('purchaseArea')(
+              {getFieldDecorator('customsCode')(
                 <Input style={{width: 180}}
-                       placeholder="采购地"
+                       placeholder="请输入海关编码"
                 />
               )}
+              <span style={{marginLeft: 10}}>(选填)</span>
+            </FormItem>
+
+            {/*建议行邮方式*/}
+            <FormItem label="建议行邮方式"
+                      colon
+                      labelCol={{span: 4}}
+                      wrapperCol={{span: 15}}
+            >
+              {getFieldDecorator('sugPostway',{
+                rules: [
+                  { required: true },
+                ],
+                initialValue: 1
+              })(
+                <Select className="sugPostway"
+                        style={{width: 180}}
+                >
+                  <Option value={1}>ETK</Option>
+                  <Option value={2}>BC</Option>
+                </Select>
+              )}
+              <span style={{marginLeft: 10}}>(选填)</span>
+            </FormItem>
+
+            {/*选择商品品类*/}
+            {this.props.form.getFieldValue('sugPostway') === 1 && <FormItem label="品类"
+                      colon
+                      labelCol={{span: 4}}
+                      wrapperCol={{span: 15}}
+            >
+              {getFieldDecorator('category', {
+                rules: [
+                  {required: true, message: '请选择品类!'},
+                ],
+              })(
+                <Select className="category"
+                        style={{width: 180}}
+                        placeholder="请选择品类"
+                        onChange={this.changeCategory.bind(this)}
+                        showSearch
+                >
+                  {categoryList}
+                </Select>
+              )}
+              <span style={{marginLeft: 10,color: 'rgba(0,0,0,.85)'}}>行邮税号 : </span>
+              <Input style={{width: 180}}
+                     placeholder="请选择品类"
+                     value={postcode}
+                     disabled
+              />
+            </FormItem>}
+
+            {/*规格型号*/}
+            {this.props.form.getFieldValue('sugPostway') === 1 && <FormItem label="规格型号"
+                      colon
+                      labelCol={{span: 4}}
+                      wrapperCol={{span: 15}}
+            >
+              {getFieldDecorator('specificationType')(
+                <Input style={{width: 180}}
+                       disabled
+                       placeholder="请选择品类"
+                />
+              )}
+              <span style={{marginLeft: 38,color: 'rgba(0,0,0,.85)'}}>单位 : </span>
+              <Input style={{width: 180}}
+                     placeholder="请选择品类"
+                     value={modelNumber}
+                     disabled
+              />
+            </FormItem>}
+
+            {/*建议ETK申报价*/}
+            <FormItem label="建议ETK申报价"
+                      colon
+                      labelCol={{span: 4}}
+                      wrapperCol={{span: 15}}
+            >
+              {getFieldDecorator('sugPrice',{
+                rules: [
+                  {required: true, message: '请输入建议ETK申报价!'},
+                ],
+              })(
+                <InputNumber style={{width: 180}}
+                             placeholder="请输入建议ETK申报价"
+                             min={0}
+                />
+              )}
+              <span style={{marginLeft: 10}}>(¥)人民币</span>
               <span style={{marginLeft: 10}}>(选填)</span>
             </FormItem>
 
             {/*提交按钮*/}
             <FormItem>
               <Button type="primary"
-                      onClick={this.submitForm.bind(this)}
+                      onClick={this.submit.bind(this)}
               >提交</Button>
               <Button type="primary"
                       onClick={this.backTo.bind(this)}
                       style={{marginLeft: 20}}
-              >返回上一个页面</Button>
-              <Button onClick={this.test.bind(this)}
-                      style={{marginLeft: 20}}
-              >test!</Button>
+              >取消</Button>
             </FormItem>
 
           </Form>

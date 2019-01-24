@@ -27,7 +27,7 @@ class commoditiesDataBase extends React.Component{
   }
   // 获取表单列表
   getSku(searchValue = this.state.searchValue,record = this.state.record,pageNum = this.state.pageNum,pageSize = this.state.pageSize) {
-    fetch(`${window.fandianUrl}/sku/getSku`, {
+    fetch(`${window.apiUrl}/sku/getSku`, {
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       body:`choice=${record}&name=${searchValue}&pageNum=${pageNum}&pageSize=${pageSize}`,
@@ -88,6 +88,9 @@ class commoditiesDataBase extends React.Component{
   toCE(type,skuId) {
     // console.log(record);
     // 使用query传值
+    // 在这里清空本地相关数据, 使得编辑和新增功能不受干扰
+    localStorage.removeItem('imgList');
+    localStorage.removeItem('newImgList');
     this.props.history.push(`/commodities-manage/commodities-database/create-and-edit?type=${type}&skuId=${skuId}`);
   }
   render() {
