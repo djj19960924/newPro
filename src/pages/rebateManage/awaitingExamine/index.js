@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, DatePicker, Form, Icon, Input, message, Select, Radio, notification,} from 'antd';
+import {Button, DatePicker, Form, Icon, Input, message, Select, Radio, notification, Badge, } from 'antd';
 import moment from 'moment';
 import ImageViewer from '@components/imageViewer/main';
 import {inject, observer} from 'mobx-react/index';
@@ -9,6 +9,7 @@ import './index.less';
 const FormItem = Form.Item;
 const Option = Select.Option;
 const RadioGroup = Radio.Group;
+const RadioButton = Radio.Button;
 
 // 正则小计(中文+韩文+英文+数字+()-_/\):
 //
@@ -29,11 +30,13 @@ class awaitingExamine extends React.Component {
       showImageViewer: false,
       // 当前图片地址
       // imgSrc: require('@img/avatar.png'),
-      //选择的国家
+      // 选择的国家
       country: '',
-      //国家列表
+      // 国家列表
       countries: [],
-      //选择的商场
+      // 国家剩余小票
+      countryLeftTicket: {},
+      // 选择的商场
       shop: undefined,
       // 商场列表
       shopList: [],
@@ -76,25 +79,17 @@ class awaitingExamine extends React.Component {
   }
 
   componentWillMount() {
-    let countries = [];
-    for (let i of countryList) {
-      countries.push(<Option key={i.id} value={i.nationName}>{i.nationName}</Option>)
-    }
+    let countries = [],countryLeftTicket = {};
+    // for (let i of countryList) {
+    //   countryLeftTicket[i.nationName] = 0;
+    //   countries.push(<Badge key={i.nationName} count={this.state.countryLeftTicket[i.nationName]}><RadioButton value={i.nationName}>{i.nationName}</RadioButton></Badge>)
+    // }
     this.setState({
-      countries: countries
+      // countries: countries,
+      countryLeftTicket: countryLeftTicket,
     });
-    // 获取当日对美元汇率
-    // fetch(window.fandianUrl + '/recipt/getExchangeRateByDate', {
-    //   method: 'POST'
-    // }).then(r => r.json()).then(r => {
-    //   if (r.success === '1') {
-    //     this.setState({
-    //       defaultExchangeRate: parseFloat(parseFloat(r.result.rate).toFixed(4))
-    //     });
-    //   }
-    // })
+    this.getCountryLeftTicket()
   }
-
   //渲染完成以后修正图片预览样式
   componentDidUpdate() {
     // 这里使用onload属性, 等待图片资源加载完成以后执行
@@ -111,11 +106,24 @@ class awaitingExamine extends React.Component {
       }
     };
   }
-
-// 监听选择国家事件
-  selectCountry(val, option) {
+  // 获取国家当前剩余小票
+  getCountryLeftTicket() {
+    fetch(`${window.fandianUrl}/recipt/countReciptByNationName`,{
+      method: 'POST',
+    }).then(r => r.json()).then(r => {
+      let dataObj = {};
+      for (let i in r.data) {
+        dataObj[r.data[i].nationName]= r.data[i].reciptTotal
+      }
+      this.setState({
+        countryLeftTicket: dataObj
+      });
+    })
+  }
+  // 监听选择国家事件
+  selectCountry(e, option) {
     this.setState({
-      country: val,
+      country: e.target.value,
       pageTotal: null,
       mallName: '',
       ticketList: [],
@@ -127,7 +135,7 @@ class awaitingExamine extends React.Component {
     fetch(window.fandianUrl + '/mall/getMallList', {
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: 'nationName=' + val
+      body: 'nationName=' + e.target.value
     }).then(r => r.json()).then(r => {
       if (r.retcode.status === '10000') {
         // message.success(r.retcode.msg)
@@ -360,7 +368,7 @@ class awaitingExamine extends React.Component {
           reciptId: the.ticketList[the.currentTicketId].reciptId,
           mallName: the.currentShop,
           teamNo: val.teamNo,
-          consumeMoney: val.totalMoney,
+          consumeMoney: parseFloat(val.totalMoney),
           brandName: the.currentBrandName,
           consumeDate: moment(val.ticketDate).format('YYYY-MM-DD'),
           exchangeRate: val.exchangeRate,
@@ -377,14 +385,10 @@ class awaitingExamine extends React.Component {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(data),
           }).then(r => r.json()).then(r => {
-            if(r.retcode.status=='10002'){
-              message.error(r.retcode.msg);
-            }
-            if(r.retcode.status=='10001'){
-              message.error(r.retcode.msg);
-            }
             if(r.retcode.status=='10000'){
               this.hasSubmit();
+            } else {
+              message.error(`${r.retcode.msg} 错误码: ${r.retcode.status}`);
             }
           })
         }
@@ -395,11 +399,21 @@ class awaitingExamine extends React.Component {
   // 提交结束以后切换小票逻辑
   hasSubmit() {
     let the = this.state;
+    // 由于不可能每次操作都调取接口, 所以在实际调取审核/驳回接口成功的同时
+    // 可以对本地数据进行同步改变, 使得角标以及商场剩余小票数量一直处于与服务器内部数据
+    // 数值同步的状态, 虽然没有实时交互, 但也从本地计算的方式达到了类似的效果
+    let dataObj = the.countryLeftTicket;
+    dataObj[the.country] = dataObj[the.country]-1;
+    this.setState({
+      ticketTotal: (the.ticketTotal - 1),
+      countryLeftTicket: dataObj
+    });
     // 重置表单
     this.props.form.resetFields();
-    the.ticketTotal = the.ticketTotal - 1;
+    // the.ticketTotal = the.ticketTotal - 1;
     if (the.currentTicketId === (the.ticketList.length - 1)) {
       this.getTicketList(this);
+      this.getCountryLeftTicket();
     } else if (the.currentTicketId <= (the.ticketList.length - 1)) {
       this.setState({
         currentTicketId: the.currentTicketId + 1,
@@ -456,21 +470,32 @@ class awaitingExamine extends React.Component {
   }
 
   render() {
-    let {showImageViewer, shopList, currentShop, hasTicket, brandList, ticketList, currentTicketId, reciptMoney, defaultExchangeRate, previewImageWH, ticketTotal, country} = this.state;
+    let {showImageViewer, shopList, currentShop, hasTicket, brandList, ticketList, currentTicketId, reciptMoney, defaultExchangeRate, previewImageWH, ticketTotal, country, countries} = this.state;
     const {getFieldDecorator} = this.props.form;
     return (
       <div className="awaitingExamine">
         <div className="shopSelect">
-          <span>所属国家: </span>
-          <Select className="selectShops"
-                  placeholder="请选择国家"
-                  onChange={this.selectCountry.bind(this)}
+          <span style={{marginRight: 5}}>所属国家: </span>
+          <RadioGroup defaultValue={0}
+                      buttonStyle="solid"
+                      className="radioBtn"
+                      onChange={this.selectCountry.bind(this)}
           >
-            {this.state.countries}
-          </Select>
+            {/*当使用map遍历生成的 react dom 对象时, 才可将对象内部参数为动态值*/}
+            {countryList.map((item,i) => (
+              <Badge key={i}
+                     count={this.state.countryLeftTicket[item.nationName]}
+                     overflowCount={99}
+              >
+                <RadioButton value={item.nationName}>
+                  {item.nationName}
+                </RadioButton>
+              </Badge>
+            ))}
+          </RadioGroup>
         </div>
         <div className="shopSelect">
-          <span>所属商场: </span>
+          <span style={{marginRight: 5}}>所属商场: </span>
           <Select className="selectShops"
                   placeholder="请选择商场"
                   value={currentShop}
