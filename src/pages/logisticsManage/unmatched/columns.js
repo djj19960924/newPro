@@ -110,5 +110,67 @@ const columns=[{
   dataIndex: 'price',
   key: 'price',
   width: 80,
-}];
+},
+  {
+    title: '行邮税号',
+    dataIndex: 'taxNumber2',
+    key: 'taxNumber2',
+    width: 100,
+  }, {
+    title: '物品名称',
+    dataIndex: 'name2',
+    key: 'name2',
+    width: 80,
+  }, {
+    title: '规格型号',
+    dataIndex: 'specification2',
+    key: 'specification2',
+    width: 80,
+  }, {
+    title: '物品数量',
+    dataIndex: 'number2',
+    key: 'number2',
+    width: 80,
+  }, {
+    title: '计量单位',
+    dataIndex: 'modelNumber2',
+    key: 'modelNumber2',
+    width: 80,
+  }, {
+    title: '物品单价',
+    dataIndex: 'price2',
+    key: 'price2',
+    width: 80,
+  },
+  {
+    title: '行邮税号',
+    dataIndex: 'taxNumber3',
+    key: 'taxNumber3',
+    width: 100,
+  }, {
+    title: '物品名称',
+    dataIndex: 'name3',
+    key: 'name3',
+    width: 80,
+  }, {
+    title: '规格型号',
+    dataIndex: 'specification3',
+    key: 'specification3',
+    width: 80,
+  }, {
+    title: '物品数量',
+    dataIndex: 'number3',
+    key: 'number3',
+    width: 80,
+  }, {
+    title: '计量单位',
+    dataIndex: 'modelNumber3',
+    key: 'modelNumber3',
+    width: 80,
+  }, {
+    title: '物品单价',
+    dataIndex: 'price3',
+    key: 'price3',
+    width: 80,
+  }];
 export default columns;
