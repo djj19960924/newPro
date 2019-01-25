@@ -15,6 +15,7 @@ import adoptExamineUnpaid from '@pages/rebateManage/adoptExamineUnpaid/';
 import awaitingExamine from '@pages/rebateManage/awaitingExamine/';
 import rejectExamine from '@pages/rebateManage/rejectExamine/';
 import setRebate from '@pages/rebateManage/setRebate/';
+import countBillList from '@pages/rebateManage/countBillList/';
 // 商品管理
 import commoditiesDataBase from '@pages/commoditiesManage/commoditiesDatabase/';
 import commoditiesCreateAndEdit from '@pages/commoditiesManage/commoditiesDatabase/commoditiesCreateAndEdit/';
@@ -45,6 +46,7 @@ class ContentMain extends React.Component{
           <Route exact path="/rebate-manage/adopt-examine-paid" component={adoptExaminePaid} />
           <Route exact path="/rebate-manage/reject-examine" component={rejectExamine} />
           <Route exact path="/rebate-manage/set-rebate" component={setRebate} />
+          {window.isTest && <Route exact path="/rebate-manage/count-bill-list" component={countBillList} />}
           <Route exact path="/commodities-manage/commodities-database" component={commoditiesDataBase} />
           <Route exact path="/commodities-manage/commodities-database/create-and-edit" component={commoditiesCreateAndEdit} />
           <Route exact path="/commodities-manage/commodities-database/commodities-img-list" component={commoditiesImgList} />

@@ -56,6 +56,11 @@ const menus = [
         icon: 'frown',
         key: '/rebate-manage/reject-examine',
       },
+      {
+        title: '审核通过对账表',
+        icon: 'diff',
+        key: '/rebate-manage/count-bill-list',
+      },
     ]
   },
   {
@@ -75,6 +80,6 @@ const menus = [
   //   icon: 'info-circle-o',
   //   key: '/about'
   // }
-]
+];
 
 export default menus;

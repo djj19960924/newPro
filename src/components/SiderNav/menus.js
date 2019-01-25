@@ -58,6 +58,18 @@ const menus = [
       },
     ]
   },
-]
+  {
+    title: '商品管理',
+    icon: 'shop',
+    key: '/commodities-manage',
+    subs: [
+      {
+        title: '商品资料库',
+        icon: 'database',
+        key: '/commodities-manage/commodities-database'
+      }
+    ]
+  }
+];
 
 export default menus;
