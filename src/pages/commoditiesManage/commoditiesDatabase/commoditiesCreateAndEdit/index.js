@@ -49,8 +49,7 @@ class commoditiesCreateAndEdit extends React.Component {
     window.commoditiesCreateAndEdit = this;
 
   }
-  // 组件加载前触发
-  componentWillMount() {
+  componentDidMount() {
     const type = window.getQueryString('type');
     const skuId = window.getQueryString('skuId');
     // 延时控制message删除

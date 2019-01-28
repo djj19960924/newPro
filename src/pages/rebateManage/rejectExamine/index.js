@@ -32,7 +32,7 @@ class rejectExamine extends React.Component{
       ticketUrl:'unShow'
     };
   }
-  componentWillMount() {
+  componentDidMount() {
     let countries = [];
     for (let i of countryList) {
       countries.push(<Option key={i.id} value={i.nationName}>{i.nationName}</Option>)

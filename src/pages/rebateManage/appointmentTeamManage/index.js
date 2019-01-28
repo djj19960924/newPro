@@ -8,6 +8,16 @@ class appointmentTeamManage extends React.Component {
     super(props);
     this.state = {};
   }
+  componentDidMount() {
+    let status = 0;
+    fetch(`http://192.168.3.32:8000/AppointmentMangement/getAppointmentByStatus`,{
+      method: `POST`,
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: `status=${status}`,
+    }).then(r => r.json()).then(r => {
+      console.log(r)
+    })
+  }
 
   render() {
     const RadioButton = Radio.Button, RadioGroup = Radio.Group;

@@ -13,7 +13,7 @@ class orderUnmatched extends React.Component{
       selectedRowKeys: []
     };
   }
-  componentWillMount() {
+  componentDidMount() {
     this.tableList2();
   }
   tableList2 (){

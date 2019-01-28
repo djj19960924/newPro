@@ -50,8 +50,7 @@ class test extends React.Component {
       fileList: dataList
     })
   };
-  // 组件即将加载前触发
-  componentWillMount() {
+  componentDidMount() {
     // fetch(`${window.testUrl}/skuUpimg/headImgUpload`,{
     //   method: 'POST',
     //   headers: {'Content-Type': 'application/json'},

@@ -30,7 +30,7 @@ class countBillList extends React.Component{
     // window.XLSX = XLSX;
   }
   // 默认读取表格
-  componentWillMount() {
+  componentDidMount() {
     // 默认载入表格数据
     this.getReciptByVerify()
   }

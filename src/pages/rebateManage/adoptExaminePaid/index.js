@@ -18,7 +18,7 @@ class adoptExaminePaid extends React.Component{
       pageTotal: null,
     };
   }
-  componentWillMount() {
+  componentDidMount() {
     this.getProgramUserPaied()
   }
   // 获取已打款信息

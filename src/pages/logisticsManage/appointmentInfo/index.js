@@ -11,7 +11,7 @@ class appointmentInfo extends React.Component{
       selection: 0,
     };
   }
-  componentWillMount() {
+  componentDidMount() {
     this.setState({selection:0});
     this.allInformation();
   }

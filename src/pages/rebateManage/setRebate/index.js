@@ -46,8 +46,7 @@ class setRebate extends React.Component{
       modalEditData: {},
     };
   }
-  // 加载国家列表
-  componentWillMount() {
+  componentDidMount() {
     let countries = [];
     for (let i of countryList) {
       countries.push(<Option key={i.id} value={i.nationName}>{i.nationName}</Option>)

@@ -72,10 +72,10 @@ class awaitingExamine extends React.Component {
       // 会固定汇率选择框, 直到替换国家
       defaultExchangeRate: '',
     };
-    window.awaitingExamine = this;
+    // window.awaitingExamine = this;
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.getCountryLeftTicket()
   }
   //渲染完成以后修正图片预览样式

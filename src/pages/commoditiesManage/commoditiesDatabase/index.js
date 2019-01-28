@@ -25,7 +25,7 @@ class commoditiesDataBase extends React.Component{
     window.moment = moment;
   }
   // 默认读取表格
-  componentWillMount() {
+  componentDidMount() {
     // 默认载入表格数据
     this.getSku()
   }

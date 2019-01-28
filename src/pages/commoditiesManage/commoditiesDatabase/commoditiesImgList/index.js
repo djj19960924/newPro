@@ -38,9 +38,7 @@ class commoditiesImgList extends React.Component {
     };
     window.commoditiesImgList = this;
   }
-
-  // 组件加载前触发
-  componentWillMount() {
+  componentDidMount() {
     const type = window.getQueryString('type');
     const skuId = window.getQueryString('skuId');
     this.setState({

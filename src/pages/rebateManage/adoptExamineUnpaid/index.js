@@ -26,7 +26,7 @@ class adoptExamineUnpaid extends React.Component{
       pageTotal: null,
     };
   }
-  componentWillMount() {
+  componentDidMount() {
     this.getProgramUserNotPayList();
   }
   // 获取列表
