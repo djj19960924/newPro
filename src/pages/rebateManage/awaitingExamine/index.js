@@ -546,11 +546,11 @@ class awaitingExamine extends React.Component {
                   initialValue: '',
                   rules: [{required: true, message: '请输入凭证号!'}],
                 })(
-                  <Input style={{width: 80, marginLeft: 10, color: '#555'}}
+                  <Input style={{width: 180, marginLeft: 10, color: '#555'}}
                   />
                 )}
               </FormItem>
-              <FormItem label={"消费金额"+'('+(!!ticketList.length ? (ticketList[currentTicketId].nationName=='韩国' ? '韩元':(ticketList[currentTicketId].nationName=='日本' ? '日元':'人民币')):'')+')'}
+              <FormItem label={"消费金额("+(!!ticketList.length ? (ticketList[currentTicketId].nationName=='韩国' ? '韩元':(ticketList[currentTicketId].nationName=='日本' ? '日元':'人民币')):'')+')'}
                         colon
                         labelCol={{span: 6}}
                         wrapperCol={{span: 8}}
