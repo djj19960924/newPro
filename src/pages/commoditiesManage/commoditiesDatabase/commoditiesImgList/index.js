@@ -62,7 +62,7 @@ class commoditiesImgList extends React.Component {
         }
         this.setState({ imgList: dataList },() => { this.makeImgToFile() });
       } else {
-        fetch(`${window.apiUrl}/sku/selectEditSkuBySkuId`, {
+        fetch(`${window.fandianUrl}/sku/selectEditSkuBySkuId`, {
           method: 'POST',
           headers: {'Content-Type': 'application/x-www-form-urlencoded'},
           body:`skuId=${skuId}`,

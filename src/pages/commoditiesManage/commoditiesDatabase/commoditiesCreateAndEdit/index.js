@@ -42,7 +42,9 @@ class commoditiesCreateAndEdit extends React.Component {
       // Loading状态
       isLoading: false,
       // Loading提示文字
-      loadingTxt: 'Loading...'
+      loadingTxt: 'Loading...',
+      // 提交按钮loading
+      submitLoading: false,
     };
     window.commoditiesCreateAndEdit = this;
 
@@ -58,7 +60,7 @@ class commoditiesCreateAndEdit extends React.Component {
     //   message.destroy()
     // },3000);
     // 获取所有品类列表,以及数量单位
-    fetch(`${window.apiUrl}/sku/getAllProductCategory`, {
+    fetch(`${window.fandianUrl}/sku/getAllProductCategory`, {
       method: 'POST'
     }).then(r => r.json()).then(r => {
       if (r.status === 10000) {
@@ -69,11 +71,15 @@ class commoditiesCreateAndEdit extends React.Component {
           dataList.push(<Option value={r.data[i].name} key={r.data[i].id}>{r.data[i].name}</Option>)
         }
         this.setState({categoryList: dataList, productCategoryList: r.data});
+        this.setForm(type,skuId)
       } else {
         // 错误,并返回错误码
         message.error(`${r.msg} 错误码:${r.status}`);
       }
     });
+  }
+  // 根据 type 填写表单
+  setForm(type,skuId) {
     // 根据 type 判断行为
     if (type === 'create') {
       this.setState({
@@ -86,6 +92,9 @@ class commoditiesCreateAndEdit extends React.Component {
           imgList: JSON.parse(localStorage.newImgList).imgList
         },()=>{this.showImg()})
       }
+      if (!!localStorage.skuInfo) {
+        this.props.form.setFieldsValue(JSON.parse(localStorage.skuInfo))
+      }
     } else if (type === 'edit') {
       // 打开loading
       this.setState({
@@ -95,7 +104,7 @@ class commoditiesCreateAndEdit extends React.Component {
         type: type,
         skuId: parseInt(skuId),
       });
-      fetch(`${window.apiUrl}/sku/selectEditSkuBySkuId`, {
+      fetch(`${window.fandianUrl}/sku/selectEditSkuBySkuId`, {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body:`skuId=${skuId}`,
@@ -130,7 +139,7 @@ class commoditiesCreateAndEdit extends React.Component {
           }
           // 这里设置表单默认值
           this.props.form.setFieldsValue({
-            skuCode: d.skuCode, category: d.category, name: d.name, grossWeight: d.grossWeight, costPrice:d.costPrice, currencyType: d.currencyType, brand: d.brand, sugPostway: d.sugPostway, specificationType: d.specificationType, stock: d.stock, sugPrice: d.sugPrice, recordPrice: d.recordPrice, taxRate: d.taxRate, purchaseArea: d.purchaseArea
+            skuCode: d.skuCode, category: d.category, name: d.name, netWeight: d.netWeight, costPrice:d.costPrice, currencyType: d.currencyType, brand: d.brand, sugPostway: d.sugPostway, specificationType: d.specificationType, stock: d.stock, sugPrice: d.sugPrice, recordPrice: d.recordPrice, taxRate: d.taxRate, purchaseArea: d.purchaseArea
           });
         } else {
           // 错误,并返回错误码
@@ -203,7 +212,8 @@ class commoditiesCreateAndEdit extends React.Component {
   backTo() {
     // this.props.history.goBack()
     // 输入准确地址, 以保证返回按钮只能回到具体页面
-    this.props.history.push('/commodities-manage/commodities-database')
+    this.props.history.push('/commodities-manage/commodities-database');
+    localStorage.removeItem('skuInfo')
   }
   // 进入编辑图片界面
   gotoEditImg() {
@@ -214,7 +224,9 @@ class commoditiesCreateAndEdit extends React.Component {
   // 提交按钮
   submit() {
     const { type, } = this.state;
+    this.setState({submitLoading: true});
     this.submitForm(type);
+    localStorage.removeItem('skuInfo')
   }
   // 上传表单
   submitForm(type) {
@@ -246,13 +258,14 @@ class commoditiesCreateAndEdit extends React.Component {
           data.skuId = skuId;
           skuUrl = `/sku/editSku`;
         }
-        fetch(`${window.apiUrl}${skuUrl}`, {
+        fetch(`${window.fandianUrl}${skuUrl}`, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(data),
         }).then(r => r.json()).then(r => {
           if (r.status === 10000) {
             message.success(`${r.msg}`);
+            this.setState({submitLoading: false})
             this.backTo();
           } else {
             message.error(`${r.msg} 错误码:${r.status}`);
@@ -264,8 +277,8 @@ class commoditiesCreateAndEdit extends React.Component {
     })
   }
   render() {
-    const { getFieldDecorator } = this.props.form;
-    const { titleName, currencyType, postcode, isLoading, loadingTxt, imgList, previewVisible, previewImage, previewImageWH, categoryList, unitName, originalType, modelNumber, } = this.state;
+    const { getFieldDecorator, getFieldValue } = this.props.form;
+    const { titleName, currencyType, postcode, isLoading, loadingTxt, imgList, previewVisible, previewImage, previewImageWH, categoryList, unitName, originalType, modelNumber, submitLoading, } = this.state;
     return (
       <div className="commoditiesCreateAndEdit">
         {/*loading遮罩层*/}
@@ -352,13 +365,13 @@ class commoditiesCreateAndEdit extends React.Component {
               </Modal>
             </div>
 
-            {/*毛重*/}
-            <FormItem label="毛重(kg)"
+            {/*净重*/}
+            <FormItem label="净重(kg)"
                       colon
                       labelCol={{span: 4}}
                       wrapperCol={{span: 12}}
             >
-              {getFieldDecorator('grossWeight', {
+              {getFieldDecorator('netWeight', {
                 rules: [
                   {required: true, message: '请输入重量!'},
                 ],
@@ -366,8 +379,10 @@ class commoditiesCreateAndEdit extends React.Component {
                 <InputNumber style={{width: 180}}
                              placeholder="请输入重量"
                              min={0}
+                             precision={4}
                 />
               )}
+              <span style={{marginLeft: 10}}>毛重: {getFieldValue('netWeight') ? (getFieldValue('netWeight') + 0.03).toFixed(4) : ''} kg</span>
             </FormItem>
 
             {/*数量 / 库存*/}
@@ -544,7 +559,7 @@ class commoditiesCreateAndEdit extends React.Component {
             </FormItem>
 
             {/*选择商品品类*/}
-            {this.props.form.getFieldValue('sugPostway') === 1 && <FormItem label="品类"
+            {getFieldValue('sugPostway') === 1 && <FormItem label="品类"
                       colon
                       labelCol={{span: 4}}
                       wrapperCol={{span: 15}}
@@ -572,7 +587,7 @@ class commoditiesCreateAndEdit extends React.Component {
             </FormItem>}
 
             {/*规格型号*/}
-            {this.props.form.getFieldValue('sugPostway') === 1 && <FormItem label="规格型号"
+            {getFieldValue('sugPostway') === 1 && <FormItem label="规格型号"
                       colon
                       labelCol={{span: 4}}
                       wrapperCol={{span: 15}}
@@ -615,6 +630,7 @@ class commoditiesCreateAndEdit extends React.Component {
             <FormItem>
               <Button type="primary"
                       onClick={this.submit.bind(this)}
+                      loading={submitLoading}
               >提交</Button>
               <Button type="primary"
                       onClick={this.backTo.bind(this)}

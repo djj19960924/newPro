@@ -32,8 +32,6 @@ class awaitingExamine extends React.Component {
       // imgSrc: require('@img/avatar.png'),
       // 选择的国家
       country: '',
-      // 国家列表
-      countries: [],
       // 国家剩余小票
       countryLeftTicket: {},
       // 选择的商场
@@ -58,8 +56,6 @@ class awaitingExamine extends React.Component {
       brandList: [],
       // 当前时间
       ticketDate: moment(new Date()).format('YYYY-MM-DD'),
-      // 当前团号
-      teamNo: '',
       // 当前所选择小票
       currentTicketId: 0,
       // 当前品牌名
@@ -72,22 +68,14 @@ class awaitingExamine extends React.Component {
       reason: null,
       // 图片预览宽高自适应
       previewImageWH: 'width',
-      // 汇率
+      // 默认汇率, 当以某一汇率提交成功小票以后
+      // 会固定汇率选择框, 直到替换国家
       defaultExchangeRate: '',
     };
     window.awaitingExamine = this;
   }
 
   componentWillMount() {
-    let countries = [],countryLeftTicket = {};
-    // for (let i of countryList) {
-    //   countryLeftTicket[i.nationName] = 0;
-    //   countries.push(<Badge key={i.nationName} count={this.state.countryLeftTicket[i.nationName]}><RadioButton value={i.nationName}>{i.nationName}</RadioButton></Badge>)
-    // }
-    this.setState({
-      // countries: countries,
-      countryLeftTicket: countryLeftTicket,
-    });
     this.getCountryLeftTicket()
   }
   //渲染完成以后修正图片预览样式
@@ -130,7 +118,8 @@ class awaitingExamine extends React.Component {
       hasTicket: false,
       currentShop: undefined,
       currentTicketId: 0,
-      ticketTotal: 0
+      ticketTotal: 0,
+      defaultExchangeRate: ``,
     });
     fetch(window.fandianUrl + '/mall/getMallList', {
       method: 'POST',
@@ -377,7 +366,7 @@ class awaitingExamine extends React.Component {
           unionId: the.ticketList[the.currentTicketId].unionId,
         };
         if (country === '韩国') data.reciptAttribute= val.reciptAttribute;
-        if( val.exchangeRate==0){
+        if( val.exchangeRate===0){
           message.error('汇率不能为零')
         }else{
           fetch(window.fandianUrl + '/recipt/checkReciptAllow', {
@@ -385,7 +374,8 @@ class awaitingExamine extends React.Component {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(data),
           }).then(r => r.json()).then(r => {
-            if(r.retcode.status=='10000'){
+            if(r.retcode.status==='10000'){
+              this.setState({defaultExchangeRate: val.exchangeRate,})
               this.hasSubmit();
             } else {
               message.error(`${r.retcode.msg} 错误码: ${r.retcode.status}`);
@@ -423,7 +413,8 @@ class awaitingExamine extends React.Component {
       });
     }
     this.props.form.setFieldsValue({
-      currentBrand: the.brandList[0].props.value
+      currentBrand: the.brandList[0].props.value,
+      exchangeRate: the.defaultExchangeRate
     });
     this.setState({
       currentBrandName: the.brandList[0].props.name
@@ -446,6 +437,16 @@ class awaitingExamine extends React.Component {
     this.setState({
       reason: e.target.value,
     });
+  }
+  // 币种判断
+  currencyType(c) {
+    let type;
+    switch (c) {
+      case `韩国`: type = `美元`; break;
+      case `日本`: type = `日元`; break;
+      default : type = `人民币`
+    }
+    return `消费金额(${type})`;
   }
 
   //驳回备注确定
@@ -470,7 +471,7 @@ class awaitingExamine extends React.Component {
   }
 
   render() {
-    let {showImageViewer, shopList, currentShop, hasTicket, brandList, ticketList, currentTicketId, reciptMoney, defaultExchangeRate, previewImageWH, ticketTotal, country, countries} = this.state;
+    let {showImageViewer, shopList, currentShop, hasTicket, brandList, ticketList, currentTicketId, reciptMoney, defaultExchangeRate, previewImageWH, ticketTotal, country} = this.state;
     const {getFieldDecorator} = this.props.form;
     return (
       <div className="awaitingExamine">
@@ -547,10 +548,11 @@ class awaitingExamine extends React.Component {
                   rules: [{required: true, message: '请输入凭证号!'}],
                 })(
                   <Input style={{width: 180, marginLeft: 10, color: '#555'}}
+                         placeholder="请输入凭证号"
                   />
                 )}
               </FormItem>
-              <FormItem label={"消费金额("+(!!ticketList.length ? (ticketList[currentTicketId].nationName=='韩国' ? '韩元':(ticketList[currentTicketId].nationName=='日本' ? '日元':'人民币')):'')+')'}
+              <FormItem label={this.currencyType(country)}
                         colon
                         labelCol={{span: 6}}
                         wrapperCol={{span: 8}}
@@ -561,7 +563,6 @@ class awaitingExamine extends React.Component {
                 })(
                   <Input style={{width: 130,}}
                          type="number"
-                    // value={totalMoney}
                          placeholder="请输入消费金额"
                          onChange={this.setTotalMoney.bind(this)}
                          id="totalMoney"
@@ -602,9 +603,9 @@ class awaitingExamine extends React.Component {
                   </Select>
                 )}
               </FormItem>
-              <FormItem label="选择日期"
+              <FormItem label="小票购买时间"
                         colon
-                        labelCol={{span: 5}}
+                        labelCol={{span: 7}}
                         wrapperCol={{span: 5}}
               >
                 {getFieldDecorator('ticketDate', {
@@ -627,7 +628,7 @@ class awaitingExamine extends React.Component {
               >
                 {getFieldDecorator('exchangeRate', {
                   rules: [
-                    {required: true,},
+                    {required: true},
                     {validator: this.exchangeRateValidator.bind(this)}
                   ],
                   initialValue: defaultExchangeRate
@@ -635,6 +636,7 @@ class awaitingExamine extends React.Component {
                   <Input style={{width: 90}}
                          type="number"
                          id="exchangeRate"
+                         placeholder="请输入汇率"
                          onChange={this.changeExchangeRate.bind(this)}
                   />
                 )}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Radio, Table, Button, Modal, } from 'antd';
+import { Radio, Table, Button, Modal, message, } from 'antd';
 // import XLSX from 'xlsx';
 // xlsx转blob
 import '@js/FileSaver.min.js';
@@ -16,12 +16,15 @@ class countBillList extends React.Component{
       tableDataList: [],
       // 选中条目
       selectedList: [],
+      // 选中条目ID
+      selectedIds: [],
       // 分页
       pageNum: 1,
       pageSize: 20,
       // 图片弹窗
       previewVisible: false,
       previewImage: '',
+      isLoading: false,
     };
     window.countBillList = this;
     // window.XLSX = XLSX;
@@ -41,7 +44,7 @@ class countBillList extends React.Component{
   // 根据发送状态获取对账表
   getReciptByVerify(n = this.state.verifyStatus, pageNum = this.state.pageNum, pageSize = this.state.pageSize) {
     // fetch(`${window.apiUrl}/sku/getReciptByVerify`, {
-    fetch(`http://192.168.3.32:8000/recipt/getReciptByVerify`,{
+    fetch(`${window.fandianUrl}/recipt/getReciptByVerify`,{
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       body:`verifyStatus=${n}&pageNum=${pageNum}&pageSize=${pageSize}`,
@@ -69,24 +72,33 @@ class countBillList extends React.Component{
   }
   // 发送
   submit() {
-    const { selectedList } = this.state;
-    let data = [];
-    for (let v of selectedList) {
-      data.push({
-        consumeDate: v.consumeDate,
-        consumeMoney: `${v.consumeMoney}`,
-        passport: v.passport,
-        pictureUrl: v.pictureUrl,
+    const { selectedList, selectedIds, isLoading, } = this.state;
+    if (selectedList.length > 0 && selectedIds.length > 0) {
+      this.setState({isLoading: true});
+      let data = {};
+      data.list = [];
+      data.reciptIdList = selectedIds;
+      for (let v of selectedList) {
+        data.list.push({
+          consumeDate: v.consumeDate,
+          consumeMoney: `${v.consumeMoney}`,
+          passport: v.passport,
+          pictureUrl: v.pictureUrl,
+        });
+      }
+      console.log(data);
+      fetch(`${window.fandianUrl}/recipt/sendReciptInSelected`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data),
+      }).then(r => r.json()).then(r => {
+        console.log(r);
+        this.setState({isLoading: false});
+        this.getReciptByVerify()
       })
+    } else {
+      message.error('未选择小票')
     }
-    console.log(data);
-    fetch(`http://192.168.3.32:8000/recipt/sendReciptInSelected`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(data),
-    }).then(r => r.json()).then(r => {
-      console.log(r)
-    })
   }
   // 导出excel方法
   // exportExcel () {
@@ -119,14 +131,8 @@ class countBillList extends React.Component{
       },
       {title: '小票购买时间', dataIndex: 'consumeDate', key: 'consumeDate', width: 140},
       {title: '小票金额', dataIndex: 'consumeMoney', key: 'consumeMoney', width: 140},
-      // {title: 'reactDOM示例', dataIndex: 'sugPostway', key: 'sugPostway', width: 100,
-      //   render: (text, record) => (
-      //     // 这里调用方法判断行邮方式
-      //     <a href="https://baidu.com">{record.sugPostway}</a>
-      //   ),
-      // },
     ];
-    const { tableDataList, verifyStatus, previewVisible, previewImage, } = this.state;
+    const { tableDataList, verifyStatus, previewVisible, previewImage, isLoading, } = this.state;
     return (
       <div className="countBillList">
         {/*查询条件单选行*/}
@@ -140,10 +146,12 @@ class countBillList extends React.Component{
         </RadioGroup>
 
         {/*执行行*/}
-        <div className="btnLine">
+        <div className="btnLine" style={{marginLeft: 10}}>
           <Button type="primary"
                   onClick={this.submit.bind(this)}
-          >选中发送对账</Button>
+                  disabled={verifyStatus === 1}
+                  loading={isLoading}
+          >发送所选小票</Button>
         </div>
 
         {/*图片预览弹窗*/}
@@ -161,15 +169,14 @@ class countBillList extends React.Component{
                pagination={false}
                // loading
                bordered
-               rowSelection={{
+               rowSelection={verifyStatus === 0 ? {
                  // 选择框变化时触发
                  onChange: (selectedRowKeys, selectedRows) => {
-                   this.setState({selectedList: selectedRows})
-                   console.log(selectedRowKeys, selectedRows)
+                   this.setState({selectedList: selectedRows,selectedIds: selectedRowKeys});
+                   // console.log(selectedRowKeys, selectedRows)
                  },
-               }}
+               } : null}
                scroll={{ y: 600 }}
-               // style={{maxWidth: 1200}}
                rowKey={(record, index) => `${record.reciptId}`}
         />
       </div>

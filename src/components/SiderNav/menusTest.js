@@ -61,6 +61,11 @@ const menus = [
         icon: 'diff',
         key: '/rebate-manage/count-bill-list',
       },
+      {
+        title: '预约挂团管理',
+        icon: 'snippets',
+        key: '/rebate-manage/appointment-team-manage',
+      },
     ]
   },
   {

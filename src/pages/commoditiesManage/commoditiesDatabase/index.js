@@ -1,6 +1,7 @@
 import React from 'react';
 import {Radio, Table, Pagination, Button, Link, Input, message, } from 'antd';
 import XLSX$Consts from 'xlsx';
+import moment from 'moment';
 
 import './index.less';
 
@@ -19,6 +20,7 @@ class commoditiesDataBase extends React.Component{
       pageTotal: 0,
     };
     window.commoditiesDataBase = this;
+    window.moment = moment;
   }
   // 默认读取表格
   componentWillMount() {
@@ -27,7 +29,7 @@ class commoditiesDataBase extends React.Component{
   }
   // 获取表单列表
   getSku(searchValue = this.state.searchValue,record = this.state.record,pageNum = this.state.pageNum,pageSize = this.state.pageSize) {
-    fetch(`${window.apiUrl}/sku/getSku`, {
+    fetch(`${window.fandianUrl}/sku/getSku`, {
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       body:`choice=${record}&name=${searchValue}&pageNum=${pageNum}&pageSize=${pageSize}`,
@@ -99,6 +101,11 @@ class commoditiesDataBase extends React.Component{
     const Search = Input.Search;
     // 表单头
     const columns = [
+      {title: '更新时间', dataIndex: 'updateTime', key: 'updateTime', width: 160,
+        render: (text, record) => (
+          <div>{!!record.updateTime ? moment(record.updateTime).format('YYYY-MM-DD HH:mm:ss') : moment(record.createTime).format('YYYY-MM-DD HH:mm:ss')}</div>
+        )
+      },
       {title: '商品名称', dataIndex: 'name', key: 'name', width: 160},
       {title: '毛重(kg)', dataIndex: 'grossWeight', key: 'grossWeight', width: 80},
       {title: '采购价', dataIndex: 'costPrice', key: 'costPrice', width: 120},
@@ -177,7 +184,7 @@ class commoditiesDataBase extends React.Component{
                columns={columns}
                pagination={false}
                bordered
-               scroll={{ y: 600, x: 1200 }}
+               scroll={{ y: 600, x: 1300 }}
                // style={{maxWidth: 1200}}
                rowKey={(record, index) => `id_${index}`}
         />
