@@ -81,14 +81,14 @@ class awaitingExamine extends React.Component {
   //渲染完成以后修正图片预览样式
   componentDidUpdate() {
     // 这里使用onload属性, 等待图片资源加载完成以后执行
-    document.getElementsByClassName('previewImage')[0].onload = function () {
+    document.getElementsByClassName('previewImage')[0].onload = () => {
       let pI = document.getElementsByClassName('previewImage')[0];
       if ((pI.width / pI.height) < (2 / 3)) {
-        window.awaitingExamine.setState({
+        this.setState({
           previewImageWH: 'height'
         })
       } else if ((pI.width / pI.height) >= (2 / 3)) {
-        window.awaitingExamine.setState({
+        this.setState({
           previewImageWH: 'width'
         })
       }

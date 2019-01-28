@@ -57,7 +57,7 @@ class countBillList extends React.Component{
   }
   // 打开弹窗
   openPreview(url) {
-    console.log(url)
+    // console.log(url)
     this.setState({
       previewVisible: true,
       previewImage: url
@@ -86,13 +86,13 @@ class countBillList extends React.Component{
           pictureUrl: v.pictureUrl,
         });
       }
-      console.log(data);
+      // console.log(data);
       fetch(`${window.fandianUrl}/recipt/sendReciptInSelected`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(data),
       }).then(r => r.json()).then(r => {
-        console.log(r);
+        // console.log(r);
         this.setState({isLoading: false});
         this.getReciptByVerify()
       })
@@ -123,6 +123,7 @@ class countBillList extends React.Component{
           >点击查看</Button>
         ),
       },
+      {title: '护照号码', dataIndex: 'passportNum', key: 'passportNum', width: 140},
       {title: '护照首页照片', dataIndex: 'passport', key: 'passport', width: 140,
         render: (text, record) => (
           <Button onClick={this.openPreview.bind(this,record.passport)}
@@ -156,6 +157,7 @@ class countBillList extends React.Component{
 
         {/*图片预览弹窗*/}
         <Modal visible={previewVisible}
+               width={800}
                footer={null}
                onCancel={this.closePreview.bind(this)}
         >
@@ -176,7 +178,7 @@ class countBillList extends React.Component{
                    // console.log(selectedRowKeys, selectedRows)
                  },
                } : null}
-               scroll={{ y: 600 }}
+               scroll={{ y: 600, x: 800 }}
                rowKey={(record, index) => `${record.reciptId}`}
         />
       </div>
