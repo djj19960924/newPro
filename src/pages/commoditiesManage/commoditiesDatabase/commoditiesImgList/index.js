@@ -36,7 +36,7 @@ class commoditiesImgList extends React.Component {
       // Loading提示文字
       loadingTxt: 'Loading...'
     };
-    window.commoditiesImgList = this;
+    // window.commoditiesImgList = this;
   }
   componentDidMount() {
     const type = window.getQueryString('type');

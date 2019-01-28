@@ -4,7 +4,7 @@ class page404 extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
-    window.page404 = this;
+    // window.page404 = this;
   }
 
   render() {

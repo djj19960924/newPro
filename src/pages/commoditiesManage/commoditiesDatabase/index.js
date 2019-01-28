@@ -21,7 +21,7 @@ class commoditiesDataBase extends React.Component{
       // 每页显示数据条数选择框
       pageSizeOptions: [`10`,`20`,`30`,`40`],
     };
-    window.commoditiesDataBase = this;
+    // window.commoditiesDataBase = this;
     window.moment = moment;
   }
   // 默认读取表格

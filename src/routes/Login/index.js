@@ -12,7 +12,7 @@ class Login extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
-    window.Login = this;
+    // window.Login = this;
     // 可以将该组件挂载至window下, 则全局都可获取到当前组件
     // 某些失去当前对象的情况下, 可以使用该方法
     // window.Login = this;
