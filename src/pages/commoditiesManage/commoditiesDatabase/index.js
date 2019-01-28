@@ -18,6 +18,8 @@ class commoditiesDataBase extends React.Component{
       pageNum: 1,
       pageSize: 10,
       pageTotal: 0,
+      // 每页显示数据条数选择框
+      pageSizeOptions: [`10`,`20`,`30`,`40`],
     };
     window.commoditiesDataBase = this;
     window.moment = moment;
@@ -41,6 +43,7 @@ class commoditiesDataBase extends React.Component{
           pageNum: r.data.pageNum,
           pageSize: r.data.pageSize,
           pageTotal: r.data.total,
+          pageSizeOptions: [`10`,`20`,`30`,(r.data.total> 40 ? r.data.total.toString() : `40`)]
         })
       } else if (r.status === 10001) {
         message.warn(`${r.msg}`);
@@ -97,7 +100,7 @@ class commoditiesDataBase extends React.Component{
   }
   render() {
     const RadioButton = Radio.Button, RadioGroup = Radio.Group;
-    const { dataList, searchValue, pageNum, pageSize, pageTotal, } = this.state;
+    const { dataList, searchValue, pageNum, pageSize, pageTotal, pageSizeOptions, } = this.state;
     const Search = Input.Search;
     // 表单头
     const columns = [
@@ -199,7 +202,7 @@ class commoditiesDataBase extends React.Component{
                     style={{float:'right',marginRight:'20px',marginTop:'10px'}}
                     onChange={this.changePage.bind(this)}
                     showSizeChanger
-                    pageSizeOptions={['10','20','30','40']}
+                    pageSizeOptions={pageSizeOptions}
                     onShowSizeChange={this.changePage.bind(this)}
         />
       </div>
