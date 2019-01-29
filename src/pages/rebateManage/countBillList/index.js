@@ -147,7 +147,7 @@ class countBillList extends React.Component{
       {title: '小票购买时间', dataIndex: 'consumeDate', key: 'consumeDate', width: 140},
       {title: '小票金额', dataIndex: 'consumeMoney', key: 'consumeMoney', width: 140},
     ];
-    const { tableDataList, verifyStatus, previewVisible, previewImage, isLoading, selectedList, } = this.state;
+    const { tableDataList, verifyStatus, previewVisible, previewImage, isLoading, selectedList, selectedIds,} = this.state;
     return (
       <div className="countBillList">
         {/*查询条件单选行*/}
@@ -186,6 +186,7 @@ class countBillList extends React.Component{
                // loading
                bordered
                rowSelection={verifyStatus === 0 ? {
+                 selectedRowKeys: selectedIds,
                  // 选择框变化时触发
                  onChange: (selectedRowKeys, selectedRows) => {
                    this.setState({selectedList: selectedRows,selectedIds: selectedRowKeys});
