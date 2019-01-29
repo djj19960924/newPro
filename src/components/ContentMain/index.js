@@ -48,7 +48,7 @@ class ContentMain extends React.Component{
           <Route exact path="/rebate-manage/reject-examine" component={rejectExamine} />
           <Route exact path="/rebate-manage/set-rebate" component={setRebate} />
           <Route exact path="/rebate-manage/count-bill-list" component={countBillList} />
-          {window.isTest && <Route exact path="/rebate-manage/appointment-team-manage" component={appointmentTeamManage} />}
+          <Route exact path="/rebate-manage/appointment-team-manage" component={appointmentTeamManage} />
           <Route exact path="/commodities-manage/commodities-database" component={commoditiesDataBase} />
           <Route exact path="/commodities-manage/commodities-database/create-and-edit" component={commoditiesCreateAndEdit} />
           <Route exact path="/commodities-manage/commodities-database/commodities-img-list" component={commoditiesImgList} />
