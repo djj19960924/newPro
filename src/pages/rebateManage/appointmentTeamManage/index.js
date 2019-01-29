@@ -251,7 +251,7 @@ class appointmentTeamManage extends React.Component {
                     className="radioBtn"
                     onChange={this.changeAppointmentStatus.bind(this)}
         >
-          <RadioButton value={0}>待申请挂团</RadioButton>
+          <RadioButton value={0}>申请挂团</RadioButton>
           <RadioButton value={1}>待反馈团号</RadioButton>
           <RadioButton value={2}>已反馈团号</RadioButton>
         </RadioGroup>
