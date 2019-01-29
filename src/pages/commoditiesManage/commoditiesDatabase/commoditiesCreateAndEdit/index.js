@@ -630,6 +630,7 @@ class commoditiesCreateAndEdit extends React.Component {
               <Button type="primary"
                       onClick={this.submit.bind(this)}
                       loading={submitLoading}
+                      style={{marginLeft: 80}}
               >提交</Button>
               <Button type="primary"
                       onClick={this.backTo.bind(this)}
