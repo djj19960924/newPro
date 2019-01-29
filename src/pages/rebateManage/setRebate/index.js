@@ -365,7 +365,7 @@ class setRebate extends React.Component{
             >
               {getFieldDecorator('brandType', {
                 rules: [{required: true}],
-                initialValue: 0
+                initialValue: 1
               })(
                   <Select style={{width: 180}}
                   >
