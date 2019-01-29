@@ -36,8 +36,7 @@ class appointmentTeamManage extends React.Component {
   }
   // 搜索预约信息
   getAppointmentByStatus(status = this.state.appointmentStatus,pageNum = this.state.pageNum, pageSize = this.state.pageSize) {
-    // fetch(`${window.fandianUrl}/AppointmentMangement/getAppointmentByStatus`,{
-    fetch(`http://192.168.3.32:8880/AppointmentMangement/getAppointmentByStatus`,{
+    fetch(`${window.fandianUrl}/AppointmentMangement/getAppointmentByStatus`,{
       method: `POST`,
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       body: `status=${status}&pageNum=${pageNum}&pageSize=${pageSize}`,
