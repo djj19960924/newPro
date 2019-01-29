@@ -250,7 +250,9 @@ class setRebate extends React.Component{
       {title: '商品码', dataIndex: 'productCode', key: 'productCode', width: 200},
       {title: '最近更新时间', dataIndex: 'updateTime', key: 'updateTime', width: 200,
       render: (text, record) => (
-          <div>{moment(record.updateTime).format('YYYY-MM-DD hh:mm:ss')}</div>
+          <div>{!!record.updateTime ?
+            moment(record.updateTime).format('YYYY-MM-DD hh:mm:ss')
+            : moment(record.createTime).format('YYYY-MM-DD hh:mm:ss')}</div>
       )
       },
       {title: '返点率', dataIndex: 'rebateRate', key: 'rebateRate', width: 100},
