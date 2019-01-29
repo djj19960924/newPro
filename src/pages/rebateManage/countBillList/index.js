@@ -26,7 +26,7 @@ class countBillList extends React.Component{
       previewImage: '',
       isLoading: false,
     };
-    // window.countBillList = this;
+    window.countBillList = this;
     // window.XLSX = XLSX;
   }
   // 默认读取表格
@@ -49,10 +49,13 @@ class countBillList extends React.Component{
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       body:`verifyStatus=${n}&pageNum=${pageNum}&pageSize=${pageSize}`,
     }).then(r => r.json()).then(r => {
-      // console.log(r)
-      this.setState({
-        tableDataList: r.data ? r.data.list : []
-      })
+      if (r.status === 10000) {
+        this.setState({
+          tableDataList: r.data ? r.data.list : []
+        })
+      } else {
+        message(`${r.msg} 错误码: ${r.status}`)
+      }
     })
   }
   // 打开弹窗
@@ -72,7 +75,7 @@ class countBillList extends React.Component{
   }
   // 发送
   submit() {
-    const { selectedList, selectedIds, isLoading, } = this.state;
+    const { selectedList, selectedIds, } = this.state;
     if (selectedList.length > 0 && selectedIds.length > 0) {
       this.setState({isLoading: true});
       let data = {};
@@ -83,6 +86,7 @@ class countBillList extends React.Component{
           consumeDate: v.consumeDate,
           consumeMoney: `${v.consumeMoney}`,
           passport: v.passport,
+          passportNum: v.passportNum,
           pictureUrl: v.pictureUrl,
         });
       }
@@ -92,9 +96,19 @@ class countBillList extends React.Component{
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(data),
       }).then(r => r.json()).then(r => {
-        // console.log(r);
-        this.setState({isLoading: false});
-        this.getReciptByVerify()
+        if (r.status === 10000) {
+          message.success(r.data);
+          this.setState({
+            isLoading: false,
+            selectedList: [],
+            selectedIds: [],
+          });
+          this.getReciptByVerify();
+        } else {
+          message.error(`${r.data} 错误码: ${r.status}`)
+        }
+      }).catch(r=>{
+        message.error(`请求发送失败`)
       })
     } else {
       message.error('未选择小票')
@@ -133,7 +147,7 @@ class countBillList extends React.Component{
       {title: '小票购买时间', dataIndex: 'consumeDate', key: 'consumeDate', width: 140},
       {title: '小票金额', dataIndex: 'consumeMoney', key: 'consumeMoney', width: 140},
     ];
-    const { tableDataList, verifyStatus, previewVisible, previewImage, isLoading, } = this.state;
+    const { tableDataList, verifyStatus, previewVisible, previewImage, isLoading, selectedList, } = this.state;
     return (
       <div className="countBillList">
         {/*查询条件单选行*/}
@@ -148,11 +162,11 @@ class countBillList extends React.Component{
 
         {/*执行行*/}
         <div className="btnLine" style={{marginLeft: 10}}>
-          <Button type="primary"
-                  onClick={this.submit.bind(this)}
-                  disabled={verifyStatus === 1}
-                  loading={isLoading}
-          >发送所选小票</Button>
+          {verifyStatus === 0 && <Button type="primary"
+                                         onClick={this.submit.bind(this)}
+                                         loading={isLoading}
+                                         disabled={selectedList.length === 0}
+          >发送所选小票</Button>}
         </div>
 
         {/*图片预览弹窗*/}
