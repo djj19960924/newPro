@@ -2,7 +2,7 @@ import React from 'react';
 import { Radio, Table, Button, Modal, message, } from 'antd';
 // import XLSX from 'xlsx';
 // xlsx转blob
-import '@js/FileSaver.min.js';
+// import '@js/FileSaver.min.js';
 
 import './index.less';
 
@@ -114,19 +114,6 @@ class countBillList extends React.Component{
       message.error('未选择小票')
     }
   }
-  // 导出excel方法
-  // exportExcel () {
-  //   let elt = document.getElementById('tableList');
-  //   let wb = XLSX.utils.table_to_book(elt, {sheet:"Sheet JS"});
-  //
-  //   // 转为下载文件
-  //   XLSX.writeFile(wb, `test.xlsx`);
-  //
-  //   // 转为blob
-  //   // 不会阻止文件下载行为
-  //   let blob = XLSX.write(wb,{ bookSST:false, type:'base64' });
-  //   window.saveAs(new Blob([blob],{type:"application/octet-stream"}), "test.xlsx");
-  // }
   render() {
     const RadioButton = Radio.Button, RadioGroup = Radio.Group;
     // 表单头

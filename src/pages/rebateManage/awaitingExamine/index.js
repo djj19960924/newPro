@@ -4,6 +4,7 @@ import moment from 'moment';
 import ImageViewer from '@components/imageViewer/main';
 import {inject, observer} from 'mobx-react/index';
 import countryList from '@js/country';
+import MoneyCalculation from './moneyCalculation/index';
 import './index.less';
 
 const FormItem = Form.Item;
@@ -40,8 +41,6 @@ class awaitingExamine extends React.Component {
       shopList: [],
       // 当前所选商场
       currentShop: undefined,
-      // 消费金额
-      totalMoney: null,
       // 是否有剩余的小票
       hasTicket: false,
       // 剩余小票列表
@@ -54,46 +53,59 @@ class awaitingExamine extends React.Component {
       currentTicket: 0,
       // 品牌列表
       brandList: [],
+      brandListOrigin: [],
+      currentBrandList: [],
+      // 子组件上传数据
+      totalData: [],
+      totalMoney: 0,
+      totalClear: false,
       // 当前时间
       ticketDate: moment(new Date()).format('YYYY-MM-DD'),
       // 当前所选择小票
       currentTicketId: 0,
-      // 当前品牌名
-      currentBrandName: '',
       // 返点金额
       reciptMoney: 0,
       // 驳回备注框的样式
-      remarks: 'unShow ',
+      remarks: 'unShow',
       // 驳回备注原因
       reason: null,
       // 图片预览宽高自适应
       previewImageWH: 'width',
       // 默认汇率, 当以某一汇率提交成功小票以后
       // 会固定汇率选择框, 直到替换国家
-      defaultExchangeRate: '',
+      defaultExchangeRate: 1,
+      // 自增变数, 用于获取页面刷新
+      hasChange: 0,
+      // 重复选择框
+      repeatList: [],
+      // 为空金额
+      emptyList: []
     };
     // window.awaitingExamine = this;
   }
 
   componentDidMount() {
     this.getCountryLeftTicket()
+    // window.fandianUrl = `//192.168.3.32:8000/`
   }
+
   //渲染完成以后修正图片预览样式
   componentDidUpdate() {
     // 这里使用onload属性, 等待图片资源加载完成以后执行
     document.getElementsByClassName('previewImage')[0].onload = () => {
       let pI = document.getElementsByClassName('previewImage')[0];
-      if ((pI.width / pI.height) < (2 / 3)) {
+      if ((pI.width / pI.height) < (400 / 650)) {
         this.setState({
           previewImageWH: 'height'
         })
-      } else if ((pI.width / pI.height) >= (2 / 3)) {
+      } else if ((pI.width / pI.height) >= (400 / 650)) {
         this.setState({
           previewImageWH: 'width'
         })
       }
     };
   }
+
   // 获取国家当前剩余小票
   getCountryLeftTicket() {
     fetch(`${window.fandianUrl}/recipt/countReciptByNationName`,{
@@ -108,6 +120,7 @@ class awaitingExamine extends React.Component {
       });
     })
   }
+
   // 监听选择国家事件
   selectCountry(e, option) {
     this.setState({
@@ -119,7 +132,7 @@ class awaitingExamine extends React.Component {
       currentShop: undefined,
       currentTicketId: 0,
       ticketTotal: 0,
-      defaultExchangeRate: ``,
+      defaultExchangeRate: 1,
     });
     fetch(window.fandianUrl + '/mall/getMallList', {
       method: 'POST',
@@ -140,6 +153,8 @@ class awaitingExamine extends React.Component {
       } else {
         message.error(`${r.retcode.msg},状态码为:${r.retcode.status}`)
       }
+    }).catch(r => {
+      message.error(`获取商场列表接口调取失败`)
     });
   }
 
@@ -153,24 +168,13 @@ class awaitingExamine extends React.Component {
       body: 'mallName=' + val,
     }).then(r => r.json()).then(r => {
       if (r.retcode.status === '10000') {
-        let dataList = [];
-        for (let i of r.data) {
-          // 这里的value会作为选择框的搜索字段, 所以需求同时可以根据Id或者Name查询, 则在value值中同时插入Id和Name
-          // 但是注意最终传值时不要取value
-          dataList.push(<Option key={i.brandId} name={i.brandName}
-                                value={i.brandId + i.brandName}>{i.brandName}</Option>)
-        }
         this.setState({
-          brandList: dataList,
+          brandListOrigin: r.data,
+          currentShop: val,
         });
-        this.props.form.setFieldsValue({
-          currentBrand: dataList[0].props.value
-        });
-        this.setState({
-          currentBrandName: dataList[0].props.name
-        });
-        this.getRebateRate(dataList[0],dataList[0].props.name,undefined,val)
       }
+    }).catch(r => {
+      message.error(`获取品牌列表接口调取失败`)
     });
     this.getTicketList(this, val);
   }
@@ -184,10 +188,10 @@ class awaitingExamine extends React.Component {
       body: 'mallName=' + val + '&pageNum=1&pageSize=20',
     }).then(r => r.json()).then(r => {
       if (r.retcode.status === '10000') {
+        // 初始化数据
         f.setState({
           ticketList: r.data.pageInfo.list,
           hasTicket: !!r.data.pageInfo.total,
-          currentShop: val,
           currentTicketId: 0,
           ticketTotal: r.data.pageInfo.total,
           remarks: 'unShow',
@@ -196,34 +200,9 @@ class awaitingExamine extends React.Component {
       } else {
         message.error(`错误码:${r.retcode.status} ${r.retcode.msg}`)
       }
+    }).catch(r => {
+      message.error(`获取小票接口调取失败`)
     });
-  }
-
-  // 改变当前品牌
-  changeCurrentBrand(val, opt) {
-    this.setState({
-      currentBrandName: opt.props.name
-    });
-    this.getRebateRate(val, opt.props.name);
-  }
-
-  // 获取当日返点率
-  getRebateRate(val, name, date = this.state.ticketDate, mallName = this.state.currentShop) {
-    let data = {
-      mallName: mallName,
-      brandName: name,
-      rebateDate: date
-    };
-    fetch(window.fandianUrl + '/rebate/getRebateByDate', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(data),
-    }).then(r => r.json()).then(r => {
-      this.props.form.setFieldsValue({
-        rebateRate: r.data ? r.data.rebateRate : 0
-      });
-      this.changeReciptMoney()
-    })
   }
 
   // 日期改变
@@ -231,63 +210,29 @@ class awaitingExamine extends React.Component {
     this.setState({
       ticketDate: moment(date).format('YYYY-MM-DD')
     });
-    if (!!this.state.currentBrandName) {
-      this.getRebateRate(this.props.form.getFieldValue('currentBrand'), this.state.currentBrandName, moment(date).format('YYYY-MM-DD'))
-    }
-  }
-
-  // 修改返点率触发
-  changeRebateRate() {
-    this.changeReciptMoney()
   }
 
   // 修正返点金额
-  changeReciptMoney() {
-    let totalMoney = parseFloat(document.querySelector('#totalMoney').value);
-    let rebateRate = parseFloat(document.querySelector('#rebateRate').value);
+  changeReciptMoney(data = this.state.totalData, isAdd = false) {
+    let totalMoney = 0, totalReciptMoney = 0, currentBrandList = [], totalClear = true;
+    for (let n in data) {
+      totalMoney += ( !!data[n].totalMoney ? data[n].totalMoney : 0 );
+      totalReciptMoney += ( (!!data[n].totalMoney && !!data[n].brandRebate) ?
+        (data[n].totalMoney / 100 * data[n].brandRebate) : 0 );
+      currentBrandList.push(data[n].brand);
+      if (!data[n].totalMoney && data[n].totalMoney !== 0) totalClear = false;
+    }
+
     let exchangeRate = parseFloat(document.querySelector('#exchangeRate').value);
     this.setState({
-      reciptMoney: (!!totalMoney && !!rebateRate && !!exchangeRate) ? parseFloat((totalMoney * rebateRate / 100 * exchangeRate).toFixed(2)) : '0'
+      reciptMoney: ( (!!totalReciptMoney && !!exchangeRate) ?
+        parseFloat((totalReciptMoney * exchangeRate).toFixed(2))
+        : '0' ),
+      totalMoney: totalMoney,
+      totalData: data,
+      currentBrandList: currentBrandList,
+      totalClear: totalClear,
     })
-  }
-
-  // 修正汇率触发
-  changeExchangeRate() {
-    this.changeReciptMoney()
-  }
-
-  // 打开图片查看器
-  openImageViewer() {
-    this.setState({
-      showImageViewer: true,
-    })
-  };
-
-  // 关闭图片查看器
-  closeImageViewer() {
-    this.setState({
-      showImageViewer: false,
-    })
-  }
-
-  // 自定义表单验证返点率, 同时修正正确的显示值
-  rebateRateValidator(rule, val, callback) {
-    let rebateRate = parseFloat(document.querySelector('#rebateRate').value);
-    let thisRule = /^\d+(\.\d{0,1})?$/;
-    if (thisRule.test(val)) {
-      if (parseFloat(val) >= 0 && parseFloat(val) <= 99.9) {
-        callback();
-        this.props.form.setFieldsValue({rebateRate: parseFloat(val)});
-        document.querySelector('#rebateRate').value = rebateRate;
-      } else {
-        callback('返点率范围在0到100以内')
-      }
-    } else if (val === '') {
-      this.props.form.setFieldsValue({rebateRate: 0});
-      document.querySelector('#rebateRate').value = 0;
-    } else {
-      callback('返点率最多可输入小数点后一位')
-    }
   }
 
   // 自定义表单验证汇率, 同时修正正确的显示值
@@ -310,37 +255,6 @@ class awaitingExamine extends React.Component {
     }
   }
 
-  // 消费金额验证格式, 在输入时强制修正输入的值
-  setTotalMoney(event) {
-    let val = event.target.value;
-    // let val = this.props.form.getFieldValue('totalMoney');
-    // 正则, 输入为数字, 最多可至小数点后两位
-    let rule = /^\d+(\.\d{0,2})?$/;
-    if (rule.test(val)) {
-      // 当字符串通过正则时
-      if (parseFloat(val) < 999999) {
-        // 数字小于6位时, 将数字转为float以后再转回字符串, 去掉头部的0
-        let valStr = parseFloat(val).toString();
-        event.target.value = valStr;
-        this.props.form.setFieldsValue({
-          totalMoney: valStr,
-        })
-      } else {
-        // 数字过大时, 将表单内存储的正常值赋回input中
-        event.target.value = this.props.form.getFieldValue('totalMoney')
-      }
-    } else if (val === '') {
-      // 删除所有值时
-      this.props.form.setFieldsValue({
-        totalMoney: '',
-      });
-      event.target.value = '';
-    } else {
-      event.target.value = this.props.form.getFieldValue('totalMoney')
-    }
-    this.changeReciptMoney()
-  }
-
   // 日期选择器范围
   disabledDate(current) {
     return current && current > moment().endOf('day');
@@ -348,34 +262,65 @@ class awaitingExamine extends React.Component {
 
   // 通过 - 提交表单
   handleSubmit() {
-    const { country, } = this.state;
+    const { country, totalClear, totalData, } = this.state;
     //.log(this.props.form.getFieldsValue());
     this.props.form.validateFields((err, val) => {
       let the = this.state;
       if (!err) {
+        // 这里赋值, 同时判断品牌是否重复
+        let dataObj = {}, dataList = [], repeatList = [];
+        for (let n in totalData) {
+          let ic = String(dataList.indexOf(totalData[n].brand));
+          if (ic !== '-1') {
+            if (repeatList.indexOf(ic) === -1) repeatList.push(ic);
+            repeatList.push(n);
+          }
+          dataList.push(the.totalData[n].brand)
+        }
+        dataObj.brandList = dataList;
         let data = {
           reciptId: the.ticketList[the.currentTicketId].reciptId,
           mallName: the.currentShop,
           teamNo: val.teamNo,
-          consumeMoney: parseFloat(val.totalMoney),
-          brandName: the.currentBrandName,
+          consumeMoney: the.totalMoney,
+          brandName: ( the.totalData.length === 0 ?
+            dataObj.brandList[0].brand
+            : JSON.stringify(dataObj) ),
           consumeDate: moment(val.ticketDate).format('YYYY-MM-DD'),
           exchangeRate: val.exchangeRate,
-          rebateRate: val.rebateRate,
+          // 数据库未保存, 扩展字段
+          // rebateRate: val.rebateRate,
           reciptMoney: the.reciptMoney,
           unionId: the.ticketList[the.currentTicketId].unionId,
         };
         if (country === '韩国') data.reciptAttribute= val.reciptAttribute;
         if( val.exchangeRate===0){
           message.error('汇率不能为零')
-        }else{
+        } else if (!totalClear) {
+          message.error('消费金额不能为空');
+          let dataList = [];
+          for (let m in totalData) {
+            if (!totalData[m].totalMoney) {
+              dataList.push(m)
+            }
+          }
+          this.setState({emptyList:dataList})
+        } else if (repeatList.length !== 0) {
+          message.error('品牌重复');
+          this.setState({repeatList: repeatList},()=>{
+            // for (let m in repeatList) {
+            //   let d = document.querySelector(`.brandLine.line_${repeatList[m]}`).querySelector('.selectBrand').querySelector('.ant-select-selection');
+            //   d.style.border = '1px solid #ea494b';
+            // }
+          });
+        } else {
           fetch(window.fandianUrl + '/recipt/checkReciptAllow', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(data),
           }).then(r => r.json()).then(r => {
             if(r.retcode.status==='10000'){
-              this.setState({defaultExchangeRate: val.exchangeRate,})
+              this.setState({defaultExchangeRate: val.exchangeRate,});
               this.hasSubmit();
             } else {
               message.error(`${r.retcode.msg} 错误码: ${r.retcode.status}`);
@@ -394,9 +339,12 @@ class awaitingExamine extends React.Component {
     // 数值同步的状态, 虽然没有实时交互, 但也从本地计算的方式达到了类似的效果
     let dataObj = the.countryLeftTicket;
     dataObj[the.country] = dataObj[the.country]-1;
+    let d = document.querySelector(`.brandLine.line_0`).querySelector('.noHandlerWrap');
+    d.style.border = '';
     this.setState({
       ticketTotal: (the.ticketTotal - 1),
-      countryLeftTicket: dataObj
+      countryLeftTicket: dataObj,
+      hasChange: (the.hasChange + 1),
     });
     // 重置表单
     this.props.form.resetFields();
@@ -412,41 +360,10 @@ class awaitingExamine extends React.Component {
         reason: null
       });
     }
+    // 将汇率修正为成功提交的数值
     this.props.form.setFieldsValue({
-      currentBrand: the.brandList[0].props.value,
       exchangeRate: the.defaultExchangeRate
     });
-    this.setState({
-      currentBrandName: the.brandList[0].props.name
-    });
-    this.getRebateRate(the.brandList[0],the.brandList[0].props.name)
-  }
-
-  // 驳回申请
-  rejected() {
-    this.setState({remarks: 'showRemark'})
-  }
-
-  // 关闭驳回
-  closeReject() {
-    this.setState({remarks: 'unShow'})
-  }
-
-  // 选择驳回原因
-  onRadioChange(e) {
-    this.setState({
-      reason: e.target.value,
-    });
-  }
-  // 币种判断
-  currencyType(c) {
-    let type;
-    switch (c) {
-      case `韩国`: type = `美元`; break;
-      case `日本`: type = `日元`; break;
-      default : type = `人民币`
-    }
-    return `消费金额(${type})`;
   }
 
   //驳回备注确定
@@ -455,7 +372,7 @@ class awaitingExamine extends React.Component {
       let reject = {
         reciptId: this.state.ticketList[this.state.currentTicketId].reciptId,
         note: this.state.reason
-      }
+      };
       fetch(window.fandianUrl + '/recipt/checkReciptRejected', {
         method: 'post',
         headers: {'Content-Type': 'application/json'},
@@ -471,10 +388,11 @@ class awaitingExamine extends React.Component {
   }
 
   render() {
-    let {showImageViewer, shopList, currentShop, hasTicket, brandList, ticketList, currentTicketId, reciptMoney, defaultExchangeRate, previewImageWH, ticketTotal, country} = this.state;
+    let {showImageViewer, shopList, currentShop, hasTicket, brandListOrigin, ticketList, currentTicketId, reciptMoney, defaultExchangeRate, previewImageWH, ticketTotal, country, ticketDate, hasChange, repeatList, emptyList, } = this.state;
     const {getFieldDecorator} = this.props.form;
     return (
       <div className="awaitingExamine">
+        {/*国家选择*/}
         <div className="shopSelect">
           <span style={{marginRight: 5}}>所属国家: </span>
           <RadioGroup defaultValue={0}
@@ -495,6 +413,7 @@ class awaitingExamine extends React.Component {
             ))}
           </RadioGroup>
         </div>
+        {/*商场选择*/}
         <div className="shopSelect">
           <span style={{marginRight: 5}}>所属商场: </span>
           <Select className="selectShops"
@@ -506,32 +425,37 @@ class awaitingExamine extends React.Component {
           </Select>
           <span style={{marginLeft: 20}}>当前商场剩余小票：{!!ticketTotal ? ticketTotal : '暂无小票'}</span>
         </div>
+        {/*状态提示*/}
         <div className="noTicket" style={{display: (hasTicket ? 'none' : 'block')}}>
           {currentShop && <div><Icon type="smile" className="iconSmile"/><span>当前商场没有小票</span></div>}
           {!country && <div><Icon type="shop" className="iconShop"/><span>请选择国家</span></div>}
           {country && !currentShop && <div><Icon type="shop" className="iconShop"/><span>请选择商场</span></div>}
         </div>
+
         <div className="container" style={{display: (hasTicket ? 'block' : 'none')}}>
+          {/*图片相关功能*/}
           <div className="containerBody containerImage">
             {/*单图片功能*/}
             <img className="previewImage"
                  src={!!ticketList.length ? ticketList[currentTicketId].pictureUrl : ''}
                  alt=""
-                 onClick={this.openImageViewer.bind(this)}
+                 // 打开图片弹窗
+                 onClick={ () => { this.setState({showImageViewer: true,}) } }
                  style={{
                    width: previewImageWH === 'width' ? '100%' : 'auto',
                    height: previewImageWH === 'height' ? '100%' : 'auto',
                  }}
             />
           </div>
+
+          {/*表单功能*/}
           <div className="containerBody containerForm">
             <Form className="examineForm"
                   id='myForm'
-              // onSubmit={this.handleSubmit.bind(this)}
             >
               <FormItem label="商场"
                         colon
-                        labelCol={{span: 3}}
+                        labelCol={{span: 2}}
               >
                 <Input style={{width: 150, marginLeft: 10, marginRight: 20, color: '#555'}}
                        disabled
@@ -541,89 +465,68 @@ class awaitingExamine extends React.Component {
               <FormItem label="请输入凭证号"
                         colon
                         labelCol={{span: 6}}
-                        wrapperCol={{span: 8}}
+                        wrapperCol={{span: 12}}
               >
                 {getFieldDecorator('teamNo', {
                   initialValue: '',
-                  rules: [{required: true, message: '请输入凭证号!'}],
+                  rules: [
+                    {required: true, message: '请输入凭证号!'}
+                  ],
                 })(
                   <Input style={{width: 180, marginLeft: 10, color: '#555'}}
                          placeholder="请输入凭证号"
                   />
                 )}
               </FormItem>
-              <FormItem label={this.currencyType(country)}
-                        colon
-                        labelCol={{span: 6}}
-                        wrapperCol={{span: 8}}
-              >
-                {getFieldDecorator('totalMoney', {
-                  rules: [{required: true, message: '请输入消费金额!'}],
-                  initialValue: ''
-                })(
-                  <Input style={{width: 130,}}
-                         type="number"
-                         placeholder="请输入消费金额"
-                         onChange={this.setTotalMoney.bind(this)}
-                         id="totalMoney"
-                  />
-                )}
-              </FormItem>
-              {country === '韩国' && <FormItem label="属性"
-                        colon
-                        labelCol={{span: 3}}
-              >
-                {getFieldDecorator('reciptAttribute', {
-                  rules: [{required: true}],
-                  initialValue: 'SG'
-                })(
-                  <Select style={{width: 90}}
-                    // defaultValue="SG"
-                  >
-                    <Option key="SG">SG</Option>
-                    <Option key="MG">MG</Option>
-                  </Select>
-                )}
-              </FormItem>}
-              <FormItem label="品牌"
-                        colon
-                        labelCol={{span: 3}}
-                        wrapperCol={{span: 10}}
-              >
-                {getFieldDecorator('currentBrand', {
-                  rules: [{required: true, message: '请输入品牌!'}],
-                  // initialValue: ''
-                })(
-                  <Select style={{width: 240}}
-                          placeholder="请输入编码/品牌查询"
-                          showSearch
-                          onChange={this.changeCurrentBrand.bind(this)}
-                  >
-                    {brandList}
-                  </Select>
-                )}
-              </FormItem>
+
               <FormItem label="小票购买时间"
                         colon
-                        labelCol={{span: 7}}
+                        labelCol={{span: 6}}
                         wrapperCol={{span: 5}}
               >
                 {getFieldDecorator('ticketDate', {
                   rules: [{required: true}],
                   initialValue: moment(new Date())
                 })(
-                  <DatePicker style={{width: 120}}
+                  <DatePicker style={{width: 130,marginLeft: 10}}
+                              dropdownClassName="datePickerPopup"
                               allowClear={false}
                               disabledDate={this.disabledDate}
                               onChange={this.changeTicketDate.bind(this)}
-                    // defaultValue={moment(new Date())}
-                    // value={ticketDate}
                   />
                 )}
               </FormItem>
+
+              <MoneyCalculation brandListOrigin={brandListOrigin}
+                                ticketDate={ticketDate}
+                                country={country}
+                                currentShop={currentShop}
+                                changeReciptMoney={this.changeReciptMoney.bind(this)}
+                                hasChange={hasChange}
+                                repeatList={repeatList}
+                                emptyList={emptyList}
+              />
+
+              {/* 韩国专有属性 */}
+              {country === '韩国' && <FormItem label="属性"
+                                             colon
+                                             labelCol={{span: 2}}
+              >
+                {getFieldDecorator('reciptAttribute', {
+                  rules: [{required: true}],
+                  initialValue: 'SG'
+                })(
+                  <Select style={{width: 100, marginLeft: 10}}
+                  >
+                    <Option key="SG">SG</Option>
+                    <Option key="MG">MG</Option>
+                  </Select>
+                )}
+              </FormItem>}
+
               <FormItem label="汇率"
                         colon
-                        labelCol={{span: 3}}
+                        labelCol={{span: 2}}
                         wrapperCol={{span: 20}}
               >
                 {getFieldDecorator('exchangeRate', {
@@ -633,36 +536,21 @@ class awaitingExamine extends React.Component {
                   ],
                   initialValue: defaultExchangeRate
                 })(
-                  <Input style={{width: 90}}
+                  <Input style={{width: 100, marginLeft: 10}}
                          type="number"
                          id="exchangeRate"
                          placeholder="请输入汇率"
-                         onChange={this.changeExchangeRate.bind(this)}
+                         // 修正汇率触发
+                         onChange={ () => this.changeReciptMoney() }
                   />
                 )}
               </FormItem>
-              <FormItem label="返点率"
-                        colon
-                        labelCol={{span: 4}}
-                        wrapperCol={{span: 20}}
-                // validator={this.rebateRateValidator}
-              >
-                {getFieldDecorator('rebateRate', {
-                  rules: [
-                    {required: true, message: '请输入返点率!'},
-                    {validator: this.rebateRateValidator.bind(this)}
-                  ],
-                  initialValue: 0
-                })(
-                  <Input style={{width: 60}}
-                         type="number"
-                         id="rebateRate"
-                         onChange={this.changeRebateRate.bind(this)}
-                  />
-                )}
-                <span> %</span>
-                <span style={{marginLeft: 20}}>返点金额(¥)：{reciptMoney}</span>
-              </FormItem>
+
+              {/* 显示返点金额 */}
+              <p>
+                <span style={{marginLeft: 10,color: '#999'}}>返点金额(¥)：{reciptMoney}</span>
+              </p>
+
               <FormItem>
                 <Button type="primary"
                         htmlType="submit"
@@ -673,7 +561,8 @@ class awaitingExamine extends React.Component {
                   通过
                 </Button>
                 <Button type="danger"
-                        onClick={this.rejected.bind(this)}
+                        // 打开驳回原因窗口
+                        onClick={ () => this.setState({remarks: 'showRemark'}) }
                         style={{marginLeft: '20px'}}
                 >
                   驳回
@@ -682,12 +571,20 @@ class awaitingExamine extends React.Component {
             </Form>
           </div>
         </div>
+
+        {/* 驳回相关模块 */}
         <div className={this.state.remarks + ' popup'}>
           <div className='remark-title'>
-            <Icon type='close' onClick={this.closeReject.bind(this)}></Icon>
+            <Icon type='close'
+                  // 关闭驳回原因选择窗口
+                  onClick={ () => this.setState({remarks: 'unShow'}) }
+            />
             <span>请选择驳回原因</span>
           </div>
-          <RadioGroup className='allReasons' onChange={this.onRadioChange.bind(this)} value={this.state.reason}>
+          <RadioGroup className='allReasons'
+                      onChange={ (e) => { this.setState({reason: e.target.value}) }}
+                      value={this.state.reason}
+          >
             <Radio value={0}>小票不清晰</Radio>
             <Radio value={1}>凭证号不正确</Radio>
             <Radio value={2}>小票重复</Radio>
@@ -696,11 +593,12 @@ class awaitingExamine extends React.Component {
           <Button type="primary" onClick={this.openNotification.bind(this)}>确定</Button>
         </div>
 
+        {/* 图片查看弹窗组件 */}
         {showImageViewer &&
         <ImageViewer // 图片链接, 上为图片查看器开关
           imgSrc={!!ticketList.length ? ticketList[currentTicketId].pictureUrl : ''}
           // 关闭图片查看
-          closeImageViewer={() => this.closeImageViewer()}
+          closeImageViewer={() => this.setState({showImageViewer: false,}) }
           option={{
             // 添加图片拖拽功能
             move: true,

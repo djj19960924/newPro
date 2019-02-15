@@ -20,11 +20,13 @@ import 'antd/dist/antd.less';
 
 import App from './App';
 
+// 发布测试版时修改
 // window.apiUrl = 'http://api.maishoumiji.com';
 // window.fandianUrl = 'http://fandian.maishoumiji.com';
 
 // 发布测试环境时修改
 window.apiUrl = window.fandianUrl = 'http://testapi.maishoumiji.com';
+document.getElementsByTagName("title")[0].innerText = `后台管理系统 - 测试版`;
 
 ReactDOM.render(
   <HashRouter>

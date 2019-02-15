@@ -9,6 +9,9 @@ const  countryList=[
   },{
     id: 2,
     nationName: '中国'
+  },{
+    id: 3,
+    nationName: '法国'
   }
 ];
 export default countryList;

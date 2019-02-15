@@ -24,10 +24,9 @@ import commoditiesImgList from '@pages/commoditiesManage/commoditiesDatabase/com
 
 // 404页面
 import page404 from '@pages/system/page404/'
-// 关于
-// import about from '@pages/about/';
-// 测试页面
-import test from '@pages/test/';
+
+// 开发人员专用调试
+import importExcel from '@pages/developerPages/importExcel/';
 
 @withRouter
 class ContentMain extends React.Component{
@@ -52,9 +51,9 @@ class ContentMain extends React.Component{
           <Route exact path="/commodities-manage/commodities-database" component={commoditiesDataBase} />
           <Route exact path="/commodities-manage/commodities-database/create-and-edit" component={commoditiesCreateAndEdit} />
           <Route exact path="/commodities-manage/commodities-database/commodities-img-list" component={commoditiesImgList} />
-          {window.isTest && <Route exact path="/test" component={test} />}
-          {/*<Route exact path="/about" component={about} />*/}
           <Route exact path="/" component={Home} />
+          {/*开发人员专用管理路由*/}
+          {window.isTest && <Route exact path="/developer-pages/import-excel" component={importExcel} />}
           {/*这里可以配置404 not found 页面*/}
           <Route component={page404} />
         </Switch>

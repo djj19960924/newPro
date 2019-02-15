@@ -25,6 +25,7 @@ const testapi = 'http://testapi.maishoumiji.com';
 // const testapi = 'http://192.168.3.32:8000';
 window.apiUrl = window.fandianUrl = window.testUrl = testapi;
 window.isTest = true;
+document.getElementsByTagName("title")[0].innerText = `后台管理系统 - 本地版`;
 
 ReactDOM.render(
   <HashRouter>

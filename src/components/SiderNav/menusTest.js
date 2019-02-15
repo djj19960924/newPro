@@ -79,7 +79,20 @@ const menus = [
         key: '/commodities-manage/commodities-database'
       }
     ]
-  }
+  },
+  {
+    title: '开发人员专用',
+    icon: 'like',
+    key: '/developer-pages',
+    subs: [
+      {
+        title: '导入excel',
+        icon: 'file-excel',
+        key: '/developer-pages/import-excel'
+      }
+    ]
+  },
+
   // {
   //   title: '关于',
   //   icon: 'info-circle-o',
