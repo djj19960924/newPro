@@ -98,7 +98,10 @@ class MoneyCalculation extends React.Component {
           let { mainDataList } = this.state;
           if (No === `default`) this.setState({defaultBrandRebate: r.data.rebateRate});
           mainDataList[(No === `default` ? '0' : No)].brandRebate = r.data.rebateRate;
-          this.setState({mainDataList: mainDataList})
+          // 当获取新的返点率以后, 实时改变返点率最后的计算值
+          this.setState({mainDataList: mainDataList},() => {
+            this.props.changeReciptMoney(this.state.mainDataList)
+          })
         }
       } else {
         if (r.retcode) {
