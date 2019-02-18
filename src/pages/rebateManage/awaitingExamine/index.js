@@ -81,12 +81,11 @@ class awaitingExamine extends React.Component {
       // 为空金额
       emptyList: []
     };
-    // window.awaitingExamine = this;
+    window.awaitingExamine = this;
   }
 
   componentDidMount() {
     this.getCountryLeftTicket()
-    // window.fandianUrl = `//192.168.3.32:8000/`
   }
 
   //渲染完成以后修正图片预览样式
@@ -111,13 +110,23 @@ class awaitingExamine extends React.Component {
     fetch(`${window.fandianUrl}/recipt/countReciptByNationName`,{
       method: 'POST',
     }).then(r => r.json()).then(r => {
-      let dataObj = {};
-      for (let i in r.data) {
-        dataObj[r.data[i].nationName]= r.data[i].reciptTotal
+      if (r.status === 10000) {
+        let dataObj = {};
+        for (let i in r.data) {
+          dataObj[r.data[i].nationName]= r.data[i].reciptTotal
+        }
+        this.setState({
+          countryLeftTicket: dataObj
+        });
+      } else {
+        if (r.retcode) {
+          message.error(`${r.retcode.msg}, 状态码为:${r.retcode.status}`)
+        } else {
+          message.error(`后端数据错误`)
+        }
       }
-      this.setState({
-        countryLeftTicket: dataObj
-      });
+    }).catch(r => {
+      message.error(`根据国家调取国家剩余小票数量接口失败`)
     })
   }
 
@@ -151,7 +160,11 @@ class awaitingExamine extends React.Component {
         // 成功静默处理
         // message.success(`${r.retcode.msg},状态码为:${r.retcode.status}`)
       } else {
-        message.error(`${r.retcode.msg},状态码为:${r.retcode.status}`)
+        if (r.retcode) {
+          message.error(`${r.retcode.msg}, 状态码为:${r.retcode.status}`)
+        } else {
+          message.error(`后端数据错误`)
+        }
       }
     }).catch(r => {
       message.error(`获取商场列表接口调取失败`)
@@ -172,6 +185,12 @@ class awaitingExamine extends React.Component {
           brandListOrigin: r.data,
           currentShop: val,
         });
+      } else {
+        if (r.retcode) {
+          message.error(`${r.retcode.msg}, 状态码为:${r.retcode.status}`)
+        } else {
+          message.error(`后端数据错误`)
+        }
       }
     }).catch(r => {
       message.error(`获取品牌列表接口调取失败`)
@@ -198,10 +217,14 @@ class awaitingExamine extends React.Component {
           reason: null
         });
       } else {
-        message.error(`错误码:${r.retcode.status} ${r.retcode.msg}`)
+        if (r.retcode) {
+          message.error(`${r.retcode.msg}, 状态码为:${r.retcode.status}`)
+        } else {
+          message.error(`后端数据错误`)
+        }
       }
     }).catch(r => {
-      message.error(`获取小票接口调取失败`)
+      message.error(`根据商场获取小票接口调取失败`)
     });
   }
 
@@ -224,6 +247,8 @@ class awaitingExamine extends React.Component {
     }
 
     let exchangeRate = parseFloat(document.querySelector('#exchangeRate').value);
+    // console.log(`返点金额为: ${ (!!totalReciptMoney && !!exchangeRate) ?
+    //   parseFloat((totalReciptMoney * exchangeRate).toFixed(2)) : '0' }\n总金额为: ${totalMoney}`);
     this.setState({
       reciptMoney: ( (!!totalReciptMoney && !!exchangeRate) ?
         parseFloat((totalReciptMoney * exchangeRate).toFixed(2))
@@ -296,7 +321,7 @@ class awaitingExamine extends React.Component {
         if (country === '韩国') data.reciptAttribute= val.reciptAttribute;
         if( val.exchangeRate===0){
           message.error('汇率不能为零')
-        } else if (!totalClear) {
+        } else if (!totalClear || the.totalMoney === null) {
           message.error('消费金额不能为空');
           let dataList = [];
           for (let m in totalData) {
@@ -307,12 +332,7 @@ class awaitingExamine extends React.Component {
           this.setState({emptyList:dataList})
         } else if (repeatList.length !== 0) {
           message.error('品牌重复');
-          this.setState({repeatList: repeatList},()=>{
-            // for (let m in repeatList) {
-            //   let d = document.querySelector(`.brandLine.line_${repeatList[m]}`).querySelector('.selectBrand').querySelector('.ant-select-selection');
-            //   d.style.border = '1px solid #ea494b';
-            // }
-          });
+          this.setState({repeatList: repeatList});
         } else {
           fetch(window.fandianUrl + '/recipt/checkReciptAllow', {
             method: 'POST',
@@ -320,11 +340,18 @@ class awaitingExamine extends React.Component {
             body: JSON.stringify(data),
           }).then(r => r.json()).then(r => {
             if(r.retcode.status==='10000'){
+              message.success(`执行通过审核成功`);
               this.setState({defaultExchangeRate: val.exchangeRate,});
               this.hasSubmit();
             } else {
-              message.error(`${r.retcode.msg} 错误码: ${r.retcode.status}`);
+              if (r.retcode) {
+                message.error(`${r.retcode.msg}, 状态码为:${r.retcode.status}`)
+              } else {
+                message.error(`后端数据错误`)
+              }
             }
+          }).catch(r => {
+            message.error(`通过审核接口调取失败`)
           })
         }
       }
@@ -345,6 +372,11 @@ class awaitingExamine extends React.Component {
       ticketTotal: (the.ticketTotal - 1),
       countryLeftTicket: dataObj,
       hasChange: (the.hasChange + 1),
+      reciptMoney: 0,
+      consumeMoney: 0,
+      totalMoney: null,
+      emptyList: [],
+      repeatList: [],
     });
     // 重置表单
     this.props.form.resetFields();
@@ -377,8 +409,19 @@ class awaitingExamine extends React.Component {
         method: 'post',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(reject),
-      }).then(res => res.json()).then(res => {
-        this.hasSubmit()
+      }).then(res => res.json()).then(r => {
+        if (r.retcode.status === `10000`) {
+          message.success(`执行驳回成功`);
+          this.hasSubmit()
+        } else {
+          if (r.retcode) {
+            message.error(`${r.retcode.msg}, 状态码为:${r.retcode.status}`)
+          } else {
+            message.error(`后端数据错误`)
+          }
+        }
+      }).catch(r => {
+        message.error(`驳回小票接口调取失败`)
       })
     } else if (this.state.reason === null) {
       notification['warning']({

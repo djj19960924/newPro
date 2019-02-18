@@ -175,7 +175,7 @@ class commoditiesCreateAndEdit extends React.Component {
         });
       };
       item.onerror = (e) => {
-        message.error('图片加载失败')
+        message.error('图片加载失败');
         // 图片如果未加载出, 也放开显示, 标出图片未加载的默认样式
         let pI = document.getElementById(`goodsImg_${i}`);
         pI.style.visibility = `visible`;
@@ -396,7 +396,8 @@ class commoditiesCreateAndEdit extends React.Component {
                              min={0}
                 />
               )}
-              <span style={{marginLeft: 10}}>单位: {unitName}</span>
+              {/*暂不显示单位*/}
+              {/*<span style={{marginLeft: 10}}>单位: {unitName}</span>*/}
               <span style={{marginLeft: 10}}>(选填)</span>
             </FormItem>
 

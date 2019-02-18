@@ -1,5 +1,5 @@
 import React from 'react';
-import { InputNumber, Select, Button, } from 'antd';
+import { InputNumber, Select, Button, message, } from 'antd';
 import './index.less';
 
 const Option = Select.Option;
@@ -54,10 +54,12 @@ class MoneyCalculation extends React.Component {
         // 这里默认选取第一个品牌
         defaultBrand: brandListOrigin[0].brandName,
         mainDataList: [{brand: brandListOrigin[0].brandName}]
-      })
+      });
+      this.props.changeReciptMoney([{brand: brandListOrigin[0].brandName}])
     }
     // 当小票提交或驳回成功以后触发
     if (prevProps.hasChange !== hasChange) {
+      this.props.changeReciptMoney([{brand: brandListOrigin[0].brandName}]);
       this.setState({
         mainDataList: [{brand: brandListOrigin[0].brandName}],
       },() => {this.getRebateRate(mainDataList[0].brand,0)})
@@ -89,10 +91,24 @@ class MoneyCalculation extends React.Component {
       body: JSON.stringify(data),
     }).then(r => r.json()).then(r => {
       // console.log(this.state.mainDataList);
-      let { mainDataList } = this.state;
-      mainDataList[(No === `default` ? 0 : No)].brandRebate = r.data.rebateRate;
-      if (No === `default`) this.setState({defaultBrandRebate: r.data.rebateRate});
-      this.setState({mainDataList: mainDataList})
+      if (r.retcode.status === `10000`) {
+        if (!r.data) {
+          message.error(`未查询到 ${name} 在 ${date} 的返点率`)
+        } else {
+          let { mainDataList } = this.state;
+          if (No === `default`) this.setState({defaultBrandRebate: r.data.rebateRate});
+          mainDataList[(No === `default` ? '0' : No)].brandRebate = r.data.rebateRate;
+          this.setState({mainDataList: mainDataList})
+        }
+      } else {
+        if (r.retcode) {
+          message.error(`${r.retcode.msg}, 状态码:${r.retcode.status}`)
+        } else {
+          message.error(`后端数据错误`)
+        }
+      }
+    }).catch(r => {
+      message.error(`根据品牌,日期获取返点率接口调取失败`)
     })
   }
 
