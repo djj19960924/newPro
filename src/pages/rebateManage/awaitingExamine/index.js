@@ -293,7 +293,7 @@ class awaitingExamine extends React.Component {
       let the = this.state;
       if (!err) {
         // 这里赋值, 同时判断品牌是否重复
-        let dataObj = {}, dataList = [], repeatList = [];
+        let dataList = [], repeatList = [];
         for (let n in totalData) {
           let ic = String(dataList.indexOf(totalData[n].brand));
           if (ic !== '-1') {
@@ -302,15 +302,13 @@ class awaitingExamine extends React.Component {
           }
           dataList.push(the.totalData[n].brand)
         }
-        dataObj.brandList = dataList;
         let data = {
           reciptId: the.ticketList[the.currentTicketId].reciptId,
           mallName: the.currentShop,
           teamNo: val.teamNo,
           consumeMoney: the.totalMoney,
-          brandName: ( the.totalData.length === 0 ?
-            dataObj.brandList[0].brand
-            : JSON.stringify(dataObj) ),
+          // 这里直接保存数组作为json字符串保存
+          brandName: ( the.totalData.length === 0 ? dataList[0] : JSON.stringify(dataList) ),
           consumeDate: moment(val.ticketDate).format('YYYY-MM-DD'),
           exchangeRate: val.exchangeRate,
           // 数据库未保存, 扩展字段
