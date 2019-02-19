@@ -204,6 +204,7 @@ class appointmentTeamManage extends React.Component {
         airTicket: v.airTicket,
         passport: v.passport,
         passportNum: v.passportNum,
+        id: v.id,
       })
     }
     if (selectedList.length > 0) {
