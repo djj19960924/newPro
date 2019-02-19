@@ -26,7 +26,7 @@ class countBillList extends React.Component{
       previewImage: '',
       isLoading: false,
     };
-    window.countBillList = this;
+    // window.countBillList = this;
     // window.XLSX = XLSX;
   }
   // 默认读取表格

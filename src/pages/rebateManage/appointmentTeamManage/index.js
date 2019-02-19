@@ -29,7 +29,7 @@ class appointmentTeamManage extends React.Component {
       // input输入框
       inputValue: {},
     };
-    window.appointmentTeamManage = this;
+    // window.appointmentTeamManage = this;
   }
   componentDidMount() {
     this.getAppointmentByStatus()

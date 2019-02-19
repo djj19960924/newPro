@@ -14,7 +14,7 @@ class MoneyCalculation extends React.Component {
       number: null,
       mainDataList: [],
     };
-    window.MoneyCalculation = this;
+    // window.MoneyCalculation = this;
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {

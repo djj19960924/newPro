@@ -81,7 +81,7 @@ class awaitingExamine extends React.Component {
       // 为空金额
       emptyList: []
     };
-    window.awaitingExamine = this;
+    // window.awaitingExamine = this;
   }
 
   componentDidMount() {
