@@ -11,7 +11,7 @@ class appointmentTeamManage extends React.Component {
       // 预约状态
       appointmentStatus: 0,
       pageNum: 1,
-      pageSize: 10,
+      pageSize: 30,
       pageTotal: 0,
       pageSizeOptions: [`10`,`20`,`30`,`40`],
       // 表格所选行
@@ -36,23 +36,51 @@ class appointmentTeamManage extends React.Component {
   }
   // 搜索预约信息
   getAppointmentByStatus(status = this.state.appointmentStatus,pageNum = this.state.pageNum, pageSize = this.state.pageSize) {
-    fetch(`${window.fandianUrl}/AppointmentMangement/getAppointmentByStatus`,{
-      method: `POST`,
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: `status=${status}&pageNum=${pageNum}&pageSize=${pageSize}`,
-    }).then(r => r.json()).then(r => {
-      if (r.status === 10000) {
-        this.setState({
-          dataList: r.data.list,
-          pageSizeOptions: [`10`,`20`,`30`,(r.data.total > 40 ? r.data.total.toString() : `40`)],
-          pageTotal: r.data.total,
-        })
-      } else {
-        message.error(`${r.msg} 错误码: ${r.status}`)
-      }
-    }).catch(()=>{
-      message.error(`接口调取失败`)
-    })
+    if (status === 3) {
+      fetch(`${window.fandianUrl}/AppointmentMangement/getMassNoByMallName`,{
+        method: `POST`,
+      }).then(r => r.json()).then(r => {
+        if (r.status === 10000) {
+          let dataObj = {};
+          for (let n in r.data) dataObj[`input_${n}`] = r.data[n].massNo;
+          this.setState({
+            dataList: r.data,
+            inputValue: dataObj,
+          })
+        } else {
+          if (r.status) {
+            message.error(`${r.msg} 错误码: ${r.status}`)
+          } else {
+            message.error(`后端数据错误`)
+          }
+        }
+      })
+    } else {
+      fetch(`${window.fandianUrl}/AppointmentMangement/getAppointmentByStatus`,{
+        method: `POST`,
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `status=${status}&pageNum=${pageNum}&pageSize=${pageSize}`,
+      }).then(r => r.json()).then(r => {
+        if (r.status === 10000) {
+          let dataObj = {};
+          if (!!r.data.list) if (!!r.data.list[0].massNo) for (let n in r.data.list) dataObj[`input_${n}`] = r.data.list[n].massNo;
+          this.setState({
+            inputValue: dataObj,
+            dataList: r.data.list,
+            pageSizeOptions: [`10`,`20`,`30`,(r.data.total > 40 ? r.data.total.toString() : `40`)],
+            pageTotal: r.data.total,
+          })
+        } else {
+          if (r.status) {
+            message.error(`${r.msg} 错误码: ${r.status}`)
+          } else {
+            message.error(`后端数据错误`)
+          }
+        }
+      }).catch(()=>{
+        message.error(`接口调取失败`)
+      });
+    }
   }
   // 打开图片弹窗
   openPreview(url) {
@@ -72,7 +100,7 @@ class appointmentTeamManage extends React.Component {
     this.setState({showEdit: dataObj},()=>{
       // 当切换为 input 输入框时, 自动对焦, 使焦点锁定当前所打开的 input 框,
       // 从而使 input 失去焦点时, 可以恢复为其他显示方式
-      let item = document.getElementsByClassName(`input_${v}`)[0];
+      let item = document.querySelector(`.input_${v}`);
       if (!!item) {
         // toggle 为双向绑定, 当关闭 input 时, 无需强制对焦
         item.focus();
@@ -82,33 +110,59 @@ class appointmentTeamManage extends React.Component {
   // 失去焦点
   loseBlur(v,b) {
     const { inputValue, } = this.state;
+    // 当输入框有值时, 默认无法直接在失去焦点时关闭输入框, 以防误操作
+    // 阻止在失去焦点时, 强制刷新页面, 以防无法点击保存按钮
+    // 这里逻辑无法将团号值置空
     if (!inputValue[`input_${v}`]) {
       this.toggleEdit(v,b);
     }
   }
   // 更改团号
-  submitMassNo(v,id) {
-    const { inputValue, } = this.state;
-    if (!!inputValue[`input_${v}`]) {
-      fetch(`${window.fandianUrl}/AppointmentMangement/editMassNoById`, {
-        method: `POST`,
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({id:id,massNo:inputValue[`input_${v}`]}),
-      }).then(r => r.json()).then(r => {
-        console.log(r);
-        if (r.status === 10000) {
-          message.success(r.data);
-          this.getAppointmentByStatus();
-          this.toggleEdit(v,false);
-          let dataObj = inputValue;
-          dataObj[`input_${v}`] = ``;
-          this.setState({inputValue: dataObj})
-        } else {
-          message.error(`${r.msg} 错误码: ${r.status}`)
-        }
-      }).catch(()=>{
-        message.error(`接口调取失败`)
-      })
+  submitMassNo(i,v) {
+    const { inputValue, appointmentStatus, } = this.state;
+    if (!!inputValue[`input_${i}`]) {
+      if (appointmentStatus === 3) {
+        fetch(`${window.fandianUrl}/AppointmentMangement/editMassNoByMallName`, {
+          method: `POST`,
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({mallName:v,massNo:inputValue[`input_${i}`]}),
+        }).then(r => r.json()).then(r => {
+          console.log(r);
+          if (r.status === 10000) {
+            message.success(r.data);
+            this.getAppointmentByStatus();
+            this.toggleEdit(i,false);
+          } else {
+            if (r.status) {
+              message.error(`${r.msg} 错误码: ${r.status}`)
+            } else {
+              message.error(`后端数据错误`)
+            }
+          }
+        }).catch(()=>{
+          message.error(`接口调取失败`)
+        })
+      } else {
+        fetch(`${window.fandianUrl}/AppointmentMangement/editMassNoById`, {
+          method: `POST`,
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({id:v,massNo:inputValue[`input_${i}`]}),
+        }).then(r => r.json()).then(r => {
+          if (r.status === 10000) {
+            message.success(r.data);
+            this.getAppointmentByStatus();
+            this.toggleEdit(i,false);
+          } else {
+            if (r.status) {
+              message.error(`${r.msg} 错误码: ${r.status}`)
+            } else {
+              message.error(`后端数据错误`)
+            }
+          }
+        }).catch(()=>{
+          message.error(`接口调取失败`)
+        })
+      }
     } else {
       // 理论上说, 当对应的 inputValue 为空时, 无法点击进入该事件
       // 这里仅做保险, 进行预判报错
@@ -127,21 +181,21 @@ class appointmentTeamManage extends React.Component {
   }
   // 换页
   changePage(pageNum,pageSize) {
-    // console.log(pageNum,pageSize)
     this.getAppointmentByStatus(undefined,pageNum,pageSize);
     this.setState({pageNum:pageNum,pageSize:pageSize})
   }
   // 更改状态
   changeAppointmentStatus(v) {
-    this.getAppointmentByStatus(v.target.value);
+    this.getAppointmentByStatus(v.target.value,1,30);
     this.setState({
-      appointmentStatus: v.target.value
+      appointmentStatus: v.target.value,
+      pageNum: 1,
+      pageSize: 30
     })
   }
   // 发送申请
   submitAppointment() {
     const {selectedList, selectedIds,} = this.state;
-    // console.log(selectedList, selectedIds);
     let dataList = [], idList = selectedIds;
     for (let v of selectedList) {
       dataList.push({
@@ -169,7 +223,11 @@ class appointmentTeamManage extends React.Component {
             selectedIds: [],
           })
         } else {
-          message.error(`${r.msg} 错误码: ${r.status}`)
+          if (r.status) {
+            message.error(`${r.msg} 错误码: ${r.status}`)
+          } else {
+            message.error(`后端数据错误`)
+          }
         }
       }).catch(()=>{
         message.error(`接口调取失败`)
@@ -215,9 +273,8 @@ class appointmentTeamManage extends React.Component {
       {title: '团号', dataIndex: 'massNo', key: 'massNo',
         render: (text, record, index) => (
           <div>
-            {appointmentStatus === 1 &&
-              (showEdit[`editRow_${index}`] ? <div className="editMassNo">
-                <Input style={{width: 200}}
+            {showEdit[`editRow_${index}`] ? <div className="editMassNo">
+                <Input style={{width: 160}}
                        value={inputValue[`input_${index}`]}
                        onChange={this.changeMassNo.bind(this,`input_${index}`)}
                        className={`input_${index}`}
@@ -228,21 +285,50 @@ class appointmentTeamManage extends React.Component {
                         style={{marginLeft: 10}}
                         onClick={this.submitMassNo.bind(this,index,record.id)}
                 >保存</Button>
+                <Button type="danger"
+                        style={{marginLeft: 10}}
+                        onClick={this.toggleEdit.bind(this,index,false)}
+                >取消</Button>
               </div>
               : <div className={`showMassNo editable-cell-value-wrap editRow_${index}`}
                      onClick={this.toggleEdit.bind(this,index,true)}
-                >
-                  编辑团号
-                </div>)
-            }
-            {appointmentStatus === 2 &&
-              <div className="showMassNo">
-                {record.massNo}
-              </div>
-            }
+              >
+                {record.massNo ? record.massNo : `编辑团号`}
+              </div>}
           </div>
         )
       });
+    const columnsMallMassNo = [
+      {title: '商场', dataIndex: 'mallName', key: 'mallName', width: 140},
+      {title: '团号', dataIndex: 'massNo', key: 'massNo',
+        render: (text, record, index) => (
+          <div>
+            {showEdit[`editRow_${index}`] ? <div className="editMassNo">
+                <Input style={{width: 160}}
+                       value={inputValue[`input_${index}`]}
+                       onChange={this.changeMassNo.bind(this,`input_${index}`)}
+                       className={`input_${index}`}
+                       placeholder="请输入团号"
+                       onBlur={this.loseBlur.bind(this,index,false)}
+                />
+                <Button type="primary"
+                        style={{marginLeft: 10}}
+                        onClick={this.submitMassNo.bind(this,index,record.mallName)}
+                >保存</Button>
+                <Button type="danger"
+                        style={{marginLeft: 10}}
+                        onClick={this.toggleEdit.bind(this,index,false)}
+                >取消</Button>
+              </div>
+              : <div className={`showMassNo editable-cell-value-wrap editRow_${index}`}
+                     onClick={this.toggleEdit.bind(this,index,true)}
+              >
+                {record.massNo ? record.massNo : `编辑团号`}
+              </div>}
+          </div>
+        )
+      }
+    ];
     return (
       <div className="appointmentTeamManage">
         {/*查询条件单选行*/}
@@ -254,6 +340,7 @@ class appointmentTeamManage extends React.Component {
           <RadioButton value={0}>申请挂团</RadioButton>
           <RadioButton value={1}>待反馈团号</RadioButton>
           <RadioButton value={2}>已反馈团号</RadioButton>
+          <RadioButton value={3}>编辑商场团号</RadioButton>
         </RadioGroup>
 
         {/*按钮行*/}
@@ -264,19 +351,27 @@ class appointmentTeamManage extends React.Component {
                   loading={isLoading}
                   disabled={selectedList.length === 0}
           >发送所选申请</Button>}
+          {/*{appointmentStatus === 1 &&*/}
+          {/*<div>*/}
+            {/*<Button type="primary"*/}
+            {/*>导出excel</Button>*/}
+            {/*<Button type="primary"*/}
+                    {/*style={{marginLeft: 10}}*/}
+            {/*>导入excel</Button>*/}
+          {/*</div>}*/}
         </div>
 
         {/*这里给出表单和分页最大宽度, 防止 table 过宽*/}
         <div className="main"
-             style={{maxWidth: 1200}}
+             style={{maxWidth: (appointmentStatus === 3 ? 500 : 1200)}}
         >
           {/*表单主体*/}
           <Table className="tableList"
                  dataSource={dataList}
-                 columns={(appointmentStatus === 0 ? columnsNoMassNo : columns)}
+                 columns={(appointmentStatus === 0 ? columnsNoMassNo : ( appointmentStatus === 3 ? columnsMallMassNo : columns ))}
                  pagination={false}
                  bordered
-                 scroll={{ y: 600, x: 1100 }}
+                 scroll={{ y: 600, x: (appointmentStatus === 3 ? 400 : 1150) }}
                  rowKey={(record, index) => `${record.id}`}
                  rowSelection={appointmentStatus === 0 ? {
                    selectedRowKeys: selectedIds,
@@ -288,7 +383,7 @@ class appointmentTeamManage extends React.Component {
           />
 
           {/*分页*/}
-          <Pagination className="tablePagination"
+          {appointmentStatus === 3 || <Pagination className="tablePagination"
                       total={pageTotal}
                       pageSize={pageSize}
                       current={pageNum}
@@ -300,7 +395,7 @@ class appointmentTeamManage extends React.Component {
                       showSizeChanger
                       pageSizeOptions={pageSizeOptions}
                       onShowSizeChange={this.changePage.bind(this)}
-          />
+          />}
         </div>
 
         {/*图片预览弹窗*/}
