@@ -46,7 +46,7 @@ class Login extends React.Component {
         // 暂时收起md5加密功能, 待后台完全发布
         // DataList.password = md5(this.props.form.getFieldValue('password'));
         fetch(
-          'http://api.maishoumiji.com/loginVerify',
+          `${window.apiUrl}/loginVerify`,
           {
             method: 'POST',
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
