@@ -127,7 +127,7 @@ class appointmentTeamManage extends React.Component {
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({mallName:v,massNo:inputValue[`input_${i}`]}),
         }).then(r => r.json()).then(r => {
-          console.log(r);
+          // console.log(r);
           if (r.status === 10000) {
             message.success(r.data);
             this.getAppointmentByStatus();
@@ -252,11 +252,24 @@ class appointmentTeamManage extends React.Component {
           >点击查看</Button>
         ),
       },
-      {title: '返程机票', dataIndex: 'airTicket', key: 'airTicket', width: 120,
+      {title: '查看机票', dataIndex: 'airTicket', key: 'airTicket', width: 160,
         render: (text, record) => (
-          <Button type="default"
-                  onClick={this.openPreview.bind(this,record.airTicket)}
-          >点击查看</Button>
+          <div>
+            {record.frenchTicket === null
+              ? <Button type="default"
+                        onClick={this.openPreview.bind(this,record.airTicket)}
+                >点击查看</Button>
+              : <div>
+                  <Button type="default"
+                          onClick={this.openPreview.bind(this,record.airTicket)}
+                  >返程</Button>
+                  <Button type="default"
+                          style={{marginLeft: 8}}
+                          onClick={this.openPreview.bind(this,record.frenchTicket)}
+                  >去程</Button>
+                </div>
+            }
+          </div>
         ),
       },
       {title: '商场', dataIndex: 'mallName', key: 'mallName', width: 140},
@@ -364,7 +377,7 @@ class appointmentTeamManage extends React.Component {
 
         {/*这里给出表单和分页最大宽度, 防止 table 过宽*/}
         <div className="main"
-             style={{maxWidth: (appointmentStatus === 3 ? 500 : 1200)}}
+             style={{maxWidth: (appointmentStatus === 3 ? 500 : 1250)}}
         >
           {/*表单主体*/}
           <Table className="tableList"
@@ -372,7 +385,7 @@ class appointmentTeamManage extends React.Component {
                  columns={(appointmentStatus === 0 ? columnsNoMassNo : ( appointmentStatus === 3 ? columnsMallMassNo : columns ))}
                  pagination={false}
                  bordered
-                 scroll={{ y: 600, x: (appointmentStatus === 3 ? 400 : 1150) }}
+                 scroll={{ y: 600, x: (appointmentStatus === 3 ? 400 : 1200) }}
                  rowKey={(record, index) => `${record.id}`}
                  rowSelection={appointmentStatus === 0 ? {
                    selectedRowKeys: selectedIds,
