@@ -36,7 +36,7 @@ class commoditiesImgList extends React.Component {
       // Loading提示文字
       loadingTxt: 'Loading...'
     };
-    // window.commoditiesImgList = this;
+    window.commoditiesImgList = this;
   }
   componentDidMount() {
     const type = window.getQueryString('type');
@@ -352,7 +352,7 @@ class commoditiesImgList extends React.Component {
         fileListData.push(fileList[i].originFileObj)
       }
       // 上传接口
-      fetch(`${window.testUrl}/skuUpimg/headImgUpload`,{
+      fetch(`${window.fandianUrl}/skuUpimg/headImgUpload`,{
         method: 'POST',
         body: formData,
       }).then(r=>r.json()).then(r=>{
@@ -393,7 +393,7 @@ class commoditiesImgList extends React.Component {
   }
   // 修改sku图片地址
   editSkuImg(type,skuId,r) {
-    fetch(`${window.testUrl}/sku/editSkuImg`,{
+    fetch(`${window.fandianUrl}/sku/editSkuImg`,{
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({

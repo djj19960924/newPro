@@ -44,7 +44,7 @@ class commoditiesCreateAndEdit extends React.Component {
       // 提交按钮loading
       submitLoading: false,
     };
-    // window.commoditiesCreateAndEdit = this;
+    window.commoditiesCreateAndEdit = this;
 
   }
   componentDidMount() {
