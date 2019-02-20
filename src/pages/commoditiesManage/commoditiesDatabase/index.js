@@ -130,7 +130,7 @@ class commoditiesDataBase extends React.Component{
       {title: '税率', dataIndex: 'taxRate', key: 'taxRate', width: 80,
         render: (text, record) => (
           // 这里调用方法判断行邮方式
-          <div>{record.taxRate ? record.taxRate : '无'}</div>
+          <div>{record.taxRate ? `${record.taxRate}%` : '无'}</div>
         ),
       },
       {title: '操作', dataIndex: '操作', key: '操作',
