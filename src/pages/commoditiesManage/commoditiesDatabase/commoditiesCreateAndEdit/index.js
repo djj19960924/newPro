@@ -223,7 +223,6 @@ class commoditiesCreateAndEdit extends React.Component {
   // 提交按钮
   submit() {
     const { type, } = this.state;
-    this.setState({submitLoading: true});
     this.submitForm(type);
     localStorage.removeItem('skuInfo')
   }
@@ -233,6 +232,7 @@ class commoditiesCreateAndEdit extends React.Component {
     this.props.form.validateFields((err, val) => {
       let the = this.state;
       if (!err) {
+        this.setState({submitLoading: true});
         // 重置数据
         let data = {};
         data = this.props.form.getFieldsValue();
@@ -257,17 +257,19 @@ class commoditiesCreateAndEdit extends React.Component {
           data.skuId = skuId;
           skuUrl = `/sku/editSku`;
         }
-        fetch(`${window.fandianUrl}${skuUrl}`, {
+        // fetch(`${window.fandianUrl}${skuUrl}`, {
+        fetch(`//192.168.3.25:8000${skuUrl}`, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(data),
         }).then(r => r.json()).then(r => {
           if (r.status === 10000) {
             message.success(`${r.msg}`);
-            this.setState({submitLoading: false})
+            this.setState({submitLoading: false});
             this.backTo();
           } else {
             message.error(`${r.msg} 错误码:${r.status}`);
+            this.setState({submitLoading: false});
           }
         });
         console.log(`上传参数: `);
@@ -299,12 +301,16 @@ class commoditiesCreateAndEdit extends React.Component {
                       labelCol={{span: 4}}
                       wrapperCol={{span: 12}}
             >
-              {getFieldDecorator('skuCode')(
+              {getFieldDecorator('skuCode', {
+                rules: [
+                  {required: true, message: '请输入商品条形码!'},
+                ],
+              })(
                 <Input style={{width: 180}}
                        placeholder="这里输入商品条形码"
                 />
               )}
-              <span style={{marginLeft: 10}}>(选填)</span>
+              {/*<span style={{marginLeft: 10}}>(选填)</span>*/}
             </FormItem>
 
             {/*商品名称*/}
@@ -413,7 +419,7 @@ class commoditiesCreateAndEdit extends React.Component {
                              min={0}
                 />
               )}
-              <span style={{marginLeft: 10}}>(未备案则先不填写)</span>
+              <span style={{marginLeft: 10}}>% (未备案则先不填写)</span>
             </FormItem>
 
             {/*采购地*/}
