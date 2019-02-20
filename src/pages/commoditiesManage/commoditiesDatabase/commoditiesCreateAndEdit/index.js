@@ -67,7 +67,7 @@ class commoditiesCreateAndEdit extends React.Component {
         for (let i in r.data) {
           // 这里的value会作为选择框的搜索字段, 所以需求同时可以根据Id或者Name查询, 则在value值中同时插入Id和Name
           // 但是注意最终传值时不要取value
-          dataList.push(<Option value={r.data[i].name} key={r.data[i].id}>{r.data[i].name}</Option>)
+          dataList.push(<Option value={r.data[i].name} key={i}>{r.data[i].name}</Option>)
         }
         this.setState({categoryList: dataList, productCategoryList: r.data});
         this.setForm(type,skuId)
@@ -205,14 +205,14 @@ class commoditiesCreateAndEdit extends React.Component {
     });
     this.props.form.setFieldsValue({
       specificationType: productCategoryList[e.key].specification,
-    })
+    });
   }
   // 返回上一个界面
   backTo() {
     // this.props.history.goBack()
     // 输入准确地址, 以保证返回按钮只能回到具体页面
     this.props.history.push('/commodities-manage/commodities-database');
-    localStorage.removeItem('skuInfo')
+    localStorage.removeItem('skuInfo');
   }
   // 进入编辑图片界面
   gotoEditImg() {
@@ -594,15 +594,16 @@ class commoditiesCreateAndEdit extends React.Component {
             >
               {getFieldDecorator('specificationType')(
                 <Input style={{width: 180}}
-                       disabled
-                       placeholder="请选择品类"
+                       // disabled
+                       placeholder="请填写规格型号"
                 />
               )}
               <span style={{marginLeft: 38,color: 'rgba(0,0,0,.85)'}}>单位 : </span>
               <Input style={{width: 180}}
-                     placeholder="请选择品类"
+                     placeholder="请填写单位"
                      value={modelNumber}
-                     disabled
+                     onChange={(e) => {this.setState({modelNumber: e.target.value})}}
+                     // disabled
               />
             </FormItem>}
 
