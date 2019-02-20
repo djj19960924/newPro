@@ -37,8 +37,6 @@ class commoditiesCreateAndEdit extends React.Component {
       unitName: '(根据品类获取)',
       // 行邮税号
       postcode: '',
-      // 单位
-      modelNumber: '',
       // Loading状态
       isLoading: false,
       // Loading提示文字
@@ -134,11 +132,11 @@ class commoditiesCreateAndEdit extends React.Component {
           // 获取单位
           let pCL = this.state.productCategoryList;
           for (let i in pCL) {
-            if (pCL[i].name === d.category) this.setState({unitName:pCL[i].modelNumber,modelNumber:r.data.modelNumber});
+            if (pCL[i].name === d.category) this.setState({unitName:pCL[i].modelNumber});
           }
           // 这里设置表单默认值
           this.props.form.setFieldsValue({
-            skuCode: d.skuCode, category: d.category, name: d.name, netWeight: d.netWeight, costPrice:d.costPrice, currencyType: d.currencyType, brand: d.brand, sugPostway: d.sugPostway, specificationType: d.specificationType, stock: d.stock, sugPrice: d.sugPrice, recordPrice: d.recordPrice, taxRate: d.taxRate, purchaseArea: d.purchaseArea
+            skuCode: d.skuCode, category: d.category, name: d.name, netWeight: d.netWeight, costPrice:d.costPrice, currencyType: d.currencyType, brand: d.brand, sugPostway: d.sugPostway, specificationType: d.specificationType, stock: d.stock, sugPrice: d.sugPrice, recordPrice: d.recordPrice, taxRate: d.taxRate, purchaseArea: d.purchaseArea,modelNumber: d.modelNumber
           });
         } else {
           // 错误,并返回错误码
@@ -201,10 +199,11 @@ class commoditiesCreateAndEdit extends React.Component {
     this.setState({
       postcode: productCategoryList[e.key].taxNumber,
       unitName: productCategoryList[e.key].modelNumber,
-      modelNumber: productCategoryList[e.key].modelNumber,
+      // modelNumber: productCategoryList[e.key].modelNumber,
     });
     this.props.form.setFieldsValue({
       specificationType: productCategoryList[e.key].specification,
+      modelNumber: productCategoryList[e.key].modelNumber,
     });
   }
   // 返回上一个界面
@@ -240,7 +239,6 @@ class commoditiesCreateAndEdit extends React.Component {
         data.originalType = originalType;
         if (this.props.form.getFieldsValue().sugPostway === 1) {
           data.postcode = postcode;
-          data.modelNumber = modelNumber;
         }
         for (let i in data) {
           // InputNumber 将输入框删除时, 值为 undefined , Input 删除时, 值为 ''
@@ -257,8 +255,7 @@ class commoditiesCreateAndEdit extends React.Component {
           data.skuId = skuId;
           skuUrl = `/sku/editSku`;
         }
-        // fetch(`${window.fandianUrl}${skuUrl}`, {
-        fetch(`//192.168.3.25:8000${skuUrl}`, {
+        fetch(`${window.fandianUrl}`, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(data),
@@ -279,7 +276,7 @@ class commoditiesCreateAndEdit extends React.Component {
   }
   render() {
     const { getFieldDecorator, getFieldValue } = this.props.form;
-    const { titleName, currencyType, postcode, isLoading, loadingTxt, imgList, previewVisible, previewImage, previewImageWH, categoryList, unitName, originalType, modelNumber, submitLoading, } = this.state;
+    const { titleName, currencyType, postcode, isLoading, loadingTxt, imgList, previewVisible, previewImage, previewImageWH, categoryList, unitName, originalType, submitLoading, } = this.state;
     return (
       <div className="commoditiesCreateAndEdit">
         {/*loading遮罩层*/}
@@ -520,12 +517,51 @@ class commoditiesCreateAndEdit extends React.Component {
                       labelCol={{span: 4}}
                       wrapperCol={{span: 15}}
             >
-              {getFieldDecorator('brand')(
+              {getFieldDecorator('brand',{
+                rules: [
+                  {required: true, message: '请输商品品牌!'},
+                ],
+              })(
                 <Input style={{width: 180}}
                        placeholder="请输入商品品牌"
                 />
               )}
-              <span style={{marginLeft: 10}}>(选填)</span>
+              {/*<span style={{marginLeft: 10}}>(选填)</span>*/}
+            </FormItem>
+
+            {/*规格型号*/}
+            <FormItem label="规格型号"
+                      colon
+                      labelCol={{span: 4}}
+                      wrapperCol={{span: 15}}
+            >
+              {getFieldDecorator('specificationType',{
+                rules: [
+                  { required: true, message: `请输入规格型号` },
+                ],
+              })(
+                <Input style={{width: 180}}
+                  // disabled
+                       placeholder="请填写规格型号"
+                />
+              )}
+            </FormItem>
+
+            {/*单位*/}
+            <FormItem label="单位"
+                      colon
+                      labelCol={{span: 4}}
+                      wrapperCol={{span: 15}}
+            >
+              {getFieldDecorator('modelNumber',{
+                rules: [
+                  { required: true, message: `请输入单位` },
+                ],
+              })(
+                <Input style={{width: 180}}
+                       placeholder="请填写单位"
+                />
+              )}
             </FormItem>
 
             {/*选择商品品牌*/}
@@ -592,32 +628,11 @@ class commoditiesCreateAndEdit extends React.Component {
               />
             </FormItem>}
 
-            {/*规格型号*/}
-            {getFieldValue('sugPostway') === 1 && <FormItem label="规格型号"
-                      colon
-                      labelCol={{span: 4}}
-                      wrapperCol={{span: 15}}
-            >
-              {getFieldDecorator('specificationType')(
-                <Input style={{width: 180}}
-                       // disabled
-                       placeholder="请填写规格型号"
-                />
-              )}
-              <span style={{marginLeft: 38,color: 'rgba(0,0,0,.85)'}}>单位 : </span>
-              <Input style={{width: 180}}
-                     placeholder="请填写单位"
-                     value={modelNumber}
-                     onChange={(e) => {this.setState({modelNumber: e.target.value})}}
-                     // disabled
-              />
-            </FormItem>}
-
             {/*建议ETK申报价*/}
-            <FormItem label="建议ETK申报价"
-                      colon
-                      labelCol={{span: 4}}
-                      wrapperCol={{span: 15}}
+            {getFieldValue('sugPostway') === 1 && <FormItem label="建议ETK申报价"
+                                                            colon
+                                                            labelCol={{span: 4}}
+                                                            wrapperCol={{span: 15}}
             >
               {getFieldDecorator('sugPrice',{
                 rules: [
@@ -631,7 +646,7 @@ class commoditiesCreateAndEdit extends React.Component {
               )}
               <span style={{marginLeft: 10}}>(¥)人民币</span>
               <span style={{marginLeft: 10}}>(选填)</span>
-            </FormItem>
+            </FormItem>}
 
             {/*提交按钮*/}
             <FormItem>
