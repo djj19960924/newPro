@@ -272,8 +272,8 @@ class commoditiesCreateAndEdit extends React.Component {
             this.setState({submitLoading: false});
           }
         });
-        console.log(`上传参数: `);
-        console.log(data)
+        // console.log(`上传参数: `);
+        // console.log(data)
       }
     })
   }
@@ -387,7 +387,7 @@ class commoditiesCreateAndEdit extends React.Component {
                              precision={4}
                 />
               )}
-              <span style={{marginLeft: 10}}>毛重: {getFieldValue('netWeight') ? (getFieldValue('netWeight') + 0.03).toFixed(4) : ''} kg</span>
+              <span style={{marginLeft: 10}}>毛重: {typeof(getFieldValue('netWeight')) === `number` ? (getFieldValue('netWeight') + 0.03).toFixed(4) : ''} kg</span>
             </FormItem>
 
             {/*数量 / 库存*/}
