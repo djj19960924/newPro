@@ -255,7 +255,7 @@ class commoditiesCreateAndEdit extends React.Component {
           data.skuId = skuId;
           skuUrl = `/sku/editSku`;
         }
-        fetch(`${window.fandianUrl}`, {
+        fetch(`${window.fandianUrl}${skuUrl}`, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(data),
@@ -387,6 +387,59 @@ class commoditiesCreateAndEdit extends React.Component {
               <span style={{marginLeft: 10}}>毛重: {typeof(getFieldValue('netWeight')) === `number` ? (getFieldValue('netWeight') + 0.03).toFixed(4) : ''} kg</span>
             </FormItem>
 
+            {/*选择商品品牌*/}
+            <FormItem label="商品品牌"
+                      colon
+                      labelCol={{span: 4}}
+                      wrapperCol={{span: 15}}
+            >
+              {getFieldDecorator('brand',{
+                rules: [
+                  {required: true, message: '请输商品品牌!'},
+                ],
+              })(
+                <Input style={{width: 180}}
+                       placeholder="请输入商品品牌"
+                />
+              )}
+              {/*<span style={{marginLeft: 10}}>(选填)</span>*/}
+            </FormItem>
+
+            {/*规格型号*/}
+            <FormItem label="规格型号"
+                      colon
+                      labelCol={{span: 4}}
+                      wrapperCol={{span: 15}}
+            >
+              {getFieldDecorator('specificationType',{
+                rules: [
+                  { required: true, message: `请输入规格型号` },
+                ],
+              })(
+                <Input style={{width: 180}}
+                  // disabled
+                       placeholder="请填写规格型号"
+                />
+              )}
+            </FormItem>
+
+            {/*单位*/}
+            <FormItem label="单位"
+                      colon
+                      labelCol={{span: 4}}
+                      wrapperCol={{span: 15}}
+            >
+              {getFieldDecorator('modelNumber',{
+                rules: [
+                  { required: true, message: `请输入单位` },
+                ],
+              })(
+                <Input style={{width: 180}}
+                       placeholder="请填写单位"
+                />
+              )}
+            </FormItem>
+
             {/*数量 / 库存*/}
             <FormItem label="数量 / 库存"
                       colon
@@ -509,59 +562,6 @@ class commoditiesCreateAndEdit extends React.Component {
               )}
               <span style={{marginLeft: 10}}>(¥)人民币</span>
               <span style={{marginLeft: 10}}>(未备案则先不填写)</span>
-            </FormItem>
-
-            {/*选择商品品牌*/}
-            <FormItem label="商品品牌"
-                      colon
-                      labelCol={{span: 4}}
-                      wrapperCol={{span: 15}}
-            >
-              {getFieldDecorator('brand',{
-                rules: [
-                  {required: true, message: '请输商品品牌!'},
-                ],
-              })(
-                <Input style={{width: 180}}
-                       placeholder="请输入商品品牌"
-                />
-              )}
-              {/*<span style={{marginLeft: 10}}>(选填)</span>*/}
-            </FormItem>
-
-            {/*规格型号*/}
-            <FormItem label="规格型号"
-                      colon
-                      labelCol={{span: 4}}
-                      wrapperCol={{span: 15}}
-            >
-              {getFieldDecorator('specificationType',{
-                rules: [
-                  { required: true, message: `请输入规格型号` },
-                ],
-              })(
-                <Input style={{width: 180}}
-                  // disabled
-                       placeholder="请填写规格型号"
-                />
-              )}
-            </FormItem>
-
-            {/*单位*/}
-            <FormItem label="单位"
-                      colon
-                      labelCol={{span: 4}}
-                      wrapperCol={{span: 15}}
-            >
-              {getFieldDecorator('modelNumber',{
-                rules: [
-                  { required: true, message: `请输入单位` },
-                ],
-              })(
-                <Input style={{width: 180}}
-                       placeholder="请填写单位"
-                />
-              )}
             </FormItem>
 
             {/*选择商品品牌*/}
