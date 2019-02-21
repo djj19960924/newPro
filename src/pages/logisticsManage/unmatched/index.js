@@ -62,7 +62,7 @@ class orderUnmatched extends React.Component{
   }
   doit () {
     var elt = document.getElementById('table');
-    var wb = XLSX$Consts.utils.table_to_book(elt, {sheet:"Sheet JS"});
+    var wb = XLSX$Consts.utils.table_to_book(elt, {raw: true, sheet:"Sheet JS"});
     XLSX$Consts.writeFile(wb, (new Date()+'未匹配订单.xlsx'));
   }
   onSelectChange = (selectedRowKeys) => {
