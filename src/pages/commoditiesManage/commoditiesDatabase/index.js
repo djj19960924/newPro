@@ -208,7 +208,7 @@ class commoditiesDataBase extends React.Component{
           <RadioButton value={0}>全部</RadioButton>
           <RadioButton value={1}>已备案</RadioButton>
           <RadioButton value={2}>未备案</RadioButton>
-          <RadioButton value={3}>导出未备案模板</RadioButton>
+          <RadioButton value={3}>导出备案模板</RadioButton>
         </RadioGroup>
         {/*新增按钮 excel导出 搜索框*/}
         <div className="searchLine">
