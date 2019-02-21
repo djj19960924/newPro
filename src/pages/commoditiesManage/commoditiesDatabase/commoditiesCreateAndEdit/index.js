@@ -443,52 +443,6 @@ class commoditiesCreateAndEdit extends React.Component {
               )}
             </FormItem>
 
-            {/*数量 / 库存*/}
-            <FormItem label="数量 / 库存"
-                      colon
-                      labelCol={{span: 4}}
-                      wrapperCol={{span: 15}}
-            >
-              {getFieldDecorator('stock')(
-                <InputNumber style={{width: 180}}
-                             placeholder="请输入数量"
-                             min={0}
-                />
-              )}
-              {/*暂不显示单位*/}
-              {/*<span style={{marginLeft: 10}}>单位: {unitName}</span>*/}
-              <span style={{marginLeft: 10}}>(选填)</span>
-            </FormItem>
-
-            {/*税率*/}
-            <FormItem label="税率"
-                      colon
-                      labelCol={{span: 4}}
-                      wrapperCol={{span: 15}}
-            >
-              {getFieldDecorator('taxRate')(
-                <InputNumber style={{width: 180}}
-                             placeholder="请输入税率"
-                             min={0}
-                />
-              )}
-              <span style={{marginLeft: 10}}>% (未备案则先不填写)</span>
-            </FormItem>
-
-            {/*采购地*/}
-            <FormItem label="采购地"
-                      colon
-                      labelCol={{span: 4}}
-                      wrapperCol={{span: 15}}
-            >
-              {getFieldDecorator('purchaseArea')(
-                <Input style={{width: 180}}
-                       placeholder="请输入采购地"
-                />
-              )}
-              <span style={{marginLeft: 10}}>(选填)</span>
-            </FormItem>
-
             {/*成本价 / 采购价*/}
             <FormItem label="成本价/采购价"
                       colon
@@ -583,7 +537,52 @@ class commoditiesCreateAndEdit extends React.Component {
                 />
               )}
               <span style={{marginLeft: 10}}>(¥)人民币</span>
-              <span style={{marginLeft: 10}}>(未备案则先不填写)</span>
+            </FormItem>
+
+            {/*数量 / 库存*/}
+            <FormItem label="数量 / 库存"
+                      colon
+                      labelCol={{span: 4}}
+                      wrapperCol={{span: 15}}
+            >
+              {getFieldDecorator('stock')(
+                <InputNumber style={{width: 180}}
+                             placeholder="请输入数量"
+                             min={0}
+                />
+              )}
+              {/*暂不显示单位*/}
+              {/*<span style={{marginLeft: 10}}>单位: {unitName}</span>*/}
+              <span style={{marginLeft: 10}}>(选填)</span>
+            </FormItem>
+
+            {/*税率*/}
+            <FormItem label="税率"
+                      colon
+                      labelCol={{span: 4}}
+                      wrapperCol={{span: 15}}
+            >
+              {getFieldDecorator('taxRate')(
+                <InputNumber style={{width: 180}}
+                             placeholder="请输入税率"
+                             min={0}
+                />
+              )}
+              <span style={{marginLeft: 10}}>%</span>
+            </FormItem>
+
+            {/*采购地*/}
+            <FormItem label="采购地"
+                      colon
+                      labelCol={{span: 4}}
+                      wrapperCol={{span: 15}}
+            >
+              {getFieldDecorator('purchaseArea')(
+                <Input style={{width: 180}}
+                       placeholder="请输入采购地"
+                />
+              )}
+              <span style={{marginLeft: 10}}>(选填)</span>
             </FormItem>
 
             {/*选择商品品牌*/}
