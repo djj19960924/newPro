@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Form, Select, Input, InputNumber, message, Icon, Modal, } from 'antd';
+import { Button, Form, Select, Input, InputNumber, message, Icon, Modal, Radio, } from 'antd';
 import {inject, observer} from 'mobx-react/index';
 
 import './index.less';
@@ -101,6 +101,7 @@ class commoditiesCreateAndEdit extends React.Component {
         type: type,
         skuId: parseInt(skuId),
       });
+      // fetch(`//192.168.1.6:8000/sku/selectEditSkuBySkuId`, {
       fetch(`${window.fandianUrl}/sku/selectEditSkuBySkuId`, {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -136,7 +137,7 @@ class commoditiesCreateAndEdit extends React.Component {
           }
           // 这里设置表单默认值
           this.props.form.setFieldsValue({
-            skuCode: d.skuCode, category: d.category, name: d.name, netWeight: d.netWeight, costPrice:d.costPrice, currencyType: d.currencyType, brand: d.brand, sugPostway: d.sugPostway, specificationType: d.specificationType, stock: d.stock, sugPrice: d.sugPrice, recordPrice: d.recordPrice, taxRate: d.taxRate, purchaseArea: d.purchaseArea,modelNumber: d.modelNumber
+            skuCode: d.skuCode, category: d.category, name: d.name, netWeight: d.netWeight, costPrice:d.costPrice, currencyType: d.currencyType, brand: d.brand, sugPostway: d.sugPostway, specificationType: d.specificationType, stock: d.stock, sugPrice: d.sugPrice, recordPrice: d.recordPrice, taxRate: d.taxRate, purchaseArea: d.purchaseArea,modelNumber: d.modelNumber,isRecord: d.isRecord
           });
         } else {
           // 错误,并返回错误码
@@ -277,6 +278,8 @@ class commoditiesCreateAndEdit extends React.Component {
   render() {
     const { getFieldDecorator, getFieldValue } = this.props.form;
     const { titleName, currencyType, postcode, isLoading, loadingTxt, imgList, previewVisible, previewImage, previewImageWH, categoryList, unitName, originalType, submitLoading, } = this.state;
+    const RadioButton = Radio.Button;
+    const RadioGroup = Radio.Group;
     return (
       <div className="commoditiesCreateAndEdit">
         {/*loading遮罩层*/}
@@ -546,6 +549,25 @@ class commoditiesCreateAndEdit extends React.Component {
                 <Option value={4}>韩币</Option>
                 <Option value={5}>港币</Option>
               </Select>
+            </FormItem>
+
+            {/*是否已备案*/}
+            <FormItem label="是否已备案"
+                      colon
+                      labelCol={{span: 4}}
+                      wrapperCol={{span: 15}}
+            >
+              {getFieldDecorator('isRecord',{
+                rules: [
+                  {required: true},
+                ],
+                initialValue: 0
+              })(
+                <RadioGroup buttonStyle="solid">
+                  <RadioButton value={0}>未备案</RadioButton>
+                  <RadioButton value={1}>已备案</RadioButton>
+                </RadioGroup>
+              )}
             </FormItem>
 
             {/*备案价*/}

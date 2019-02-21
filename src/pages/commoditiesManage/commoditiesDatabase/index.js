@@ -16,7 +16,7 @@ class commoditiesDataBase extends React.Component{
       // 搜索备案类型
       record: 0,
       pageNum: 1,
-      pageSize: 10,
+      pageSize: 30,
       pageTotal: 0,
       // 每页显示数据条数选择框
       pageSizeOptions: [`10`,`20`,`30`,`40`],
@@ -31,33 +31,40 @@ class commoditiesDataBase extends React.Component{
   }
   // 获取表单列表
   getSku(searchValue = this.state.searchValue,record = this.state.record,pageNum = this.state.pageNum,pageSize = this.state.pageSize) {
+    if (record === 3) record = 2;
+    // fetch(`//192.168.1.6:8000/sku/getSku`, {
     fetch(`${window.fandianUrl}/sku/getSku`, {
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       body:`choice=${record}&name=${searchValue}&pageNum=${pageNum}&pageSize=${pageSize}`,
     }).then(r => r.json()).then(r => {
-      // console.log(r.data.list)
-      if (r.status === 10000) {
-        this.setState({
-          dataList: r.data.list,
-          pageNum: r.data.pageNum,
-          pageSize: r.data.pageSize,
-          pageTotal: r.data.total,
-          pageSizeOptions: [`10`,`20`,`30`,(r.data.total> 40 ? r.data.total.toString() : `40`)]
-        })
-      } else if (r.status === 10001) {
-        message.warn(`${r.msg}`);
-        this.setState({dataList: []})
+      if (r.status) {
+        if (r.status === 10000) {
+          this.setState({
+            dataList: r.data.list,
+            pageNum: r.data.pageNum,
+            pageSize: r.data.pageSize,
+            pageTotal: r.data.total,
+            pageSizeOptions: [`10`,`20`,`30`,(r.data.total> 40 ? r.data.total.toString() : `40`)]
+          })
+        } else if (r.status === 10001) {
+          message.warn(`${r.msg}`);
+          this.setState({dataList: []})
+        } else {
+          message.error(`${r.msg} 状态码:${r.status}`);
+          this.setState({dataList: []})
+        }
       } else {
-        message.warn(`${r.msg} 状态码:${r.status}`);
-        this.setState({dataList: []})
+        message.error(`后端数据错误`)
       }
-    })
+    }).catch(r => {
+      message.error(`商品列表接口调取失败`)
+    });
   }
   // 导出excel
   exportExcel () {
     var elt = document.getElementById('tableList');
-    var wb = XLSX$Consts.utils.table_to_book(elt, {sheet:"Sheet JS"});
+    var wb = XLSX$Consts.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
     // console.log(wb);
     XLSX$Consts.writeFile(wb, `商品资料库.xlsx`);
   }
@@ -75,11 +82,28 @@ class commoditiesDataBase extends React.Component{
   // 更改是否已备案条件触发
   changeRecord(e) {
     // console.log(e.target.value)
+    // 参数项设为 undefined 时, 将使用函数自带默认参数
+    this.getSku(undefined, e.target.value, 1, 30)
     this.setState({
       record: e.target.value,
-    });
-    // 参数项设为 undefined 时, 将使用函数自带默认参数
-    this.getSku(undefined, e.target.value)
+      pageNum: 1,
+      pageSize: 30,
+    })
+  }
+  // 调取根据skuId修改备案价以及备案状态接口
+  updateSkuBySkuId() {
+    fetch(`//192.168.1.6:8000/sku/updateSkuBySkuId`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        // skuId: data.skuId,
+        // recordPrice: data.recordPrice,
+        // isRecord: data.isRecord
+        // skuCode: data.skuCode
+      }),
+    }).then(r => r.json()).then(r => {
+      console.log(r)
+    })
   }
   // 更改当前页或每页显示条数
   changePage(n,s) {
@@ -100,7 +124,7 @@ class commoditiesDataBase extends React.Component{
   }
   render() {
     const RadioButton = Radio.Button, RadioGroup = Radio.Group;
-    const { dataList, searchValue, pageNum, pageSize, pageTotal, pageSizeOptions, } = this.state;
+    const { dataList, searchValue, pageNum, pageSize, pageTotal, pageSizeOptions, record, } = this.state;
     const Search = Input.Search;
     // 表单头
     const columns = [
@@ -121,7 +145,7 @@ class commoditiesDataBase extends React.Component{
         ),
       },
       {title: '数量', dataIndex: 'stock', key: 'stock', width: 80},
-      {title: 'etk备案价(¥)', dataIndex: 'recordPrice', key: 'recordPrice', width: 120,
+      {title: '备案价(¥)', dataIndex: 'recordPrice', key: 'recordPrice', width: 120,
         render: (text, record) => (
           // 这里调用方法判断行邮方式
           <div>{record.recordPrice ? record.recordPrice : '无'}</div>
@@ -146,6 +170,32 @@ class commoditiesDataBase extends React.Component{
         ),
       }
     ];
+    const columnsForExport = [
+      // 非必填字段于表中隐藏, 不对应实际dataIndex, 只填写必须部分
+      {title: `商家编码`, dataIndex: `商家编码`, key: `商家编码`, width: 80},
+      {title: `商品名称`, dataIndex: `name`, key: `name`, width: 80},
+      // 即备案价, 返回以后用于导入, 覆盖原有备案价
+      {title: `成本价`, dataIndex: `recordPrice`, key: `recordPrice`, width: 80},
+      {title: `服务费`, dataIndex: `服务费`, key: `服务费`, width: 50},
+      {title: `税率`, dataIndex: `税率`, key: `税率`, width: 80},
+      {title: `库存地`, dataIndex: `库存地`, key: `库存地`, width: 50},
+      {title: `商品货号`, dataIndex: `skuCode`, key: `skuCode`, width: 50},
+      {title: `HS编码`, dataIndex: `HS编码`, key: `HS编码`, width: 50},
+      {title: `计量单位`, dataIndex: `计量单位`, key: `计量单位`, width: 80},
+      {title: `法定单位`, dataIndex: `法定单位`, key: `法定单位`, width: 50},
+      {title: `第二单位`, dataIndex: `第二单位`, key: `第二单位`, width: 50},
+      {title: `商品规格`, dataIndex: `specificationType`, key: `specificationType`, width: 80},
+      {title: `品牌`, dataIndex: `brand`, key: `brand`, width: 80},
+      {title: `行邮税号`, dataIndex: `行邮税号`, key: `行邮税号`, width: 80},
+      {title: `行邮税名称`, dataIndex: `行邮税名称`, key: `行邮税名称`, width: 80},
+      {title: `净重`, dataIndex: `netWeight`, key: `netWeight`, width: 80},
+      {title: `毛重`, dataIndex: `grossWeight`, key: `grossWeight`, width: 80},
+      {title: `原产国`, dataIndex: `原产国`, key: `原产国`, width: 80},
+      {title: `生产厂家`, dataIndex: `brand`, key: `brandOrigin`, width: 80},
+      {title: `商检备案号`, dataIndex: `商检备案号`, key: `商检备案号`, width: 50},
+      {title: `这行不能修改任何名称`, dataIndex: `这行不能修改任何名称`, key: `这行不能修改任何名称`},
+      {title: `这一列请勿修改任何数据`, dataIndex: `skuId`, key: `skuId`, width: 80},
+    ];
     return (
       <div className="dataBase">
         {/*查询条件单选行*/}
@@ -157,6 +207,7 @@ class commoditiesDataBase extends React.Component{
           <RadioButton value={0}>全部</RadioButton>
           <RadioButton value={1}>已备案</RadioButton>
           <RadioButton value={2}>未备案</RadioButton>
+          <RadioButton value={3}>导出未备案模板</RadioButton>
         </RadioGroup>
         {/*新增按钮 excel导出 搜索框*/}
         <div className="searchLine">
@@ -184,10 +235,10 @@ class commoditiesDataBase extends React.Component{
                id="tableList"
                ref={'commoditiesTable'}
                dataSource={dataList}
-               columns={columns}
+               columns={record === 3 ? columnsForExport : columns}
                pagination={false}
                bordered
-               scroll={{ y: 600, x: 1300 }}
+               scroll={{ y: 500, x: 1300 }}
                // style={{maxWidth: 1200}}
                rowKey={(record, index) => `id_${index}`}
         />
@@ -199,7 +250,7 @@ class commoditiesDataBase extends React.Component{
                     showTotal={(total, range) =>
                       `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`
                     }
-                    style={{float:'right',marginRight:'20px',marginTop:'10px'}}
+                    style={{float:'right',marginRight:20,marginTop:10,marginBottom: 20}}
                     onChange={this.changePage.bind(this)}
                     showSizeChanger
                     pageSizeOptions={pageSizeOptions}
