@@ -194,7 +194,8 @@ class commoditiesDataBase extends React.Component{
       {title: `生产厂家`, dataIndex: `brand`, key: `brandOrigin`, width: 80},
       {title: `商检备案号`, dataIndex: `商检备案号`, key: `商检备案号`, width: 50},
       {title: `这行不能修改任何名称`, dataIndex: `这行不能修改任何名称`, key: `这行不能修改任何名称`},
-      {title: `这一列请勿修改任何数据`, dataIndex: `skuId`, key: `skuId`, width: 80},
+      // 暂不显示skuId
+      // {title: `这一列请勿修改任何数据`, dataIndex: `skuId`, key: `skuId`, width: 80},
     ];
     return (
       <div className="dataBase">
