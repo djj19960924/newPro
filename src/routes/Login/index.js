@@ -63,7 +63,7 @@ class Login extends React.Component {
               this.addCookie();
               // 登陆以后进入的页面
               // this.props.history.push('/');
-              this.props.history.push('/logistics-manage/appointment-info');
+              this.props.history.push('/');
             } else {
               message.error(r.message);
             }

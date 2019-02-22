@@ -1,5 +1,5 @@
 import React from 'react';
-import {Radio, Table, Pagination, Button, Input, message, Modal, } from 'antd';
+import {Radio, Table, Pagination, Button, Input, message, Modal, Icon, } from 'antd';
 import XLSX from 'xlsx';
 import moment from 'moment';
 import PageLoading from '@components/pageLoading/';
@@ -14,6 +14,12 @@ class commoditiesDataBase extends React.Component{
       importModalVisible: false,
       excelDataListOrigin: [],
       excelDataList: [],
+      errorList: [],
+      // 自增用序列号
+      Num: 0,
+      failList: [],
+      failListNum: [],
+      successList: [],
       // 表单数据
       dataList: [],
       // 搜索字段
@@ -21,11 +27,12 @@ class commoditiesDataBase extends React.Component{
       // 搜索备案类型
       record: 0,
       pageNum: 1,
-      pageSize: 30,
+      pageSize: 100,
       pageTotal: 0,
       // 每页显示数据条数选择框
-      pageSizeOptions: [`10`,`20`,`30`,`40`],
+      pageSizeOptions: [`50`,`100`,`200`,`300`],
       loadingTxt: ``,
+      isSubmit: false,
     };
     window.commoditiesDataBase = this;
     window.moment = moment;
@@ -60,25 +67,33 @@ class commoditiesDataBase extends React.Component{
           type: 'binary'
         });
         // 这里对list进行复制, 并且于此改写形式
-        let excelDataListOrigin = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]),excelDataList = [];
-        for (let v of excelDataListOrigin) {
-          excelDataList.push({
-            skuId: v.商家编码,
-            skuCode: v.商品货号,
-            // 净重: "0.044"
-            // 品牌: "圣罗兰"
-            // 商品名称: "YSL 方管口红 19#"
-            // 商品规格: "3.8g-3.8ml"
-            // 商品货号: "3365440269330"
-            // 商家编码: "1342"
-            // 毛重: "0.074"
-            // 生产厂家: "圣罗兰"
-          })
+        let excelDataListOrigin = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]),excelDataList = [],errorList = [];
+        for (let i in excelDataListOrigin) {
+          // i + 2 = 表单内行数号
+          let id = excelDataListOrigin[i].商家编码, code = excelDataListOrigin[i].商品货号, price = excelDataListOrigin[i].成本价;
+          if (!id || !code || !price) {
+            errorList.push({
+              Num: parseInt(i),
+              errValue: `${!id ? `商家编码 ` : ``}${!code ? `商品货号 ` : ``}${!price ? `成本价` : ``}`,
+            })
+          } else {
+            excelDataList.push({
+              skuId: id,
+              skuCode: code,
+              recordPrice: price,
+              Num: parseInt(i),
+            });
+          }
         }
-        console.log(excelDataListOrigin);
+        // console.log(`这里显示表单内源数据: `);
+        // console.log(excelDataListOrigin);
+        // console.log(`这里显示处理后数据: `);
+        // console.log(excelDataList);
         this.setState({
           importModalVisible: true,
           excelDataListOrigin: excelDataListOrigin,
+          excelDataList: excelDataList,
+          errorList: errorList,
         })
       };
       // 执行reader进行加载
@@ -110,7 +125,7 @@ class commoditiesDataBase extends React.Component{
             pageNum: r.data.pageNum,
             pageSize: r.data.pageSize,
             pageTotal: r.data.total,
-            pageSizeOptions: [`10`,`20`,`30`,(r.data.total> 40 ? r.data.total.toString() : `40`)]
+            pageSizeOptions: [`50`,`100`,`200`,(r.data.total> 40 ? r.data.total.toString() : `300`)]
           })
         } else if (r.status === 10001) {
           message.warn(`${r.msg}`);
@@ -128,10 +143,10 @@ class commoditiesDataBase extends React.Component{
   }
   // 导出excel
   exportExcel () {
+    const { record, } = this.state;
     var elt = document.getElementById('tableList');
     var wb = XLSX.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
-    // console.log(wb);
-    XLSX.writeFile(wb, `商品资料库.xlsx`);
+    XLSX.writeFile(wb, (record === 3 ? `商品资料库备案表.xlsx` : `商品资料库.xlsx`));
   }
   // 判断行邮方式
   postWay(q) {
@@ -146,9 +161,8 @@ class commoditiesDataBase extends React.Component{
   }
   // 更改是否已备案条件触发
   changeRecord(e) {
-    // console.log(e.target.value)
     // 参数项设为 undefined 时, 将使用函数自带默认参数
-    this.getSku(undefined, e.target.value, 1, 30)
+    this.getSku(undefined, e.target.value, 1, 100)
     this.setState({
       record: e.target.value,
       pageNum: 1,
@@ -157,18 +171,47 @@ class commoditiesDataBase extends React.Component{
   }
   // 调取根据skuId修改备案价以及备案状态接口
   updateSkuBySkuId() {
-    fetch(`//192.168.1.6:8000/sku/updateSkuBySkuId`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        // skuId: data.skuId,
-        // recordPrice: data.recordPrice,
-        // isRecord: data.isRecord
-        // skuCode: data.skuCode
-      }),
-    }).then(r => r.json()).then(r => {
-      console.log(r)
-    })
+    const { Num, excelDataList, successList, failList, failListNum, } = this.state;
+    if (Num < excelDataList.length) {
+      this.setState({isSubmit: true});
+      fetch(`${window.fandianUrl}/sku/updateSkuBySkuId`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          skuId: excelDataList[Num].skuId,
+          skuCode: excelDataList[Num].skuCode,
+          recordPrice: excelDataList[Num].recordPrice,
+          isRecord: 1,
+        }),
+      }).then(r => r.json()).then(r => {
+        if (r.status) {
+          if (r.status === 10000) {
+            successList.push(excelDataList[Num]);
+            // 后端处理数据成功
+            this.setState({Num: (Num + 1), successList: successList,}, () => {
+              this.updateSkuBySkuId();
+            })
+          } else {
+            // 后端处理数据失败
+            message.error(`${r.msg}, 错误码: ${r.status}`);
+            let dataObj = Object.assign({},excelDataList[Num]);
+            dataObj.msg = r.msg;
+            dataObj.status = r.status;
+            failList.push(dataObj);
+            failListNum.push(dataObj.Num + 2);
+            this.setState({Num: (Num + 1), failList: failList, failListNum: failListNum,}, () => {
+              this.updateSkuBySkuId();
+            })
+          }
+        } else {
+          message.error(`后端数据类型错误`)
+        }
+      }).catch(() => {
+        message.error(`更改备案价接口调取失败`)
+      })
+    } else {
+      this.setState({isSubmit: false});
+    }
   }
   // 更改当前页或每页显示条数
   changePage(n,s) {
@@ -178,7 +221,7 @@ class commoditiesDataBase extends React.Component{
     });
     this.getSku(undefined,undefined,n,s)
   }
-  // 跳转
+  // 跳转至编辑界面
   toCE(type,skuId) {
     // console.log(record);
     // 使用query传值
@@ -189,7 +232,7 @@ class commoditiesDataBase extends React.Component{
   }
   render() {
     const RadioButton = Radio.Button, RadioGroup = Radio.Group;
-    const { dataList, searchValue, pageNum, pageSize, pageTotal, pageSizeOptions, record, loadingTxt, importModalVisible, input } = this.state;
+    const { dataList, searchValue, pageNum, pageSize, pageTotal, pageSizeOptions, record, loadingTxt, importModalVisible, input, errorList, isSubmit, failList, failListNum, excelDataList, successList, } = this.state;
     const Search = Input.Search;
     // 表单头
     const columns = [
@@ -271,17 +314,33 @@ class commoditiesDataBase extends React.Component{
 
         {/*导入弹窗*/}
         <Modal title="导入"
+               className="importModal"
                visible={importModalVisible}
-               // maskClosable
-               // onOk={}
+               confirmLoading={!!isSubmit}
+               onOk={this.updateSkuBySkuId.bind(this)}
                onCancel={
-                 () => { loadingTxt ?
+                 () => { isSubmit ?
                    message.warn(`文件导入中,请勿关闭`)
                    : this.setState({importModalVisible: false},() => { input.value = null; })
                  }
                }
         >
-          <p>所选文件名: {!!input.value ? input.files[0].name : ``}</p>
+          <p>所选文件名: {!!input.value ? input.files[0].name : null}</p>
+          {isSubmit ? <p><Icon type="loading" /> <span style={{color:`red`}}>正在上传数据中... 请勿关闭页面!!!</span></p> : null}
+          <p>{`当前上传条数 ${successList.length}/${excelDataList.length}, 成功${successList.length}条, 失败${failList.length}条`}</p>
+          <p style={{color: `red`}}>请注意备份本页报错数据, 并根据报错提示检查备案表内数据</p>
+          <div className="failList">
+            <p>{`excel表内出错数据行数: ${failListNum}`}</p>
+            {failList.map((item,i) => (
+              <p key={i}>{`excel表内出错数据行数: ${item.Num+2}, 出错原因: ${item.msg}, 错误码: ${item.status}`}</p>
+            ))}
+          </div>
+          {errorList.length > 0 ? <p>当前excel表格存在数据漏填, 如继续导入, 以下行数数据则不会进行处理</p> : ``}
+          <div className="errorList">
+            {errorList.map((item,i) => (
+              <p key={i}>{`excel表内出错数据行数: ${item.Num+2}, 出错数据值: ${item.errValue}`}</p>
+            ))}
+          </div>
         </Modal>
 
         {/*查询条件单选行*/}
@@ -298,10 +357,11 @@ class commoditiesDataBase extends React.Component{
 
         {/*新增按钮 excel导出 搜索框*/}
         <div className="searchLine">
+          {record !== 3 &&
           <Button type="primary"
                   className="createNew"
                   onClick={this.toCE.bind(this,'create',null)}
-          >新增商品</Button>
+          >新增商品</Button>}
           <Button type="primary"
                   className="exportExcelBtn"
                   onClick={this.exportExcel.bind(this)}
@@ -330,7 +390,6 @@ class commoditiesDataBase extends React.Component{
                pagination={false}
                bordered
                scroll={{ y: 500, x: 1300 }}
-               // style={{maxWidth: 1200}}
                rowKey={(record, index) => `id_${index}`}
         />
 
