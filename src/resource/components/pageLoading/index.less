@@ -1,0 +1,38 @@
+.pageLoading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+
+  .loadingTxt {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    color: #fff;
+    z-index: 10000;
+    font-size: 40px;
+    line-height: 40px;
+
+    .loadingIcon {
+      display: block;
+      float: left;
+    }
+    .loadingMain {
+      display: block;
+      float: left;
+      margin-left: 10px;
+    }
+  }
+
+  .shadowLayer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    background: rgba(0,0,0,.3);
+  }
+}

@@ -1,7 +1,8 @@
 import React from 'react';
-import {Radio, Table, Pagination, Button, Link, Input, message, } from 'antd';
-import XLSX$Consts from 'xlsx';
+import {Radio, Table, Pagination, Button, Input, message, Modal, } from 'antd';
+import XLSX from 'xlsx';
 import moment from 'moment';
+import PageLoading from '@components/pageLoading/';
 
 import './index.less';
 
@@ -9,6 +10,10 @@ class commoditiesDataBase extends React.Component{
   constructor(props) {
     super(props);
     this.state = {
+      input: null,
+      importModalVisible: false,
+      excelDataListOrigin: [],
+      excelDataList: [],
       // 表单数据
       dataList: [],
       // 搜索字段
@@ -20,17 +25,77 @@ class commoditiesDataBase extends React.Component{
       pageTotal: 0,
       // 每页显示数据条数选择框
       pageSizeOptions: [`10`,`20`,`30`,`40`],
+      loadingTxt: ``,
     };
     window.commoditiesDataBase = this;
     window.moment = moment;
   }
+  // 这里需要在组件即将加载时优先生成input
+  componentWillMount() {
+    // 创建导入用input
+    let input = document.createElement(`input`);
+    input.type = `file`;
+    input.className = "inputImport";
+    input.onchange = this.showModal.bind(this);
+    this.setState({input: input});
+  }
+
   // 默认读取表格
   componentDidMount() {
     // 默认载入表格数据
-    this.getSku()
+    this.getSku();
+  }
+  // 打开弹窗
+  showModal(e) {
+    const { input } = this.state;
+    let item = e.target.files[0];
+    // 格式校验
+    if (item.type === `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
+      || item.type === `application/vnd.ms-excel`) {
+      let reader = new FileReader();
+      // 定义reader的加载方法, 于加载完成后触发
+      reader.onload = (e) => {
+        let data = e.target.result,wb;
+        wb = XLSX.read(data, {
+          type: 'binary'
+        });
+        // 这里对list进行复制, 并且于此改写形式
+        let excelDataListOrigin = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]),excelDataList = [];
+        for (let v of excelDataListOrigin) {
+          excelDataList.push({
+            skuId: v.商家编码,
+            skuCode: v.商品货号,
+            // 净重: "0.044"
+            // 品牌: "圣罗兰"
+            // 商品名称: "YSL 方管口红 19#"
+            // 商品规格: "3.8g-3.8ml"
+            // 商品货号: "3365440269330"
+            // 商家编码: "1342"
+            // 毛重: "0.074"
+            // 生产厂家: "圣罗兰"
+          })
+        }
+        console.log(excelDataListOrigin);
+        this.setState({
+          importModalVisible: true,
+          excelDataListOrigin: excelDataListOrigin,
+        })
+      };
+      // 执行reader进行加载
+      reader.readAsBinaryString(e.target.files[0]);
+    } else {
+      message.warn(`所选文件格式不正确`);
+      this.setState({importModalVisible: false},() => { input.value = null; })
+    }
+  }
+  // 寻找 input 进行点击
+  clickIT() {
+    const { input, } = this.state;
+    input.click();
   }
   // 获取表单列表
   getSku(searchValue = this.state.searchValue,record = this.state.record,pageNum = this.state.pageNum,pageSize = this.state.pageSize) {
+    // 状态管理, 这里的 3 请求条件等同于 2
     if (record === 3) record = 2;
     // fetch(`//192.168.1.6:8000/sku/getSku`, {
     fetch(`${window.fandianUrl}/sku/getSku`, {
@@ -64,9 +129,9 @@ class commoditiesDataBase extends React.Component{
   // 导出excel
   exportExcel () {
     var elt = document.getElementById('tableList');
-    var wb = XLSX$Consts.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
+    var wb = XLSX.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
     // console.log(wb);
-    XLSX$Consts.writeFile(wb, `商品资料库.xlsx`);
+    XLSX.writeFile(wb, `商品资料库.xlsx`);
   }
   // 判断行邮方式
   postWay(q) {
@@ -124,7 +189,7 @@ class commoditiesDataBase extends React.Component{
   }
   render() {
     const RadioButton = Radio.Button, RadioGroup = Radio.Group;
-    const { dataList, searchValue, pageNum, pageSize, pageTotal, pageSizeOptions, record, } = this.state;
+    const { dataList, searchValue, pageNum, pageSize, pageTotal, pageSizeOptions, record, loadingTxt, importModalVisible, input } = this.state;
     const Search = Input.Search;
     // 表单头
     const columns = [
@@ -172,7 +237,9 @@ class commoditiesDataBase extends React.Component{
     ];
     const columnsForExport = [
       // 非必填字段于表中隐藏, 不对应实际dataIndex, 只填写必须部分
-      {title: `商家编码`, dataIndex: `商家编码`, key: `商家编码`, width: 80},
+      // {title: `商家编码`, dataIndex: `商家编码`, key: `商家编码`, width: 80},
+      // 商家编码暂存skuId
+      {title: `商家编码`, dataIndex: `skuId`, key: `skuId`, width: 80},
       {title: `商品名称`, dataIndex: `name`, key: `name`, width: 80},
       // 即备案价, 返回以后用于导入, 覆盖原有备案价
       {title: `成本价`, dataIndex: `recordPrice`, key: `recordPrice`, width: 80},
@@ -199,6 +266,24 @@ class commoditiesDataBase extends React.Component{
     ];
     return (
       <div className="dataBase">
+        {/*加载*/}
+        {loadingTxt && <PageLoading loadingTxt={loadingTxt}/>}
+
+        {/*导入弹窗*/}
+        <Modal title="导入"
+               visible={importModalVisible}
+               // maskClosable
+               // onOk={}
+               onCancel={
+                 () => { loadingTxt ?
+                   message.warn(`文件导入中,请勿关闭`)
+                   : this.setState({importModalVisible: false},() => { input.value = null; })
+                 }
+               }
+        >
+          <p>所选文件名: {!!input.value ? input.files[0].name : ``}</p>
+        </Modal>
+
         {/*查询条件单选行*/}
         <RadioGroup defaultValue={0}
                     buttonStyle="solid"
@@ -210,27 +295,32 @@ class commoditiesDataBase extends React.Component{
           <RadioButton value={2}>未备案</RadioButton>
           <RadioButton value={3}>导出备案模板</RadioButton>
         </RadioGroup>
+
         {/*新增按钮 excel导出 搜索框*/}
         <div className="searchLine">
           <Button type="primary"
                   className="createNew"
                   onClick={this.toCE.bind(this,'create',null)}
           >新增商品</Button>
-          {/*<Button type="primary">excel导入</Button>*/}
           <Button type="primary"
-                  className="exportExcel"
+                  className="exportExcelBtn"
                   onClick={this.exportExcel.bind(this)}
           >excel导出</Button>
+          {record === 3 &&
+          <Button type="primary"
+                  onClick={this.clickIT.bind(this)}
+                  className="importExcelBtn"
+          >excel导入更新备案价</Button>}
           <Search className="searchInput"
                   placeholder="请输入关键字进行搜索"
                   value={searchValue}
-                  // onSearch={this.onSearch.bind(this)}
                   // 根据条件搜索
                   onSearch={(e) => this.getSku(e)}
                   // 保存搜索框值
                   onChange={(e) => this.setState({searchValue: e.target.value})}
           />
         </div>
+
         {/*表单主体*/}
         <Table className="tableList"
                id="tableList"
@@ -243,6 +333,7 @@ class commoditiesDataBase extends React.Component{
                // style={{maxWidth: 1200}}
                rowKey={(record, index) => `id_${index}`}
         />
+
         {/*分页*/}
         <Pagination className="tablePagination"
                     total={pageTotal}
