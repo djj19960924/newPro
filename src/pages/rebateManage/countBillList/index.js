@@ -107,7 +107,7 @@ class countBillList extends React.Component{
         } else {
           message.error(`${r.data} 错误码: ${r.status}`)
         }
-      }).catch(r=>{
+      }).catch(()=>{
         message.error(`请求发送失败`)
       })
     } else {

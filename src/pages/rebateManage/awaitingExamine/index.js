@@ -125,7 +125,7 @@ class awaitingExamine extends React.Component {
           message.error(`后端数据错误`)
         }
       }
-    }).catch(r => {
+    }).catch(() => {
       message.error(`根据国家调取国家剩余小票数量接口失败`)
     })
   }
@@ -166,7 +166,7 @@ class awaitingExamine extends React.Component {
           message.error(`后端数据错误`)
         }
       }
-    }).catch(r => {
+    }).catch(() => {
       message.error(`获取商场列表接口调取失败`)
     });
   }
@@ -192,7 +192,7 @@ class awaitingExamine extends React.Component {
           message.error(`后端数据错误`)
         }
       }
-    }).catch(r => {
+    }).catch(() => {
       message.error(`获取品牌列表接口调取失败`)
     });
     this.getTicketList(this, val);
@@ -223,7 +223,7 @@ class awaitingExamine extends React.Component {
           message.error(`后端数据错误`)
         }
       }
-    }).catch(r => {
+    }).catch(() => {
       message.error(`根据商场获取小票接口调取失败`)
     });
   }
@@ -348,7 +348,7 @@ class awaitingExamine extends React.Component {
                 message.error(`后端数据错误`)
               }
             }
-          }).catch(r => {
+          }).catch(() => {
             message.error(`通过审核接口调取失败`)
           })
         }
@@ -418,7 +418,7 @@ class awaitingExamine extends React.Component {
             message.error(`后端数据错误`)
           }
         }
-      }).catch(r => {
+      }).catch(() => {
         message.error(`驳回小票接口调取失败`)
       })
     } else if (this.state.reason === null) {

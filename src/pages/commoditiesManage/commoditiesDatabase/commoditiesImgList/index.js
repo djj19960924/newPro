@@ -375,7 +375,7 @@ class commoditiesImgList extends React.Component {
         } else {
           message.error(`${r.msg} 错误码为:${r.code}`)
         }
-      }).catch(r => {
+      }).catch(() => {
         message.error('图片上传接口调取失败!');
         // 关闭loading
         this.setState({ isLoading: false, loadingTxt: 'Loading...' });
@@ -409,7 +409,7 @@ class commoditiesImgList extends React.Component {
       } else {
         message.error(`${r.msg} 错误码为:${r.status}`)
       }
-    }).catch(r=>{
+    }).catch(() => {
       message.error('图片修改接口调取失败!')
     })
   }

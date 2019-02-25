@@ -31,11 +31,17 @@ class airportTransfer extends React.Component {
   // 获取接送机用户信息
   // infoType: 0 - 送机, 1 - 接机
   getAirportInfo(infoType = this.state.infoType, pageNum=this.state.pageNum, pageSize=this.state.pageSize) {
+    const { startTime, endTime, } = this.state;
     this.setState({tableIsLoading: {spinning:true,tip:`正在加载中...`}});
     fetch(`${window.apiUrl}/airportManagement/${infoType === 0 ? `getAirportDropInfo` : `getAirportPickInfo`}`,{
       method:"post",
-      headers:{'Content-Type': 'application/x-www-form-urlencoded'},
-      body:`pageNum=${pageNum}&pageSize=${pageSize}`
+      headers:{'Content-Type': 'application/json'},
+      body:JSON.stringify({
+        pageNum: pageNum,
+        pageSize: pageSize,
+        startTime: startTime ? `${moment(startTime).format('YYYY-MM-DD')} 00:00:00` : null,
+        endTime: endTime ? `${moment(endTime).format('YYYY-MM-DD')} 23:59:59` : null,
+      }),
     }).then(r => r.json()).then(r => {
       if (r.status) {
         if (r.status === 10000) {
@@ -47,7 +53,7 @@ class airportTransfer extends React.Component {
           })
         } else { message.error(`${r.msg}, 错误码:${r.status}`); this.resetTableDataList(); }
       } else { message.error(`后端数据错误`); this.resetTableDataList(); }
-    }).catch(r => { message.error(`前端接口调用错误: 获取送机用户信息接口调取失败`); this.resetTableDataList(); })
+    }).catch(() => { message.error(`前端接口调用错误: 获取用户信息接口调取失败`); this.resetTableDataList(); })
   }
 
   // 复位数据
@@ -129,13 +135,13 @@ class airportTransfer extends React.Component {
                   onClick={this.getAirportInfo.bind(this,infoType,undefined,undefined)}
           >查询</Button>
         </div>
-        <div style={{maxWidth: 1250}}>
+        <div style={{maxWidth: 1320}}>
           <Table className="tableList"
                  dataSource={tableDataList}
                  columns={infoType === 0 ? dropColumns : pickColumns }
                  pagination={false}
                  bordered
-                 scroll={{ x:1200, y: 500 }}
+                 scroll={{ x:1300, y: 500 }}
                  rowKey={(record, index) => `id_${index}`}
                  loading={tableIsLoading}
           />

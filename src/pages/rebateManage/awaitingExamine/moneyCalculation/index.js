@@ -110,7 +110,7 @@ class MoneyCalculation extends React.Component {
           message.error(`后端数据错误`)
         }
       }
-    }).catch(r => {
+    }).catch(() => {
       message.error(`根据品牌,日期获取返点率接口调取失败`)
     })
   }

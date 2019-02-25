@@ -137,7 +137,7 @@ class commoditiesDataBase extends React.Component{
       } else {
         message.error(`后端数据错误`)
       }
-    }).catch(r => {
+    }).catch(() => {
       message.error(`商品列表接口调取失败`)
     });
   }

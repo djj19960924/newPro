@@ -180,7 +180,7 @@ class importExcel extends React.Component{
             }
           }
         }
-      }).catch(r => {
+      }).catch(() => {
         message.error(`新增商品资料接口调取失败`)
       })
     } else {
