@@ -9,11 +9,15 @@ import orderMatched from '@pages/logisticsManage/matched/';
 import orderUnmatched from '@pages/logisticsManage/unmatched/';
 // 预约
 import appointmentInfo from '@pages/logisticsManage/appointmentInfo/';
+// 接送机
+import airportTransfer from '@pages/logisticsManage/airportTransfer/';
 // 返点
 import adoptExaminePaid from '@pages/rebateManage/adoptExaminePaid/';
 import adoptExamineUnpaid from '@pages/rebateManage/adoptExamineUnpaid/';
-import awaitingExamine from '@pages/rebateManage/awaitingExamine/';
 import rejectExamine from '@pages/rebateManage/rejectExamine/';
+// 审核小票
+import awaitingExamine from '@pages/rebateManage/awaitingExamine/';
+// 设置返点
 import setRebate from '@pages/rebateManage/setRebate/';
 import countBillList from '@pages/rebateManage/countBillList/';
 import appointmentTeamManage from '@pages/rebateManage/appointmentTeamManage/';
@@ -41,6 +45,7 @@ class ContentMain extends React.Component{
           <Route exact path="/logistics-manage/unmatched" component={orderUnmatched} />
           <Route exact path="/logistics-manage/matched" component={orderMatched} />
           <Route exact path="/logistics-manage/appointment-info" component={appointmentInfo} />
+          <Route exact path="/logistics-manage/airport-transfer" component={airportTransfer} />
           <Route exact path="/rebate-manage/awaiting-examine" component={awaitingExamine} />
           <Route exact path="/rebate-manage/adopt-examine-unpaid" component={adoptExamineUnpaid} />
           <Route exact path="/rebate-manage/adopt-examine-paid" component={adoptExaminePaid} />

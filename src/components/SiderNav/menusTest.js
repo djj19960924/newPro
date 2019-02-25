@@ -24,6 +24,11 @@ const menus = [
         icon: 'solution',
         key: '/logistics-manage/appointment-info',
       },
+      {
+        title: '预约接送机',
+        icon: 'exclamation-circle',
+        key: '/logistics-manage/airport-transfer'
+      }
     ]
   },
   {
