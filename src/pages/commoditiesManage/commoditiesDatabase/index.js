@@ -210,6 +210,7 @@ class commoditiesDataBase extends React.Component{
         message.error(`更改备案价接口调取失败`)
       })
     } else {
+      message.success(`导入成功, 如需继续, 请重新选择excel文件`);
       this.setState({isSubmit: false});
     }
   }
@@ -232,7 +233,7 @@ class commoditiesDataBase extends React.Component{
   }
   render() {
     const RadioButton = Radio.Button, RadioGroup = Radio.Group;
-    const { dataList, searchValue, pageNum, pageSize, pageTotal, pageSizeOptions, record, loadingTxt, importModalVisible, input, errorList, isSubmit, failList, failListNum, excelDataList, successList, } = this.state;
+    const { dataList, searchValue, pageNum, pageSize, pageTotal, pageSizeOptions, record, loadingTxt, importModalVisible, input, errorList, isSubmit, failList, failListNum, excelDataList, successList, Num, } = this.state;
     const Search = Input.Search;
     // 表单头
     const columns = [
@@ -321,7 +322,17 @@ class commoditiesDataBase extends React.Component{
                onCancel={
                  () => { isSubmit ?
                    message.warn(`文件导入中,请勿关闭`)
-                   : this.setState({importModalVisible: false},() => { input.value = null; })
+                   : this.setState({
+                     // 复位数据
+                     importModalVisible: false,
+                     excelDataListOrigin: [],
+                     excelDataList: [],
+                     errorList: [],
+                     Num: 0,
+                     failList: [],
+                     failListNum: [],
+                     successList: [],
+                   },() => { input.value = null; })
                  }
                }
         >
