@@ -119,8 +119,8 @@ class awaitingExamine extends React.Component {
           countryLeftTicket: dataObj
         });
       } else {
-        if (r.retcode) {
-          message.error(`${r.retcode.msg}, 状态码为:${r.retcode.status}`)
+        if (r.status) {
+          message.error(`${r.msg}, 状态码为:${r.status}`)
         } else {
           message.error(`后端数据错误`)
         }
