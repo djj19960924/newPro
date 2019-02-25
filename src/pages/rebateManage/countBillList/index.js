@@ -83,8 +83,8 @@ class countBillList extends React.Component{
       data.reciptIdList = selectedIds;
       for (let v of selectedList) {
         data.list.push({
-          consumeDate: v.consumeDate,
-          consumeMoney: `${v.consumeMoney}`,
+          // consumeDate: v.consumeDate,
+          // consumeMoney: `${v.consumeMoney}`,
           passport: v.passport,
           passportNum: v.passportNum,
           pictureUrl: v.pictureUrl,
@@ -131,8 +131,8 @@ class countBillList extends React.Component{
           >点击查看</Button>
         ),
       },
-      {title: '小票购买时间', dataIndex: 'consumeDate', key: 'consumeDate', width: 140},
-      {title: '小票金额', dataIndex: 'consumeMoney', key: 'consumeMoney', width: 140},
+      // {title: '小票购买时间', dataIndex: 'consumeDate', key: 'consumeDate', width: 140},
+      // {title: '小票金额', dataIndex: 'consumeMoney', key: 'consumeMoney', width: 140},
     ];
     const { tableDataList, verifyStatus, previewVisible, previewImage, isLoading, selectedList, selectedIds,} = this.state;
     return (
