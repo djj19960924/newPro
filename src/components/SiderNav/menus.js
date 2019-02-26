@@ -66,6 +66,11 @@ const menus = [
         icon: 'snippets',
         key: '/rebate-manage/appointment-team-manage',
       },
+      {
+        title: '预约接送机',
+        icon: 'exclamation-circle',
+        key: '/logistics-manage/airport-transfer'
+      }
     ]
   },
   {
