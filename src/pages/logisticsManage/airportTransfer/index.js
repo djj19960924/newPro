@@ -34,7 +34,7 @@ class airportTransfer extends React.Component {
   getAirportInfo(infoType = this.state.infoType, pageNum=this.state.pageNum, pageSize=this.state.pageSize,) {
     const { startTime, endTime, } = this.state;
     this.setState({tableIsLoading: {spinning:true,tip:`正在加载中...`}});
-    fetch(`${window.apiUrl}/airportManagement/${infoType === 0 ? `getAirportDropInfo` : `getAirportPickInfo`}`,{
+    fetch(`${window.fandianUrl}/airportManagement/${infoType === 0 ? `getAirportDropInfo` : `getAirportPickInfo`}`,{
       method:"POST",
       headers:{'Content-Type': 'application/json'},
       body:JSON.stringify({
