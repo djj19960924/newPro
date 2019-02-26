@@ -15,6 +15,7 @@ import airportTransfer from '@pages/logisticsManage/airportTransfer/';
 import adoptExaminePaid from '@pages/rebateManage/adoptExaminePaid/';
 import adoptExamineUnpaid from '@pages/rebateManage/adoptExamineUnpaid/';
 import rejectExamine from '@pages/rebateManage/rejectExamine/';
+import updateQRCode from '@pages/rebateManage/updateQRCode/';
 // 审核小票
 import awaitingExamine from '@pages/rebateManage/awaitingExamine/';
 // 设置返点
@@ -53,6 +54,7 @@ class ContentMain extends React.Component{
           <Route exact path="/rebate-manage/set-rebate" component={setRebate} />
           <Route exact path="/rebate-manage/count-bill-list" component={countBillList} />
           <Route exact path="/rebate-manage/appointment-team-manage" component={appointmentTeamManage} />
+          <Route exact path="/rebate-manage/update-QR-code" component={updateQRCode} />
           <Route exact path="/commodities-manage/commodities-database" component={commoditiesDataBase} />
           <Route exact path="/commodities-manage/commodities-database/create-and-edit" component={commoditiesCreateAndEdit} />
           <Route exact path="/commodities-manage/commodities-database/commodities-img-list" component={commoditiesImgList} />

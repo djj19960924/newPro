@@ -10,6 +10,11 @@ const menus = [
     key: '/logistics-manage',
     subs: [
       {
+        title: '预约上门打包',
+        icon: 'solution',
+        key: '/logistics-manage/appointment-info',
+      },
+      {
         title: '未匹配订单',
         icon: 'file-unknown',
         key: '/logistics-manage/unmatched'
@@ -18,11 +23,6 @@ const menus = [
         title: '已匹配订单',
         icon: 'file-done',
         key: '/logistics-manage/matched'
-      },
-      {
-        title: '预约信息',
-        icon: 'solution',
-        key: '/logistics-manage/appointment-info',
       },
       {
         title: '预约接送机',
@@ -37,9 +37,19 @@ const menus = [
     key: '/rebate-manage',
     subs: [
       {
+        title: '预约挂团',
+        icon: 'snippets',
+        key: '/rebate-manage/appointment-team-manage',
+      },
+      {
         title: '设置返点',
         icon:'edit',
         key: '/rebate-manage/set-rebate'
+      },
+      {
+        title: '对账管理',
+        icon: 'diff',
+        key: '/rebate-manage/count-bill-list',
       },
       {
         title: '待审核',
@@ -47,12 +57,12 @@ const menus = [
         key: '/rebate-manage/awaiting-examine',
       },
       {
-        title: '通过-未返款',
+        title: '待返款',
         icon: 'meh',
         key: '/rebate-manage/adopt-examine-unpaid',
       },
       {
-        title: '通过-已返款',
+        title: '已返款',
         icon: 'smile',
         key: '/rebate-manage/adopt-examine-paid',
       },
@@ -62,14 +72,9 @@ const menus = [
         key: '/rebate-manage/reject-examine',
       },
       {
-        title: '审核通过对账表',
-        icon: 'diff',
-        key: '/rebate-manage/count-bill-list',
-      },
-      {
-        title: '预约挂团管理',
-        icon: 'snippets',
-        key: '/rebate-manage/appointment-team-manage',
+        title: '上传日上二维码',
+        icon: 'qrcode',
+        key: '/rebate-manage/update-QR-code',
       },
     ]
   },
