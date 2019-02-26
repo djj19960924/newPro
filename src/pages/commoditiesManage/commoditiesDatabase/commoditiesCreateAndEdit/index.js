@@ -26,7 +26,7 @@ class commoditiesCreateAndEdit extends React.Component {
       // 预览图片宽高比
       previewImageWH: [],
       // 商品进货价货币类型
-      currencyType: 0,
+      costType: 0,
       // 商品原价货币类型
       originalType: 0,
       // 品类列表
@@ -89,8 +89,9 @@ class commoditiesCreateAndEdit extends React.Component {
           imgList: JSON.parse(localStorage.newImgList).imgList
         },()=>{this.showImg()})
       }
-      if (!!localStorage.skuInfo) {
-        this.props.form.setFieldsValue(JSON.parse(localStorage.skuInfo))
+      if (!!localStorage.skuInfo && !!!!localStorage.skuInfoState) {
+        this.props.form.setFieldsValue(JSON.parse(localStorage.skuInfo));
+        this.setState(JSON.parse(localStorage.skuInfoState));
       }
     } else if (type === 'edit') {
       // 打开loading
@@ -128,7 +129,6 @@ class commoditiesCreateAndEdit extends React.Component {
           // 图片存入 state 供读取使用
           this.setState({
             imgList: dataList,
-            postcode: d.postcode
           });
           // 获取单位
           let pCL = this.state.productCategoryList;
@@ -137,8 +137,9 @@ class commoditiesCreateAndEdit extends React.Component {
           }
           // 这里设置表单默认值
           this.props.form.setFieldsValue({
-            skuCode: d.skuCode, category: d.category, name: d.name, netWeight: d.netWeight, costPrice:d.costPrice, currencyType: d.currencyType, brand: d.brand, sugPostway: d.sugPostway, specificationType: d.specificationType, stock: d.stock, sugPrice: d.sugPrice, recordPrice: d.recordPrice, taxRate: d.taxRate, purchaseArea: d.purchaseArea,modelNumber: d.modelNumber,isRecord: d.isRecord
+            skuCode: d.skuCode, category: d.category, name: d.name, netWeight: d.netWeight, costPrice:d.costPrice, brand: d.brand, sugPostway: d.sugPostway, specificationType: d.specificationType, stock: d.stock, sugPrice: d.sugPrice, recordPrice: d.recordPrice, taxRate: d.taxRate, purchaseArea: d.purchaseArea,modelNumber: d.modelNumber,isRecord: d.isRecord,originalPrice: d.originalPrice,customsCode: d.customsCode,
           });
+          this.setState({costType: d.costType,originalType: d.originalType,postcode: d.postcode,});
         } else {
           // 错误,并返回错误码
           message.error(`${r.msg} 错误码:${r.status}`);
@@ -213,22 +214,30 @@ class commoditiesCreateAndEdit extends React.Component {
     // 输入准确地址, 以保证返回按钮只能回到具体页面
     this.props.history.push('/commodities-manage/commodities-database');
     localStorage.removeItem('skuInfo');
+    localStorage.removeItem('skuInfoState');
   }
   // 进入编辑图片界面
   gotoEditImg() {
     const { type, skuId } = this.state;
+    let the = this.state;
     localStorage.skuInfo = JSON.stringify(this.props.form.getFieldsValue());
+    localStorage.skuInfoState = JSON.stringify({
+      costType: the.costType,
+      originalType: the.originalType,
+      postcode: the.postcode,
+    });
     this.props.history.push(`/commodities-manage/commodities-database/commodities-img-list?type=${type}&skuId=${skuId}`);
   }
   // 提交按钮
   submit() {
     const { type, } = this.state;
     this.submitForm(type);
-    localStorage.removeItem('skuInfo')
+    localStorage.removeItem('skuInfo');
+    localStorage.removeItem('skuInfoState');
   }
   // 上传表单
   submitForm(type) {
-    const { skuId, currencyType, postcode, imgList, originalType, modelNumber, } = this.state;
+    const { skuId, costType, postcode, imgList, originalType, } = this.state;
     this.props.form.validateFields((err, val) => {
       let the = this.state;
       if (!err) {
@@ -236,7 +245,7 @@ class commoditiesCreateAndEdit extends React.Component {
         // 重置数据
         let data = {};
         data = this.props.form.getFieldsValue();
-        data.currencyType = currencyType;
+        data.costType = costType;
         data.originalType = originalType;
         if (this.props.form.getFieldsValue().sugPostway === 1) {
           data.postcode = postcode;
@@ -277,7 +286,7 @@ class commoditiesCreateAndEdit extends React.Component {
   }
   render() {
     const { getFieldDecorator, getFieldValue } = this.props.form;
-    const { titleName, currencyType, postcode, isLoading, loadingTxt, imgList, previewVisible, previewImage, previewImageWH, categoryList, unitName, originalType, submitLoading, } = this.state;
+    const { titleName, costType, postcode, isLoading, loadingTxt, imgList, previewVisible, previewImage, previewImageWH, categoryList, originalType, submitLoading, } = this.state;
     const RadioButton = Radio.Button;
     const RadioGroup = Radio.Group;
     return (
@@ -460,12 +469,12 @@ class commoditiesCreateAndEdit extends React.Component {
                 />
               )}
               {/*选择货币类型*/}
-              <Select className="currencyTypeSelect"
+              <Select className="costTypeSelect"
                       style={{width: 100,marginLeft: 10}}
                       // 当存在 defaultValue 时, 则无需 placeholder
-                      defaultValue={0}
-                      Value={currencyType}
-                      onChange={(v) => this.setState({currencyType: v})}
+                      // defaultValue={costType}
+                      value={costType}
+                      onChange={(v) => this.setState({costType: v})}
               >
                 <Option value={0}>人民币</Option>
                 <Option value={1}>美元</Option>
@@ -492,9 +501,10 @@ class commoditiesCreateAndEdit extends React.Component {
               <Select className="originalType"
                       style={{width: 100,marginLeft: 10}}
                 // 当存在 defaultValue 时, 则无需 placeholder
-                      defaultValue={0}
-                      Value={originalType}
-                      onChange={(v) => this.setState({currencyType: v})}
+                //       defaultValue={0}
+                //       defaultValue={costType}
+                      value={originalType}
+                      onChange={(v) => this.setState({originalType: v})}
               >
                 <Option value={0}>人民币</Option>
                 <Option value={1}>美元</Option>
