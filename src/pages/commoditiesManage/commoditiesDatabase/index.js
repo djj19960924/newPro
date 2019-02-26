@@ -377,7 +377,7 @@ class commoditiesDataBase extends React.Component{
                   className="exportExcelBtn"
                   onClick={this.exportExcel.bind(this)}
           >excel导出</Button>
-          {record === 3 &&
+          {(record === 3 && (window.isLocalTest || window.isServerTest)) &&
           <Button type="primary"
                   onClick={this.clickIT.bind(this)}
                   className="importExcelBtn"

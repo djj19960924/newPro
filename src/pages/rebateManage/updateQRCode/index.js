@@ -1,6 +1,5 @@
 import React from 'react';
 import { message, Button, Upload, Icon, Modal, } from 'antd';
-import PageLoading from '@components/pageLoading/';
 import './index.less';
 
 class updateQRCode extends React.Component {

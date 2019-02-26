@@ -21,12 +21,15 @@ import 'antd/dist/antd.less';
 import App from './App';
 
 // 正式版:
-// window.apiUrl = 'http://api.maishoumiji.com';
-// window.fandianUrl = 'http://fandian.maishoumiji.com';
+window.apiUrl = 'http://api.maishoumiji.com';
+window.fandianUrl = 'http://fandian.maishoumiji.com';
 
 // 测试版:
-window.apiUrl = window.fandianUrl = 'http://testapi.maishoumiji.com';
-document.getElementsByTagName("title")[0].innerText = `后台管理系统 - 测试版`;
+window.isServerTest = true; // 服务端测试版开口
+if (window.isServerTest) {
+  window.apiUrl = window.fandianUrl = 'http://testapi.maishoumiji.com';
+  document.getElementsByTagName("title")[0].innerText = `后台管理系统 - 测试版`;
+}
 
 ReactDOM.render(
   <HashRouter>

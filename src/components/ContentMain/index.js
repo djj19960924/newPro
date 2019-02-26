@@ -60,7 +60,7 @@ class ContentMain extends React.Component{
           <Route exact path="/commodities-manage/commodities-database/commodities-img-list" component={commoditiesImgList} />
           <Route exact path="/" component={Home} />
           {/*开发人员专用管理路由*/}
-          {window.isTest && <Route exact path="/developer-pages/import-excel" component={importExcel} />}
+          {window.isLocalTest && <Route exact path="/developer-pages/import-excel" component={importExcel} />}
           {/*这里可以配置404 not found 页面*/}
           <Route component={page404} />
         </Switch>
