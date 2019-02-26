@@ -71,6 +71,11 @@ const menus = [
         icon: 'frown',
         key: '/rebate-manage/reject-examine',
       },
+      {
+        title: '上传日上二维码',
+        icon: 'qrcode',
+        key: '/rebate-manage/update-QR-code',
+      },
     ]
   },
   {
