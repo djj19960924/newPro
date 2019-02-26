@@ -156,7 +156,7 @@ class airportTransfer extends React.Component {
           <RadioButton value={1}>送机用户信息</RadioButton>
         </RadioGroup>
         <div className="datePickerLine">
-          <span>起始时间: </span>
+          <span>开始时间: </span>
           <DatePicker value={startTime}
                       onChange={(date, dateString) => this.setState({startTime: date})}
                       disabledDate={this.disabledStartTime.bind(this)}
