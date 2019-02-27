@@ -210,7 +210,7 @@ class commoditiesDataBase extends React.Component{
         message.error(`更改备案价接口调取失败`)
       })
     } else {
-      message.success(`导入成功, 如需继续, 请重新选择excel文件`);
+      message.success(`导入结束, 如需继续, 请重新选择excel文件`);
       this.setState({isSubmit: false});
     }
   }

@@ -22,7 +22,7 @@ class countBillList extends React.Component{
       pageTotal: 0,
       pageNum: 1,
       pageSize: 2000,
-      pageSizeOptions: [`30`,`50`,`80`,`100`],
+      // pageSizeOptions: [`30`,`50`,`80`,`100`],
       // 图片弹窗
       previewVisible: false,
       previewImage: '',
