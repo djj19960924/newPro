@@ -23,11 +23,6 @@ const menusLocalTest = [
         title: '已匹配订单',
         icon: 'file-done',
         key: '/logistics-manage/matched'
-      },
-      {
-        title: '预约接送机',
-        icon: 'exclamation-circle',
-        key: '/logistics-manage/airport-transfer'
       }
     ]
   },
@@ -79,6 +74,18 @@ const menusLocalTest = [
     ]
   },
   {
+    title: '服务预定管理',
+    icon: 'tags',
+    key: '/reservation-service',
+    subs: [
+      {
+        title: '预约接送机',
+        icon: 'exclamation-circle',
+        key: '/reservation-service/airport-transfer'
+      }
+    ]
+  },
+  {
     title: '商品管理',
     icon: 'shop',
     key: '/commodities-manage',
@@ -90,6 +97,7 @@ const menusLocalTest = [
       }
     ]
   },
+  // 本地专用
   {
     title: '开发人员专用',
     icon: 'like',

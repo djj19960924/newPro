@@ -43,10 +43,11 @@ class ContentMain extends React.Component{
     return(
       <div style={{backgroundColor: '#eee', width: '100%', height: '100%', padding: '10px'}}>
         <Switch>
+          {/*物流管理*/}
           <Route exact path="/logistics-manage/unmatched" component={orderUnmatched} />
           <Route exact path="/logistics-manage/matched" component={orderMatched} />
           <Route exact path="/logistics-manage/appointment-info" component={appointmentInfo} />
-          <Route exact path="/logistics-manage/airport-transfer" component={airportTransfer} />
+          {/*返点管理*/}
           <Route exact path="/rebate-manage/awaiting-examine" component={awaitingExamine} />
           <Route exact path="/rebate-manage/adopt-examine-unpaid" component={adoptExamineUnpaid} />
           <Route exact path="/rebate-manage/adopt-examine-paid" component={adoptExaminePaid} />
@@ -55,6 +56,9 @@ class ContentMain extends React.Component{
           <Route exact path="/rebate-manage/count-bill-list" component={countBillList} />
           <Route exact path="/rebate-manage/appointment-team-manage" component={appointmentTeamManage} />
           <Route exact path="/rebate-manage/update-QR-code" component={updateQRCode} />
+          {/*服务预定管理*/}
+          <Route exact path="/reservation-service/airport-transfer" component={airportTransfer} />
+          {/*商品管理*/}
           <Route exact path="/commodities-manage/commodities-database" component={commoditiesDataBase} />
           <Route exact path="/commodities-manage/commodities-database/create-and-edit" component={commoditiesCreateAndEdit} />
           <Route exact path="/commodities-manage/commodities-database/commodities-img-list" component={commoditiesImgList} />
