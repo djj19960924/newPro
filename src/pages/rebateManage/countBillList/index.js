@@ -53,7 +53,10 @@ class countBillList extends React.Component{
       if (r.status === 10000) {
         if (r.data) {
           if (this.state.pageSize >= r.data.total) {
-            this.setState({tableDataList: r.data ? r.data.list : [], pageTotal: r.data.total})
+            for (let i in r.data.list) {
+              r.data.list[i].id = (parseInt(i)+1)
+            }
+            this.setState({tableDataList: r.data.list, pageTotal: r.data.total})
           } else {
             this.setState({pageSize: r.data.total}, () => {
               this.getReciptByVerify()
@@ -135,6 +138,7 @@ class countBillList extends React.Component{
     const RadioButton = Radio.Button, RadioGroup = Radio.Group;
     // 表单头
     const columns = [
+      {title: `序号`, dataIndex: `id`, key: 'id', width: 50},
       {title: '小票照片', dataIndex: 'pictureUrl', key: 'pictureUrl', width: 140,
         render: (text, record) => (
           <Button onClick={this.openPreview.bind(this,record.pictureUrl)}
