@@ -1,5 +1,5 @@
 import React from 'react';
-import { Radio, Table, Button, Modal, message, } from 'antd';
+import { Radio, Table, Button, Modal, message, Pagination, } from 'antd';
 // import XLSX from 'xlsx';
 // xlsx转blob
 // import '@js/FileSaver.min.js';
@@ -19,8 +19,10 @@ class countBillList extends React.Component{
       // 选中条目ID
       selectedIds: [],
       // 分页
+      pageTotal: 0,
       pageNum: 1,
-      pageSize: 20,
+      pageSize: 2000,
+      pageSizeOptions: [`30`,`50`,`80`,`100`],
       // 图片弹窗
       previewVisible: false,
       previewImage: '',
@@ -43,20 +45,23 @@ class countBillList extends React.Component{
   }
   // 根据发送状态获取对账表
   getReciptByVerify(n = this.state.verifyStatus, pageNum = this.state.pageNum, pageSize = this.state.pageSize) {
-    // fetch(`${window.apiUrl}/sku/getReciptByVerify`, {
     fetch(`${window.fandianUrl}/recipt/getReciptByVerify`,{
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       body:`verifyStatus=${n}&pageNum=${pageNum}&pageSize=${pageSize}`,
     }).then(r => r.json()).then(r => {
       if (r.status === 10000) {
-        this.setState({
-          tableDataList: r.data ? r.data.list : []
-        })
+        if (this.state.pageSize >= r.data.total) {
+          this.setState({tableDataList: r.data ? r.data.list : []})
+        } else {
+          this.setState({pageSize: r.data.total},() => {
+            this.getReciptByVerify()
+          })
+        }
       } else {
-        message(`${r.msg} 错误码: ${r.status}`)
+        if (r.state) { message.error(`${r.msg}, 错误码: ${r.status}`) } else { message.error(`后端数据错误`) }
       }
-    })
+    }).catch(()=>{message.error(`前端错误: 对账表信息接口调取失败`)})
   }
   // 打开弹窗
   openPreview(url) {
@@ -134,7 +139,7 @@ class countBillList extends React.Component{
       // {title: '小票购买时间', dataIndex: 'consumeDate', key: 'consumeDate', width: 140},
       // {title: '小票金额', dataIndex: 'consumeMoney', key: 'consumeMoney', width: 140},
     ];
-    const { tableDataList, verifyStatus, previewVisible, previewImage, isLoading, selectedList, selectedIds,} = this.state;
+    const { tableDataList, verifyStatus, previewVisible, previewImage, isLoading, selectedList, selectedIds, pageTotal, pageSize, pageNum, pageSizeOptions} = this.state;
     return (
       <div className="countBillList">
         {/*查询条件单选行*/}
@@ -183,6 +188,20 @@ class countBillList extends React.Component{
                scroll={{ y: 600, x: 800 }}
                rowKey={(record, index) => `${record.reciptId}`}
         />
+        {/*分页*/}
+        {/*<Pagination className="tablePagination"*/}
+                    {/*total={pageTotal}*/}
+                    {/*pageSize={pageSize}*/}
+                    {/*current={pageNum}*/}
+                    {/*showTotal={(total, range) =>*/}
+                      {/*`${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`*/}
+                    {/*}*/}
+                    {/*style={{float:'right',marginRight:20,marginTop:10,marginBottom: 20}}*/}
+                    {/*// onChange={this.changePage.bind(this)}*/}
+                    {/*showSizeChanger*/}
+                    {/*pageSizeOptions={pageSizeOptions}*/}
+                    {/*// onShowSizeChange={this.changePage.bind(this)}*/}
+        {/*/>*/}
       </div>
     )
   }
