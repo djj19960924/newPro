@@ -51,17 +51,25 @@ class countBillList extends React.Component{
       body:`verifyStatus=${n}&pageNum=${pageNum}&pageSize=${pageSize}`,
     }).then(r => r.json()).then(r => {
       if (r.status === 10000) {
-        if (this.state.pageSize >= r.data.total) {
-          this.setState({tableDataList: r.data ? r.data.list : []})
+        if (r.data) {
+          if (this.state.pageSize >= r.data.total) {
+            this.setState({tableDataList: r.data ? r.data.list : [], pageTotal: r.data.total})
+          } else {
+            this.setState({pageSize: r.data.total}, () => {
+              this.getReciptByVerify()
+            })
+          }
         } else {
-          this.setState({pageSize: r.data.total},() => {
-            this.getReciptByVerify()
-          })
+          message.warn(`${r.msg}`);
+          this.setState({tableDataList: [],pageTotal: 0})
         }
       } else {
-        if (r.state) { message.error(`${r.msg}, 错误码: ${r.status}`) } else { message.error(`后端数据错误`) }
+        if (r.state) { message.error(`${r.msg}, 错误码: ${r.status}`);
+          this.setState({tableDataList: [],pageTotal: 0}) }
+        else { message.error(`后端数据错误`);
+          this.setState({tableDataList: [],pageTotal: 0}) }
       }
-    }).catch(()=>{message.error(`前端错误: 对账表信息接口调取失败`)})
+    }).catch(()=>{message.error(`前端错误: 对账表信息接口调取失败`); this.setState({tableDataList: [],pageTotal: 0})})
   }
   // 打开弹窗
   openPreview(url) {
@@ -110,10 +118,14 @@ class countBillList extends React.Component{
           });
           this.getReciptByVerify();
         } else {
-          message.error(`${r.data} 错误码: ${r.status}`)
+          if (r.status) {
+            message.error(`${r.data} 错误码: ${r.status}`)
+          } else {
+            message.error(`后端数据错误`)
+          }
         }
       }).catch(()=>{
-        message.error(`请求发送失败`)
+        message.error(`前端错误: 请求发送失败`)
       })
     } else {
       message.error('未选择小票')
@@ -151,6 +163,8 @@ class countBillList extends React.Component{
           <RadioButton value={0}>未发送</RadioButton>
           <RadioButton value={1}>已发送</RadioButton>
         </RadioGroup>
+
+        <span>共计: {pageTotal} 条</span>
 
         {/*执行行*/}
         <div className="btnLine" style={{marginLeft: 10}}>
