@@ -10,7 +10,7 @@ import orderUnmatched from '@pages/logisticsManage/unmatched/';
 // 预约
 import appointmentInfo from '@pages/logisticsManage/appointmentInfo/';
 // 接送机
-import airportTransfer from '@pages/logisticsManage/airportTransfer/';
+import airportTransfer from '@pages/reservationService/airportTransfer/';
 // 返点
 import adoptExaminePaid from '@pages/rebateManage/adoptExaminePaid/';
 import adoptExamineUnpaid from '@pages/rebateManage/adoptExamineUnpaid/';

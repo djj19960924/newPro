@@ -251,8 +251,8 @@ class setRebate extends React.Component{
       {title: '最近更新时间', dataIndex: 'updateTime', key: 'updateTime', width: 200,
       render: (text, record) => (
           <div>{!!record.updateTime ?
-            moment(record.updateTime).format('YYYY-MM-DD hh:mm:ss')
-            : moment(record.createTime).format('YYYY-MM-DD hh:mm:ss')}</div>
+            moment(record.updateTime).format('YYYY-MM-DD HH:mm:ss')
+            : moment(record.createTime).format('YYYY-MM-DD HH:mm:ss')}</div>
       )
       },
       {title: '返点率', dataIndex: 'rebateRate', key: 'rebateRate', width: 100},

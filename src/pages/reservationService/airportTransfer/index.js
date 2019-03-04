@@ -114,7 +114,7 @@ class airportTransfer extends React.Component {
     const columns = [
       {title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 140,
         render: (text, record) => (
-          <div>{moment(record.createTime).format('YYYY-MM-DD hh:mm:ss')}</div>
+          <div>{moment(record.createTime).format('YYYY-MM-DD HH:mm:ss')}</div>
         )
       },
       {title: '送机时间', dataIndex: `${infoType === 0 ? `takeoffTime` : `arrivalTime`}`, key: `${infoType === 0 ? `takeoffTime` : `arrivalTime`}`, width: 140},
