@@ -41,9 +41,11 @@ class commoditiesImgList extends React.Component {
   componentDidMount() {
     const type = window.getQueryString('type');
     const skuId = window.getQueryString('skuId');
+    const record = window.getQueryString('record');
     this.setState({
       type: type,
-      skuId: skuId
+      skuId: skuId,
+      record: record
     });
 
     if (type === 'edit') {
@@ -101,7 +103,7 @@ class commoditiesImgList extends React.Component {
       }
     } else {
       message.error('错误的商品处理类型, 即将返回商品库页面!');
-      this.props.history.push('/commodities-manage/commodities-database');
+      this.props.history.push(`/commodities-manage/commodities-database?record=${record}`);
     }
   }
   // 组件渲染值完成以后触发
@@ -342,7 +344,7 @@ class commoditiesImgList extends React.Component {
       isLoading: true,
       loadingTxt: '图片上传中, 请稍后...'
     });
-    const { fileList, } = this.state;
+    const { fileList, record } = this.state;
     if ( fileList.length > 0 ) {
       let formData = new FormData(),fileListData = [];
       // 多文件格式
@@ -368,7 +370,7 @@ class commoditiesImgList extends React.Component {
             // localStorage 只能存储字符串, 但是可以自动将数组转化为由 ',' 分割的 string
             message.success('图片上传成功, 请继续填写信息以完成商品录入');
             localStorage.newImgList = JSON.stringify({imgList:r.imgList});
-            this.props.history.push(`/commodities-manage/commodities-database/create-and-edit?type=${type}&skuId=${skuId}`);
+            this.props.history.push(`/commodities-manage/commodities-database/create-and-edit?type=${type}&skuId=${skuId}&record=${record}`);
           } else if (type === 'edit') {
             this.editSkuImg(type,skuId,r);
           }
@@ -388,11 +390,12 @@ class commoditiesImgList extends React.Component {
       } else if (type === 'edit') {
         this.editSkuImg(type,skuId,{imgList:[]});
       }
-      this.props.history.push(`/commodities-manage/commodities-database/create-and-edit?type=${type}&skuId=${skuId}`);
+      this.props.history.push(`/commodities-manage/commodities-database/create-and-edit?type=${type}&skuId=${skuId}&record=${record}`);
     }
   }
   // 修改sku图片地址
   editSkuImg(type,skuId,r) {
+    const { record, } = this.state;
     fetch(`${window.fandianUrl}/sku/editSkuImg`,{
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
@@ -405,7 +408,7 @@ class commoditiesImgList extends React.Component {
         // 修改成功
         message.success(`${r.msg}`);
         // 返回上一页面
-        this.props.history.push(`/commodities-manage/commodities-database/create-and-edit?type=${type}&skuId=${skuId}`);
+        this.props.history.push(`/commodities-manage/commodities-database/create-and-edit?type=${type}&skuId=${skuId}&record=${record}`);
       } else {
         message.error(`${r.msg} 错误码为:${r.status}`)
       }
@@ -427,8 +430,8 @@ class commoditiesImgList extends React.Component {
   }
   // 返回上一个界面
   backTo() {
-    const { type, skuId } = this.state;
-    this.props.history.push(`/commodities-manage/commodities-database/create-and-edit?type=${type}&skuId=${skuId}`);
+    const { type, skuId, record } = this.state;
+    this.props.history.push(`/commodities-manage/commodities-database/create-and-edit?type=${type}&skuId=${skuId}&record=${record}`);
   }
 
   render() {

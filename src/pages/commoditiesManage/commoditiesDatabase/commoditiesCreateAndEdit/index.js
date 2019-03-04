@@ -43,6 +43,7 @@ class commoditiesCreateAndEdit extends React.Component {
       loadingTxt: 'Loading...',
       // 提交按钮loading
       submitLoading: false,
+      record: null,
     };
     window.commoditiesCreateAndEdit = this;
 
@@ -50,6 +51,7 @@ class commoditiesCreateAndEdit extends React.Component {
   componentDidMount() {
     const type = window.getQueryString('type');
     const skuId = window.getQueryString('skuId');
+    const record = window.getQueryString('record');
     // 延时控制message删除
     // 用于上传大文件时给出loading的提示
     // message.loading('loading...',0,() => {console.log('关闭啦!')});
@@ -67,7 +69,7 @@ class commoditiesCreateAndEdit extends React.Component {
           // 但是注意最终传值时不要取value
           dataList.push(<Option value={r.data[i].name} key={i}>{r.data[i].name}</Option>)
         }
-        this.setState({categoryList: dataList, productCategoryList: r.data});
+        this.setState({categoryList: dataList, productCategoryList: r.data,record: record});
         this.setForm(type,skuId)
       } else {
         // 错误,并返回错误码
@@ -210,15 +212,16 @@ class commoditiesCreateAndEdit extends React.Component {
   }
   // 返回上一个界面
   backTo() {
+    const { record, } = this.state;
     // this.props.history.goBack()
     // 输入准确地址, 以保证返回按钮只能回到具体页面
-    this.props.history.push('/commodities-manage/commodities-database');
+    this.props.history.push(`/commodities-manage/commodities-database?record=${record}`);
     localStorage.removeItem('skuInfo');
     localStorage.removeItem('skuInfoState');
   }
   // 进入编辑图片界面
   gotoEditImg() {
-    const { type, skuId } = this.state;
+    const { type, record, skuId } = this.state;
     let the = this.state;
     localStorage.skuInfo = JSON.stringify(this.props.form.getFieldsValue());
     localStorage.skuInfoState = JSON.stringify({
@@ -226,7 +229,7 @@ class commoditiesCreateAndEdit extends React.Component {
       originalType: the.originalType,
       postcode: the.postcode,
     });
-    this.props.history.push(`/commodities-manage/commodities-database/commodities-img-list?type=${type}&skuId=${skuId}`);
+    this.props.history.push(`/commodities-manage/commodities-database/commodities-img-list?type=${type}&skuId=${skuId}&record=${record}`);
   }
   // 提交按钮
   submit() {
@@ -530,6 +533,8 @@ class commoditiesCreateAndEdit extends React.Component {
                 <RadioGroup buttonStyle="solid">
                   <RadioButton value={0}>未备案</RadioButton>
                   <RadioButton value={1}>已备案</RadioButton>
+                  <RadioButton value={2}>备案中</RadioButton>
+                  <RadioButton value={3}>作废</RadioButton>
                 </RadioGroup>
               )}
             </FormItem>
