@@ -68,11 +68,6 @@ class adoptExaminePaid extends React.Component{
       this.setState({dataList: [],pageTotal: 0})
     })
   }
-  // 改变每页尺寸
-  changePageSize(pageNum,pageSize) {
-    // console.log(pageNum,pageSize);
-    this.getProgramUserPaied(pageNum,pageSize)
-  }
   // 翻页事件
   changePage(pageNum,pageSize) {
     // console.log(pageNum,pageSize);
@@ -180,7 +175,7 @@ class adoptExaminePaid extends React.Component{
                     onChange={this.changePage.bind(this)}
                     showSizeChanger
                     pageSizeOptions={pageSizeOptions}
-                    onShowSizeChange={this.changePageSize.bind(this)}
+                    onShowSizeChange={this.changePage.bind(this)}
         />
       </div>
     )
