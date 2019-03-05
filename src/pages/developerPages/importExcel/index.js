@@ -62,29 +62,31 @@ class importExcel extends React.Component{
     // console.log(e.target.files[0]);
     let item = e.target.files[0];
     // 判断文件类型为 .xlsx 或 .xls
-    if (item.type === `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
-      || item.type === `application/vnd.ms-excel`) {
-      let reader = new FileReader();
-      reader.onload = (e) => {
-        let data = e.target.result,wb;
-        wb = XLSX.read(data, {
-          type: 'binary'
-        });
-        // json
-        // console.log(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]));
+    if (!!item) {
+      if (item.type === `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
+        || item.type === `application/vnd.ms-excel`) {
+        let reader = new FileReader();
+        reader.onload = (e) => {
+          let data = e.target.result,wb;
+          wb = XLSX.read(data, {
+            type: 'binary'
+          });
+          // json
+          // console.log(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]));
 
-        this.setState({
-          dataList: XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]),
-        },() => {
-          this.beforeUploadSku()
-        })
-      };
-      reader.readAsBinaryString(e.target.files[0]);
-      // 改写标签内容, 将文件名写入
-      document.getElementsByClassName(`filesName`)[0].innerHTML = e.target.files[0].name;
-    } else {
-      message.error(`文件类型错误`);
-      e.target.value = ``
+          this.setState({
+            dataList: XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]),
+          },() => {
+            this.beforeUploadSku()
+          })
+        };
+        reader.readAsBinaryString(e.target.files[0]);
+        // 改写标签内容, 将文件名写入
+        document.getElementsByClassName(`filesName`)[0].innerHTML = e.target.files[0].name;
+      } else {
+        message.error(`文件类型错误`);
+        e.target.value = ``
+      }
     }
   }
   // 导入至商品库
@@ -97,29 +99,29 @@ class importExcel extends React.Component{
     }
     for (let i in dataList) {
       let dataObj = {
-        skuCode: dataList[i].商品条码,
-        name: dataList[i].商品名称,
-        // 这里由于excel表内部分数据错误填写了单位, 使用方法屏蔽字母
-        netWeight: parseFloat(dataList[i].净重),
-        costPrice: dataList[i].成本价,
-        currencyType: 0,
         brand: dataList[i].品牌,
-        category: dataList[i].品类,
-        // 行邮税号判断, excel表内行邮税号基本错误
-        postcode: difObj[dataList[i].品类] ? difObj[dataList[i].品类] : null,
-        sugPostway: (dataList[i].建议行邮方式 === 'ETK' ? 1 : (dataList[i].建议行邮方式 === 'BC' ? 2 : null)),
-        specificationType: dataList[i].规格型号,
-        stock: dataList[i].库存,
-        sugPrice: dataList[i].建议etk申报价,
-        recordPrice: null,
-        taxRate: 11.8,
-        purchaseArea: null,
-        modelNumber: dataList[i].计量单位,
+        // category: null,
+        costPrice: null,
+        costType: 0,
         customsCode: null,
+        imgList: [],
+        // 本次导入为全部已备案
+        isRecord: 1,
+        modelNumber: dataList[i].计量单位,
+        name: dataList[i].商品名称,
+        netWeight: dataList[i].净重,
         originalPrice: null,
         originalType: 0,
-        imgList: [],
-        isRecord: 0,
+        // postcode: null,
+        purchaseArea: dataList[i].原产国,
+        recordPrice: dataList[i].成本价,
+        skuCode: dataList[i].商品货号,
+        specificationType: dataList[i].商品规格,
+        stock: null,
+        // 本次导入建议行邮方式全部为2(BC)
+        sugPostway: 2,
+        // sugPrice: null,
+        taxRate: null
       };
       list.push(dataObj)
     }

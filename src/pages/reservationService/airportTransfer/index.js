@@ -152,8 +152,8 @@ class airportTransfer extends React.Component {
                     value={infoType}
                     onChange={(e)=> { this.setState({infoType: e.target.value}); this.getAirportInfo(e.target.value) }}
         >
-          <RadioButton value={0}>接机用户信息</RadioButton>
-          <RadioButton value={1}>送机用户信息</RadioButton>
+          <RadioButton value={0}>送机用户信息</RadioButton>
+          <RadioButton value={1}>接机用户信息</RadioButton>
         </RadioGroup>
         <div className="datePickerLine">
           <span>开始时间: </span>

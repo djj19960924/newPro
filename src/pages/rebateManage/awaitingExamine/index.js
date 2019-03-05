@@ -111,13 +111,18 @@ class awaitingExamine extends React.Component {
       method: 'POST',
     }).then(r => r.json()).then(r => {
       if (r.status === 10000) {
-        let dataObj = {};
-        for (let i in r.data) {
-          dataObj[r.data[i].nationName]= r.data[i].reciptTotal
+        if (r.msg) {
+          // 成功获取数据, 但结果为空
+          message.warn(`${r.msg}`);
+        } else {
+          let dataObj = {};
+          for (let i in r.data) {
+            dataObj[r.data[i].nationName] = r.data[i].reciptTotal
+          }
+          this.setState({
+            countryLeftTicket: dataObj
+          });
         }
-        this.setState({
-          countryLeftTicket: dataObj
-        });
       } else {
         if (r.status) {
           message.error(`${r.msg}, 状态码为:${r.status}`)
