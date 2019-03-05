@@ -12,6 +12,7 @@ class commoditiesDataBase extends React.Component{
     this.state = {
       input: null,
       importModalVisible: false,
+      exportModalVisible: false,
       excelDataListOrigin: [],
       excelDataList: [],
       errorList: [],
@@ -148,31 +149,50 @@ class commoditiesDataBase extends React.Component{
   // 导出excel
   exportExcel () {
     const { record, dataList, } = this.state;
-    var elt = document.getElementById('tableList');
-    var wb = XLSX.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
+    let elt = document.getElementById('tableList');
+    let wb = XLSX.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
     XLSX.writeFile(wb, (record === 3 ? `商品资料库备案表.xlsx` : `商品资料库.xlsx`));
     // 导出的同时调取接口,将相应的商品状态改为备案中
-    let dataArray = [];
+    let dataArray = [],dataArrayAll = [];
     for (let i of dataList) {
-      dataArray.push(i.skuCode)
+      dataArray.push(i.skuCode);
+      dataArrayAll.push({ skuId: i.skuId, name: i.name, recordPrice: i.recordPrice, skuCode: i.skuCode, specificationType: i.specificationType, brand: i.brand, netWeight: i.netWeight, grossWeight: i.grossWeight })
     }
-    fetch(`${window.fandianUrl}/sku/updateProductRecordState`, {
+    fetch(`${window.fandianUrl}/sku/sendExcel`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(dataArray),
+      body: JSON.stringify(dataArrayAll),
     }).then(r => r.json()).then(r => {
       if (r.status) {
         if (r.status === 10000) {
-          message.success(`${r.msg}`)
+          // 当备份excel文件接口调取成功以后,再行处理更改备案状态接口以做保险
+          // message.success(`${r.msg}`);
+          fetch(`${window.fandianUrl}/sku/updateProductRecordState`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(dataArray),
+          }).then(r => r.json()).then(r => {
+            if (r.status) {
+              if (r.status === 10000) {
+                message.success(`${r.msg}`)
+              } else {
+                message.error(`${r.msg}, 错误码:${r.status}`)
+              }
+            } else {
+              message.error(`后端数据错误`)
+            }
+          }).catch(()=>{
+            message.error(`前端错误: 将未备案数据改为已备案状态接口调取失败`)
+          })
         } else {
-          message.error(`${r.msg}, 错误码:${r.status}`)
+          message.error(`${r.msg}, 错误码: ${r.status}`)
         }
       } else {
         message.error(`后端数据错误`)
       }
     }).catch(()=>{
-      message.error(`前端错误: 将未备案数据改为已备案状态接口调取失败`)
-    })
+      message.error(`前端错误: 备份excel文件接口调取失败`)
+    });
   }
   // 判断行邮方式
   postWay(q) {
@@ -264,7 +284,7 @@ class commoditiesDataBase extends React.Component{
   }
   render() {
     const RadioButton = Radio.Button, RadioGroup = Radio.Group;
-    const { dataList, searchValue, pageNum, pageSize, pageTotal, pageSizeOptions, record, loadingTxt, importModalVisible, input, errorList, isSubmit, failList, failListNum, excelDataList, successList, tableIsLoading, } = this.state;
+    const { dataList, searchValue, pageNum, pageSize, pageTotal, pageSizeOptions, record, loadingTxt, importModalVisible, input, errorList, isSubmit, failList, failListNum, excelDataList, successList, tableIsLoading, exportModalVisible, } = this.state;
     const Search = Input.Search;
     // 表单头
     const columns = [
@@ -344,6 +364,17 @@ class commoditiesDataBase extends React.Component{
         {/*加载*/}
         {loadingTxt && <PageLoading loadingTxt={loadingTxt}/>}
 
+        {/*导出弹窗*/}
+        <Modal title="导出"
+               className="exportModal"
+               visible={exportModalVisible}
+               onOk={this.exportExcel.bind(this)}
+               onCancel={()=>this.setState({exportModalVisible: false})}
+        >
+          <p>确认是否导出该页全部商品excel文件, 并将他们移至至备案中</p>
+          <p style={{color:`red`,opacity: .8}}>请将导出的excel文件妥善保存</p>
+        </Modal>
+
         {/*导入弹窗*/}
         <Modal title="导入"
                className="importModal"
@@ -406,7 +437,7 @@ class commoditiesDataBase extends React.Component{
           >新增商品</Button>
           {record === 2 && <Button type="primary"
                   className="exportExcelBtn"
-                  onClick={this.exportExcel.bind(this)}
+                  onClick={()=>this.setState({exportModalVisible: true})}
           >excel导出</Button>}
           {(record === 3 && (window.isLocalTest || window.isServerTest)) &&
           <Button type="primary"
