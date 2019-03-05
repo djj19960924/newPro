@@ -462,9 +462,9 @@ class commoditiesCreateAndEdit extends React.Component {
                       wrapperCol={{span: 15}}
             >
               {getFieldDecorator('costPrice', {
-                rules: [
-                  {required: true, message: '请输入成本价/采购价!'},
-                ],
+                // rules: [
+                //   {required: true, message: '请输入成本价/采购价!'},
+                // ],
               })(
                 <InputNumber style={{width: 180}}
                              placeholder="请输入成本价/采购价"
@@ -681,7 +681,6 @@ class commoditiesCreateAndEdit extends React.Component {
                 />
               )}
               <span style={{marginLeft: 10}}>(¥)人民币</span>
-              <span style={{marginLeft: 10}}>(选填)</span>
             </FormItem>}
 
             {/*提交按钮*/}

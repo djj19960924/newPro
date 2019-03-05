@@ -161,7 +161,15 @@ class commoditiesDataBase extends React.Component{
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(dataArray),
     }).then(r => r.json()).then(r => {
-      console.log(r)
+      if (r.status) {
+        if (r.status === 10000) {
+          message.success(`${r.msg}`)
+        } else {
+          message.error(`${r.msg}, 错误码:${r.status}`)
+        }
+      } else {
+        message.error(`后端数据错误`)
+      }
     }).catch(()=>{
       message.error(`前端错误: 将未备案数据改为已备案状态接口调取失败`)
     })
