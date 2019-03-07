@@ -251,7 +251,12 @@ class commoditiesDataBase extends React.Component{
             })
           } else {
             // 后端处理数据失败
-            message.error(`${r.msg}, 错误码: ${r.status}`);
+            // 于后端约定, 10000 为成功,当大于 10000 为 error 报错, 当小于 10000 则为 warn 警告
+            if (parseInt(r.status) < 10000) {
+              message.warn(`${r.msg}, 状态码: ${r.status}`);
+            } else {
+              message.error(`${r.msg}, 状态码: ${r.status}`);
+            }
             let dataObj = Object.assign({},excelDataList[Num]);
             dataObj.msg = r.msg;
             dataObj.status = r.status;
@@ -307,23 +312,23 @@ class commoditiesDataBase extends React.Component{
       },
       {title: '商品名称', dataIndex: 'name', key: 'name', width: 160},
       {title: '商品条码', dataIndex: 'skuCode', key: 'skuCode', width: 160},
-      {title: '毛重(kg)', dataIndex: 'grossWeight', key: 'grossWeight', width: 80},
-      {title: '采购价', dataIndex: 'costPrice', key: 'costPrice', width: 120},
-      {title: '商品品牌', dataIndex: 'brand', key: 'brand', width: 140},
-      // {title: '商品品类', dataIndex: 'category', key: 'category', width: 140},
-      {title: '行邮方式', dataIndex: 'sugPostway', key: 'sugPostway', width: 100,
-        render: (text, record) => (
-          // 这里调用方法判断行邮方式
-          <div>{this.postWay(record.sugPostway)}</div>
-        ),
-      },
-      {title: '数量', dataIndex: 'stock', key: 'stock', width: 80},
       {title: '备案价(¥)', dataIndex: 'recordPrice', key: 'recordPrice', width: 120,
         render: (text, record) => (
           // 这里调用方法判断行邮方式
           <div>{record.recordPrice ? record.recordPrice : '无'}</div>
         ),
       },
+      {title: '行邮方式', dataIndex: 'sugPostway', key: 'sugPostway', width: 100,
+        render: (text, record) => (
+          // 这里调用方法判断行邮方式
+          <div>{this.postWay(record.sugPostway)}</div>
+        ),
+      },
+      {title: '商品品牌', dataIndex: 'brand', key: 'brand', width: 140},
+      {title: '毛重(kg)', dataIndex: 'grossWeight', key: 'grossWeight', width: 80},
+      {title: '采购价', dataIndex: 'costPrice', key: 'costPrice', width: 120},
+      // {title: '商品品类', dataIndex: 'category', key: 'category', width: 140},
+      {title: '数量', dataIndex: 'stock', key: 'stock', width: 80},
       {title: '税率', dataIndex: 'taxRate', key: 'taxRate', width: 80,
         render: (text, record) => (
           // 这里调用方法判断行邮方式
@@ -422,7 +427,10 @@ class commoditiesDataBase extends React.Component{
           <div className="failList">
             <p>{`excel表内出错数据行数: ${failListNum}`}</p>
             {failList.map((item,i) => (
-              <p key={i}>{`excel表内出错数据行数: ${item.Num+2}, 出错原因: ${item.msg}, 错误码: ${item.status}`}</p>
+              <p key={i}>{ parseInt(item.status) < 10000 ?
+                (`excel表内警告数据行数: ${item.Num+2}, 警告原因: ${item.msg}, 状态码: ${item.status}`)
+                : (`excel表内出错数据行数: ${item.Num+2}, 出错原因: ${item.msg}, 状态码: ${item.status}`)
+              }</p>
             ))}
           </div>
           {errorList.length > 0 ? <p>当前excel表格存在数据漏填, 如继续导入, 以下行数数据则不会进行处理</p> : ``}
