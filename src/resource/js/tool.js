@@ -19,7 +19,7 @@ window.setCookie = function(name,value,time) {
   let exp = new Date();
   exp.setTime(exp.getTime() + time*1000);
   document.cookie = name + "="+ value + ";expires=" + exp.toGMTString();
-}
+};
 
 //获取一个cookie
 window.getCookie = function(name) {
@@ -31,9 +31,20 @@ window.getCookie = function(name) {
     if(t[0] === name) {
       return t[1];
     }
-  };
+  }
   return null;
-}
+};
+
+// 获取所有cookie
+window.getCookies = () => {
+  let strCookie = document.cookie;
+  let arr = strCookie.split('; ');
+  let obj = {};
+  for (let i of arr) {
+    obj[i.split('=')[0]]=i.split('=')[1]
+  }
+  return obj;
+};
 
 //删除一个cookie
 window.delCookie = function(name) {
@@ -42,4 +53,4 @@ window.delCookie = function(name) {
   exp.setTime(exp.getTime() - 1);
   let cval=window.getCookie(name);
   if(cval!=null) document.cookie= name + "="+cval+";expires="+exp.toUTCString();
-}
+};
