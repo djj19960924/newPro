@@ -122,6 +122,7 @@ class commoditiesDataBase extends React.Component{
       headers: {'Content-Type': 'application/json'},
       body:JSON.stringify({choice:record,pageNum:pageNum,pageSize:pageSize,searchParm:searchValue}),
     }).then(r => r.json()).then(r => {
+      this.setState({tableIsLoading:false,dataList: []});
       if (r.status) {
         if (r.status === 10000) {
           this.setState({
@@ -133,17 +134,14 @@ class commoditiesDataBase extends React.Component{
           })
         } else if (r.status === 10001) {
           message.warn(`${r.msg}`);
-          this.setState({dataList: []})
         } else {
           message.error(`${r.msg} 状态码:${r.status}`);
-          this.setState({dataList: []})
         }
       } else {
         message.error(`后端数据错误`)
       }
-      this.setState({tableIsLoading:false});
     }).catch(() => {
-      this.setState({tableIsLoading:false});
+      this.setState({tableIsLoading:false,dataList: []});
       message.error(`商品列表接口调取失败`)
     });
   }
