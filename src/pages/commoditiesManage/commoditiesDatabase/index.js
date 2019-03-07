@@ -117,8 +117,7 @@ class commoditiesDataBase extends React.Component{
          record = this.state.record,
          pageNum = this.state.pageNum,
          pageSize = this.state.pageSize) {
-    fetch(`//192.168.1.7:8000/sku/getSku`, {
-    // fetch(`${window.fandianUrl}/sku/getSku`, {
+    fetch(`${window.fandianUrl}/sku/getSku`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body:JSON.stringify({choice:record,pageNum:pageNum,pageSize:pageSize,searchParm:searchValue}),

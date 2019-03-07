@@ -104,7 +104,6 @@ class commoditiesCreateAndEdit extends React.Component {
         type: type,
         skuId: parseInt(skuId),
       });
-      // fetch(`//192.168.1.6:8000/sku/selectEditSkuBySkuId`, {
       fetch(`${window.fandianUrl}/sku/selectEditSkuBySkuId`, {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
