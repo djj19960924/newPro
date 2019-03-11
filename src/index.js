@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 // 离线缓存
 import * as serviceWorker from './serviceWorker';
 // Hash路由
-import {HashRouter} from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 // 预加载antd组件
 import { LocaleProvider } from 'antd';
 // antd中文组件
@@ -32,13 +32,13 @@ if (window.isServerTest) {
 }
 
 ReactDOM.render(
-  <HashRouter>
+  <BrowserRouter>
     <LocaleProvider locale={zh_CN}>
       <Provider {...store}>
         <App/>
       </Provider>
     </LocaleProvider>
-  </HashRouter>,
+  </BrowserRouter>,
   document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change

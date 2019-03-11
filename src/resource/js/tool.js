@@ -4,8 +4,8 @@
 window.getQueryString = function (name) {
   let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
   // 这里修正了地址, 从hash中截取参数, 因为该react项目中使用HashRouter进行路由导航, 参数会拼接在hash中
-  if (!(window.location.hash.split('?')[1])) return null;
-  let r = window.location.hash.split('?')[1].match(reg);
+  if (!(window.location.search.split('?')[1])) return null;
+  let r = window.location.search.split('?')[1].match(reg);
   if (r != null) return decodeURIComponent(r[2]);
   return null;
 };
