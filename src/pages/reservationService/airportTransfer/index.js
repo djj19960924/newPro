@@ -117,7 +117,7 @@ class airportTransfer extends React.Component {
           <div>{moment(record.createTime).format('YYYY-MM-DD HH:mm:ss')}</div>
         )
       },
-      {title: `${infoType === 0 ? `送机时间` : `接机时间`}`, dataIndex: `${infoType === 0 ? `takeoffTime` : `arrivalTime`}`, key: `${infoType === 0 ? `takeoffTime` : `arrivalTime`}`, width: 140},
+      {title: '微信号', dataIndex: 'wechatNum', key: 'wechatNum', width: 140},
       {title: '机票照片', dataIndex: `${infoType === 0 ? `airportDropoffUrl` : `airportPickupUrl`}`, key: `${infoType === 0 ? `airportDropoffUrl` : `airportPickupUrl`}`, width: 160,
         render: (text, record) => (
           <Button type="default"
@@ -125,26 +125,23 @@ class airportTransfer extends React.Component {
                     previewImage: (infoType === 0 ? record[`airportDropoffUrl`] : record[`airportPickupUrl`]) })}}
           >点击查看</Button>
         ),},
-      {title: '行李件数', dataIndex: 'bagNum', key: 'bagNum', width: 90},
-      {title: '微信号', dataIndex: 'wechatNum', key: 'wechatNum', width: 140},
-    ];
-    const columnsBottom = [
+      {title: `${infoType === 0 ? `送机时间` : `接机时间`}`, dataIndex: `${infoType === 0 ? `takeoffTime` : `arrivalTime`}`, key: `${infoType === 0 ? `takeoffTime` : `arrivalTime`}`, width: 140},
       {title: '用车人数', dataIndex: 'carMember', key: 'carMember', width: 90},
       {title: '用车类型', dataIndex: 'carChoice', key: 'carChoice', width: 140,
         render: (text, record) => (
           <div>{record.carChoice === 0 ? `拼车` : `专车(包车)`}</div>
         ),
       },
-      // {title: '订单号', dataIndex: 'orderNo', key: 'orderNo', width: 140}
+      {title: '行李件数', dataIndex: 'bagNum', key: 'bagNum', width: 90},
     ];
     const dropColumns = columns.concat([
       {title: '所在地址', dataIndex: 'location', key: 'location', width: 140},
-    ]).concat(columnsBottom);
+    ]);
     const pickColumns = columns.concat([
       {title: '目的地1', dataIndex: 'location1', key: 'location1', width: 140},
       {title: '目的地2', dataIndex: 'location2', key: 'location2', width: 140},
       {title: '目的地3', dataIndex: 'location3', key: 'location3', width: 140},
-    ]).concat(columnsBottom);
+    ]);
     return (
       <div className="airportTransfer">
         <RadioGroup buttonStyle="solid"
