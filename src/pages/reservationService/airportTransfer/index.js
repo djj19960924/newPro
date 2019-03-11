@@ -127,12 +127,12 @@ class airportTransfer extends React.Component {
         ),},
       {title: `${infoType === 0 ? `送机时间` : `接机时间`}`, dataIndex: `${infoType === 0 ? `takeoffTime` : `arrivalTime`}`, key: `${infoType === 0 ? `takeoffTime` : `arrivalTime`}`, width: 140},
       {title: '用车人数', dataIndex: 'carMember', key: 'carMember', width: 90},
+      {title: '行李件数', dataIndex: 'bagNum', key: 'bagNum', width: 90},
       {title: '用车类型', dataIndex: 'carChoice', key: 'carChoice', width: 140,
         render: (text, record) => (
           <div>{record.carChoice === 0 ? `拼车` : `专车(包车)`}</div>
         ),
       },
-      {title: '行李件数', dataIndex: 'bagNum', key: 'bagNum', width: 90},
     ];
     const dropColumns = columns.concat([
       {title: '所在地址', dataIndex: 'location', key: 'location', width: 140},
@@ -168,7 +168,7 @@ class airportTransfer extends React.Component {
                   onClick={this.getAirportInfo.bind(this,infoType,undefined,undefined)}
           >查询</Button>
         </div>
-        <div style={{maxWidth: 1320}}>
+        <div style={{maxWidth: 1400}}>
           <Table className="tableList"
                  dataSource={tableDataList}
                  columns={infoType === 0 ? dropColumns : pickColumns }
