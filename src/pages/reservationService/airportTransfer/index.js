@@ -117,7 +117,7 @@ class airportTransfer extends React.Component {
           <div>{moment(record.createTime).format('YYYY-MM-DD HH:mm:ss')}</div>
         )
       },
-      {title: '送机时间', dataIndex: `${infoType === 0 ? `takeoffTime` : `arrivalTime`}`, key: `${infoType === 0 ? `takeoffTime` : `arrivalTime`}`, width: 140},
+      {title: `${infoType === 0 ? `送机时间` : `接机时间`}`, dataIndex: `${infoType === 0 ? `takeoffTime` : `arrivalTime`}`, key: `${infoType === 0 ? `takeoffTime` : `arrivalTime`}`, width: 140},
       {title: '机票照片', dataIndex: `${infoType === 0 ? `airportDropoffUrl` : `airportPickupUrl`}`, key: `${infoType === 0 ? `airportDropoffUrl` : `airportPickupUrl`}`, width: 160,
         render: (text, record) => (
           <Button type="default"
@@ -141,9 +141,9 @@ class airportTransfer extends React.Component {
       {title: '所在地址', dataIndex: 'location', key: 'location', width: 140},
     ]).concat(columnsBottom);
     const pickColumns = columns.concat([
-      {title: '所在地址1', dataIndex: 'location1', key: 'location1', width: 140},
-      {title: '所在地址2', dataIndex: 'location2', key: 'location2', width: 140},
-      {title: '所在地址3', dataIndex: 'location3', key: 'location3', width: 140},
+      {title: '目的地1', dataIndex: 'location1', key: 'location1', width: 140},
+      {title: '目的地2', dataIndex: 'location2', key: 'location2', width: 140},
+      {title: '目的地3', dataIndex: 'location3', key: 'location3', width: 140},
     ]).concat(columnsBottom);
     return (
       <div className="airportTransfer">

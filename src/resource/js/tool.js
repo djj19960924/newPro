@@ -19,6 +19,7 @@ window.setCookie = function(name,value,time) {
   let exp = new Date();
   exp.setTime(exp.getTime() + time*1000);
   document.cookie = name + "="+ value + ";expires=" + exp.toGMTString();
+  return `赋值成功 - ${name}:${value}`
 };
 
 //获取一个cookie
@@ -53,4 +54,13 @@ window.delCookie = function(name) {
   exp.setTime(exp.getTime() - 1);
   let cval=window.getCookie(name);
   if(cval!=null) document.cookie= name + "="+cval+";expires="+exp.toUTCString();
+};
+
+//删除所有cookie
+window.delCookies = () => {
+  let strCookie = document.cookie;
+  let arr = strCookie.split('; ');
+  for (let i of arr) {
+    window.delCookie(i.split('=')[0])
+  }
 };
