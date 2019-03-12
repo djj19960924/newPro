@@ -145,7 +145,13 @@ class commoditiesDataBase extends React.Component{
       message.error(`商品列表接口调取失败`)
     });
   }
-  // 导出excel
+  // 导出备案excel
+  exportExcel_record_1 () {
+    let elt = document.getElementById('tableList_record_1');
+    let wb = XLSX.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
+    XLSX.writeFile(wb, `商品资料库 (美渠)`);
+  }
+  // 导出未备案excel
   exportExcel () {
     const { record, dataList, } = this.state;
     let elt = document.getElementById('tableList');
@@ -458,10 +464,18 @@ class commoditiesDataBase extends React.Component{
                   className="createNew"
                   onClick={this.toCE.bind(this,'create',null)}
           >新增商品</Button>
+
+
+          {record === 1 && <Button type="primary"
+                                   className="exportExcelBtn"
+                                   onClick={this.exportExcel_record_1.bind(this)}
+          >导出已备案资料</Button>}
+
           {record === 2 && <Button type="primary"
                   className="exportExcelBtn"
                   onClick={()=>this.setState({exportModalVisible: true})}
           >excel导出</Button>}
+
           {(record === 3 && (window.isLocalTest || window.isServerTest)) &&
           <Button type="primary"
                   onClick={this.clickIT.bind(this)}
@@ -479,7 +493,6 @@ class commoditiesDataBase extends React.Component{
 
         {/*表单主体*/}
         <Table className="tableList"
-               // id="tableList"
                ref={'commoditiesTable'}
                dataSource={dataList}
                // columns={record === 2 ? columnsForExport : columns}
@@ -490,16 +503,6 @@ class commoditiesDataBase extends React.Component{
                rowKey={(record, index) => `id_${index}`}
                loading={tableIsLoading}
         />
-
-        {/*导出用表单*/}
-        {record === 2 && <Table className="tableListForExport"
-               id="tableList"
-               columns={columnsForExport}
-               dataSource={dataList}
-               pagination={false}
-               style={{display:'none'}}
-               rowKey={(record, index) => `id_${index}`}
-        />}
 
         {/*分页*/}
         <Pagination className="tablePagination"
@@ -515,6 +518,47 @@ class commoditiesDataBase extends React.Component{
                     pageSizeOptions={pageSizeOptions}
                     onShowSizeChange={this.changePage.bind(this)}
         />
+
+        {/*导出用表单*/}
+        {record === 2 && <Table className="tableListForExport"
+               id="tableList"
+               columns={columnsForExport}
+               dataSource={dataList}
+               pagination={false}
+               style={{display:'none'}}
+               rowKey={(record, index) => `id_${index}`}
+        />}
+
+        {/*已备案导出用表单, 美渠推单用*/}
+        {record === 1 && <Table className="tableListForExport_20190312"
+                                id="tableList_record_1"
+                                columns={[
+                                  {title: `商品条形码`, dataIndex: `skuCode`, key: `skuCode`},
+                                  {title: `商品名称`, dataIndex: `name`, key: `name`},
+                                  {title: `备案价`, dataIndex: `recordPrice`, key: `recordPrice`, width: 80},
+                                  {title: `净重(kg)`, dataIndex: `netWeight`, key: `netWeight`},
+                                  {title: `毛重(kg)`, dataIndex: `grossWeight`, key: `grossWeight`},
+                                  {title: `商品品牌`, dataIndex: `brand`, key: `brand`},
+                                  {title: `规格型号`, dataIndex: `specificationType`, key: `specificationType`},
+                                  {title: `单位`, dataIndex: `modelNumber`, key: `modelNumber`},
+                                  {title: `数量/库存`, dataIndex: `stock`, key: `stock`},
+                                  {title: `税率(%)`, dataIndex: `taxRate`, key: `taxRate`},
+                                  {title: `采购地`, dataIndex: `purchaseArea`, key: `purchaseArea`},
+                                  {title: `海关编码`, dataIndex: `customsCode`, key: `customsCode`},
+                                  {title: `建议行邮方式`, dataIndex: `sugPostway`, key: `sugPostway`,
+                                    render: (text, record) => (
+                                      // 这里判断行邮方式
+                                      <div>{record.sugPostway === 1 ? `ETK` : (record.sugPostway === 2 ? `BC` : `无`)}</div>
+                                    ),
+                                  },
+                                  {title: `品类`, dataIndex: `category`, key: `category`},
+                                  {title: `行邮税号`, dataIndex: `postcode`, key: `postcode`},
+                                ]}
+                                dataSource={dataList}
+                                pagination={false}
+                                style={{display:'none'}}
+                                rowKey={(record, index) => `id_${index}`}
+        />}
       </div>
     )
   }
