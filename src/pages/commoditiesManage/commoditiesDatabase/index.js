@@ -76,11 +76,6 @@ class commoditiesDataBase extends React.Component{
         let excelDataListOrigin = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]),excelDataList = [],errorList = [];
         for (let i in excelDataListOrigin) {
           // i + 2 = 表单内行数号
-          //                                  .brand,
-          //           name: excelDataList[Num].name,
-          //           netWeight: excelDataList[Num].netWeight,
-          //           grossWeight: excelDataList[Num].grossWeight,
-          //           purchaseArea: excelDataList[Num].purchaseArea,
           let code = excelDataListOrigin[i].商品货号,
             price = excelDataListOrigin[i].成本价,
             name = excelDataListOrigin[i].商品名称,
