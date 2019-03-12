@@ -234,7 +234,8 @@ class commoditiesDataBase extends React.Component{
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-          skuCode: excelDataList[Num].skuCode,
+          // skuCode: excelDataList[Num].skuCode,
+          skuCode: excelDataList[Num].skuCode.split(`JD`)[1],
           recordPrice: excelDataList[Num].recordPrice,
           isRecord: 1,
         }),

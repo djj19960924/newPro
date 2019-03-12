@@ -3,8 +3,10 @@ import { Button, message, Icon, } from 'antd';
 import XLSX from 'xlsx';
 // xlsx转blob
 import '@js/FileSaver.min.js';
-
 import './index.less';
+
+import Country from "@js/countryForCD";
+
 class importExcel extends React.Component{
   constructor(props) {
     super(props);
@@ -107,15 +109,15 @@ class importExcel extends React.Component{
         imgList: [],
         // 本次导入为全部已备案
         isRecord: 1,
-        modelNumber: dataList[i].计量单位,
+        modelNumber: dataList[i].商品规格.split('/')[1],
         name: dataList[i].商品名称,
         netWeight: dataList[i].净重,
         originalPrice: null,
         originalType: 0,
         // postcode: null,
-        purchaseArea: dataList[i].原产国,
+        purchaseArea: Country[dataList[i].原产国],
         recordPrice: dataList[i].成本价,
-        skuCode: dataList[i].商品货号,
+        skuCode: dataList[i].商品货号.split('JD')[1],
         specificationType: dataList[i].商品规格,
         stock: null,
         // 本次导入建议行邮方式全部为2(BC)

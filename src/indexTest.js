@@ -10,6 +10,7 @@ import { LocaleProvider } from 'antd';
 import zh_CN from 'antd/lib/locale-provider/zh_CN';
 // 自定义工具类
 import '@js/tool';
+import '@js/qrcode.min';
 
 import { Provider} from 'mobx-react'
 import store from './store/store'
