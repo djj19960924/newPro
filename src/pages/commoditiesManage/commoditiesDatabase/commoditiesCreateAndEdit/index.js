@@ -416,7 +416,7 @@ class commoditiesCreateAndEdit extends React.Component {
                        placeholder="请输入商品品牌"
                 />
               )}
-              {/*<span style={{marginLeft: 10}}>(选填)</span>*/}
+              <span style={{marginLeft: 10}}>(请输入品牌英文名,以用于备案)</span>
             </FormItem>
 
             {/*规格型号*/}
