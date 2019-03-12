@@ -161,7 +161,7 @@ class commoditiesDataBase extends React.Component{
   exportExcel_record_1 () {
     let elt = document.getElementById('tableList_record_1');
     let wb = XLSX.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
-    XLSX.writeFile(wb, `商品资料库 (美渠)`);
+    XLSX.writeFile(wb, `商品资料库 (美渠).xlsx`);
   }
   // 导出未备案excel
   exportExcel () {
