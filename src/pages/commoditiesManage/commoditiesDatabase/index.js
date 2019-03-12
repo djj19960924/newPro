@@ -3,6 +3,7 @@ import {Radio, Table, Pagination, Button, Input, message, Modal, Icon, } from 'a
 import XLSX from 'xlsx';
 import moment from 'moment';
 import PageLoading from '@components/pageLoading/';
+import Country from "@js/countryForCD";
 
 import './index.less';
 
@@ -75,7 +76,18 @@ class commoditiesDataBase extends React.Component{
         let excelDataListOrigin = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]),excelDataList = [],errorList = [];
         for (let i in excelDataListOrigin) {
           // i + 2 = 表单内行数号
-          let code = excelDataListOrigin[i].商品货号, price = excelDataListOrigin[i].成本价;
+          //                                  .brand,
+          //           name: excelDataList[Num].name,
+          //           netWeight: excelDataList[Num].netWeight,
+          //           grossWeight: excelDataList[Num].grossWeight,
+          //           purchaseArea: excelDataList[Num].purchaseArea,
+          let code = excelDataListOrigin[i].商品货号,
+            price = excelDataListOrigin[i].成本价,
+            name = excelDataListOrigin[i].商品名称,
+            brand = excelDataListOrigin[i].品牌,
+            netWeight = excelDataListOrigin[i].净重,
+            grossWeight = excelDataListOrigin[i].毛重,
+            purchaseArea = Country[excelDataListOrigin[i].原产国];
           if (!code || !price) {
             errorList.push({
               Num: parseInt(i),
@@ -86,6 +98,11 @@ class commoditiesDataBase extends React.Component{
               skuCode: code,
               recordPrice: price,
               Num: parseInt(i),
+              name: name,
+              brand: brand,
+              netWeight: netWeight,
+              grossWeight: grossWeight,
+              purchaseArea: purchaseArea,
             });
           }
         }
@@ -244,6 +261,11 @@ class commoditiesDataBase extends React.Component{
           skuCode: excelDataList[Num].skuCode.split(`JD`)[1],
           recordPrice: excelDataList[Num].recordPrice,
           isRecord: 1,
+          brand: excelDataList[Num].brand,
+          name: excelDataList[Num].name,
+          netWeight: excelDataList[Num].netWeight,
+          grossWeight: excelDataList[Num].grossWeight,
+          purchaseArea: excelDataList[Num].purchaseArea,
         }),
       }).then(r => r.json()).then(r => {
         if (r.status) {
