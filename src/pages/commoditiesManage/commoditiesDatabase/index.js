@@ -91,7 +91,7 @@ class commoditiesDataBase extends React.Component{
           if (!code || !price) {
             errorList.push({
               Num: parseInt(i),
-              errValue: `${!code ? `商品货号 ` : ``}${!price ? `成本价` : ``}`,
+              errValue: `${!code ? `商品货号 ` : ``}${!code ? '商品名称 ' : ''}${!code ? '品牌 ' : ''}${!code ? '净重 ' : ''}${!code ? '毛重 ' : ''}${!code ? '原产国 ' : ''}${!price ? `成本价` : ``}`,
             })
           } else {
             excelDataList.push({
