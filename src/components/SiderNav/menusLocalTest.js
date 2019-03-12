@@ -94,6 +94,11 @@ const menusLocalTest = [
         title: '商品资料库',
         icon: 'database',
         key: '/commodities-manage/commodities-database'
+      },
+      {
+        title: '商品打包',
+        icon: 'gift',
+        key: '/commodities-manage/commodities-packaging'
       }
     ]
   },

@@ -26,6 +26,9 @@ import appointmentTeamManage from '@pages/rebateManage/appointmentTeamManage/';
 import commoditiesDataBase from '@pages/commoditiesManage/commoditiesDatabase/';
 import commoditiesCreateAndEdit from '@pages/commoditiesManage/commoditiesDatabase/commoditiesCreateAndEdit/';
 import commoditiesImgList from '@pages/commoditiesManage/commoditiesDatabase/commoditiesImgList/';
+// 商品打包
+import commoditiesPackaging from "../../pages/commoditiesManage/commoditiesPackaging";
+import customerLogin from "../../pages/commoditiesManage/commoditiesPackaging/customerLogin";
 
 // 404页面
 import page404 from '@pages/system/page404/'
@@ -62,6 +65,9 @@ class ContentMain extends React.Component{
           <Route exact path="/commodities-manage/commodities-database" component={commoditiesDataBase} />
           <Route exact path="/commodities-manage/commodities-database/create-and-edit" component={commoditiesCreateAndEdit} />
           <Route exact path="/commodities-manage/commodities-database/commodities-img-list" component={commoditiesImgList} />
+          <Route exact path="/commodities-manage/commodities-packaging" component={commoditiesPackaging} />
+          <Route exact path="/commodities-manage/commodities-packaging/customer-login" component={customerLogin} />
+          {/*首页*/}
           <Route exact path="/" component={Home} />
           {/*开发人员专用管理路由*/}
           {window.isLocalTest && <Route exact path="/developer-pages/import-excel" component={importExcel} />}
