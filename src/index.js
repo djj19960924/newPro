@@ -22,8 +22,8 @@ import 'antd/dist/antd.less';
 import App from './App';
 
 // 正式版:
-window.apiUrl = 'http://api.maishoumiji.com';
-window.fandianUrl = 'http://fandian.maishoumiji.com';
+window.apiUrl = '//api.maishoumiji.com';
+window.fandianUrl = '//fandian.maishoumiji.com';
 
 // 测试版:
 window.isServerTest = true; // 服务端测试版开口
