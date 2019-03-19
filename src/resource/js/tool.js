@@ -1,13 +1,23 @@
 // 这里的工具方法挂在在顶层对象window中
 
-// 获取hash内部参数方法
+// 获取search参数方法
 window.getQueryString = function (name) {
   let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
-  // 这里修正了地址, 从hash中截取参数, 因为该react项目中使用HashRouter进行路由导航, 参数会拼接在hash中
   if (!(window.location.search.split('?')[1])) return null;
   let r = window.location.search.split('?')[1].match(reg);
   if (r != null) return decodeURIComponent(r[2]);
   return null;
+};
+
+// 获取全部search参数
+window.getAllQueryString = () => {
+  if (!(window.location.search.split('?')[1])) return null;
+  let dataObj = {};
+  let searchList = window.location.search.split('?')[1].split('&');
+  for (let i = 0; i < searchList.length; i++) {
+    dataObj[searchList[i].split('=')[0]] = decodeURIComponent(searchList[i].split('=')[1])
+  }
+  return dataObj;
 };
 
 // 设置一个cookie
@@ -37,7 +47,7 @@ window.getCookie = function(name) {
 };
 
 // 获取所有cookie
-window.getCookies = () => {
+window.getAllCookie = () => {
   let strCookie = document.cookie;
   let arr = strCookie.split('; ');
   let obj = {};
