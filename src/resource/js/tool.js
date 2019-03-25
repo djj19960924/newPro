@@ -28,7 +28,8 @@ window.setCookie = function(name,value,time) {
   if (!time) return console.error('请输入正确参数有效时间');
   let exp = new Date();
   exp.setTime(exp.getTime() + time*1000);
-  document.cookie = name + "="+ value + ";expires=" + exp.toGMTString();
+  // 这里强制定义path属性, 因为cookie有path属性, 当处于不同path时无法操作, 所以定义所有cookie的path为根目录
+  document.cookie = name + "="+ value + ";expires=" + exp.toGMTString() + ";path=/";
   return `赋值成功 - ${name}:${value}`
 };
 
@@ -63,14 +64,16 @@ window.delCookie = function(name) {
   let exp = new Date();
   exp.setTime(exp.getTime() - 1);
   let cval=window.getCookie(name);
-  if(cval!=null) document.cookie= name + "="+cval+";expires="+exp.toUTCString();
+  if(cval!=null) document.cookie = name + "=" + cval + ";expires=" + exp.toUTCString() + ";path=/";
+  return `删除 ${name} 成功`
 };
 
 //删除所有cookie
-window.delCookies = () => {
+window.delAllCookie = () => {
   let strCookie = document.cookie;
   let arr = strCookie.split('; ');
   for (let i of arr) {
     window.delCookie(i.split('=')[0])
   }
+  return `删除所有 cookie 成功`
 };

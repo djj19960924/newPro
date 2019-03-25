@@ -20,7 +20,7 @@ class customerLogin extends React.Component{
     let onKeyDownTime = null, onKeyDownKey = null, lastInputTime = null, inputValue = ``;
     window.onkeydown = (e) => {
       if (allowedKeys.includes(e.key) || e.key === `Enter`) {
-        console.log(`按键值:"${e.key}", 按键时间:${new Date().getTime()}`);
+        // console.log(`按键值:"${e.key}", 按键时间:${new Date().getTime()}`);
         onKeyDownTime = new Date().getTime();
         onKeyDownKey = e.key;
       }
@@ -34,8 +34,8 @@ class customerLogin extends React.Component{
       };
       // 判断
       if (allowedKeys.includes(e.key)) {
-        console.warn(`按键值:"${e.key}", 起键时间:${new Date().getTime()}`);
-        if ((new Date().getTime() - onKeyDownTime) <= 3) {
+        // console.warn(`按键值:"${e.key}", 起键时间:${new Date().getTime()}`);
+        if ((new Date().getTime() - onKeyDownTime) <= 10) {
           // 按键: onkeydown, 起键: onkeyup
           // 这里做双重保障: 1.判断按键与起键时间差, 只有扫码才能在3ms内进行按键操作
           // 2.判断按键与起键的值, 在人手动使用键盘乱按的时候, 是有可能造成输入延迟, 导致某次起键动作被延迟
@@ -47,7 +47,8 @@ class customerLogin extends React.Component{
             lastInputTime = new Date().getTime();
           } else {
             // 输入间隔过大时, 删除判断时间以作保险
-            lastInputTime = null
+            lastInputTime = null;
+            inputValue = null;
           }
         }
       } else if (e.key === `Enter`) {
@@ -55,19 +56,21 @@ class customerLogin extends React.Component{
         // 所以这里不处理下箭头, 直接以Enter作为输入结束符号,
         // 所有复位的功能都做在Enter中, 为保险起见, 也可作为公共结束事件,绑定在fetch内部的各个结果中
         let rule = new RegExp('^unionId:');
-        if ((new Date().getTime() - onKeyDownTime) <= 3) {
-          console.log(inputValue.split(`unionId:`)[1]);
+        if ((new Date().getTime() - onKeyDownTime) <= 10) {
+          // console.log(inputValue);
+          // console.log(inputValue.split('&'));
           if (rule.test(inputValue) && onKeyDownKey === e.key && (new Date().getTime() - lastInputTime) <= 50) {
             // 对 value 赋值, 并将各项数据复位
-            let value = inputValue.split(`unionId:`)[1];
+            let unionId = inputValue.split('&')[0].split(`unionId:`)[1];
+            let nickname = decodeURIComponent(inputValue.split('&')[1].split(`nickname:`)[1]);
             clearData();
-            if (value.length >= 28 && value.length <= 32) {
+            if (unionId.length >= 28 && unionId.length <= 32) {
               // 如果长度也符合, 那么则可以模糊判定所获取到的信息为 unionId
               // 当符合条件的时候, 则可以进行接口操作, 根据 unionId 获取该用户下所有转运箱号资料
               message.success(`成功获取用户信息,即将跳转`);
-              this.props.history.push(`/commodities-manage/commodities-packaging/?unionId=${value}`)
+              this.props.history.push(`/commodities-manage/commodities-packaging/?unionId=${unionId}&nickname=${nickname}`)
             } else {
-              message.error(`unionId字段长度不正确, 请联系管理员`)
+              message.error(`获取用户信息失败, 请重试`)
             }
           } else {
             message.error(`二维码格式错误, 请确保用户登陆二维码正确, 并重试`);
@@ -88,8 +91,8 @@ class customerLogin extends React.Component{
 
     // 生成导向用户授权登陆的扫码页面
     let qrcode = new window.QRCode(this.refs.QRCodeShow, {
-      // text: "http://api.maishoumiji.com/wechat/authorize?returnUrl=http%3A%2F%2Ftest3suyun.maishoumiji.com/wechat-login",
-      text: "unionId:oD65q01KvlrAoMNy00doXOn7AEcA",
+      text: "http://api.maishoumiji.com/wechat/authorize?returnUrl=http%3A%2F%2Ftest3suyun.maishoumiji.com/wechat-login",
+      // text: `?openId=oFTRD1mNjqol2R3776_sYjNKN6hU&unionId=oD65q0zEahBqGk88VYAtsIKY4hSM&nickname=%E6%99%AE%E5%88%A9%E5%B0%BCsama&headimgurl=http://thirdwx.qlogo.cn/mmopen/vi_32/PiajxSqBRaEKLyfLeABlyeG0q3hEpr4MpKIyPI6DuoYxm5IdZwr0JZxac1DCk8VdK3d4osK9diaPgnZnmf7W2nqQ/132`,
       width: 200,
       height: 200,
       colorDark : "#000",
