@@ -17,8 +17,6 @@ class commoditiesPackaging extends React.Component{
       boxesList: [],
       // 当前所选箱号
       selectBox: ``,
-      // 箱子重量
-      boxesWeight: [],
     };
     window.commoditiesPackaging = this;
   }
@@ -31,19 +29,17 @@ class commoditiesPackaging extends React.Component{
     } else if (window.getQueryString('unionId') !== null) {
       unionId = window.getQueryString('unionId');
       nickname = window.getQueryString('nickname');
-      window.setCookie('unionId',unionId,3600);
-      window.setCookie('nickname',nickname,3600);
+      window.setCookie('unionId',unionId,7200);
+      window.setCookie('nickname',nickname,7200);
     } else {
       message.warn(`请用户登陆`);
       this.props.history.push(`/commodities-manage/commodities-packaging/customer-login`);
       return false
     }
-    this.setState({unionId:unionId,nickname:nickname});
-    this.getParcelProductListByUnionId();
+    this.setState({unionId:unionId,nickname:nickname},()=>{
+      this.getParcelProductListByUnionId();
+    });
     this.loadKeyListener();
-
-    // 用于书签跳转
-    // window.location.href = `${window.location.origin}${window.location.pathname}${window.location.search}#box_0`
 
     window.onblur = () => {
       // console.log(`失去焦点!`);
@@ -53,27 +49,97 @@ class commoditiesPackaging extends React.Component{
 
   // 根据unionId获取用户信息
   getParcelProductListByUnionId() {
+    const { selectBox, unionId, } = this.state;
     fetch(`${window.fandianUrl}/parcelManagement/getParcelProductListByUnionId`,{
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      // body: JSON.stringify({unionId:unionId})
-      body: JSON.stringify({unionId:123123})
+      body: JSON.stringify({unionId:unionId})
     }).then(r => r.json()).then(r => {
       // console.log(r);
       if (!r.data && !r.msg) {
         message.error(`后端返回数据错误`)
       } else {
         if (r.status === 10000) {
-          this.setState({boxesList:r.data,selectBox:r.data[0].parcelNo})
+          this.setState({boxesList:r.data,selectBox:selectBox === '' ? r.data[0].parcelNo : selectBox})
         } else if (r.status === 10001) {
-          message.success(r.msg)
+          message.success(r.msg);
+          this.setState({boxesList: [],selectBox: ''})
         } else {
-          message.error(`${r.msg}, 错误码: ${r.status}`)
+          message.error(`${r.msg}, 错误码: ${r.status}`);
+          this.setState({boxesList: [],selectBox: ''})
         }
       }
     }).catch(() => {
       message.error(`前端接口调取失败`)
     });
+  }
+
+  // 增加箱子
+  generateParcel(parcelNo) {
+    const { unionId, nickname, } = this.state;
+    fetch(`${window.fandianUrl}/parcelManagement/generateParcel`,{
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        parcelNo: parcelNo,
+        unionId: unionId,
+        wechatName: nickname,
+      })
+    }).then(r => r.json()).then(r => {
+      // console.log(r);
+      if (!r.data && !r.msg) {
+        message.error(`后端返回数据错误`)
+      } else {
+        if (r.status === 10000) {
+          this.setState({boxesList:r.data,selectBox:r.data[`${r.data.length-1}`].parcelNo},()=>{
+            window.location.hash = `box_${r.data.length-1}`
+          });
+        } else if (r.status > 10000) {
+          message.error(`${r.msg}, 错误码: ${r.status}`)
+        } else if (r.status < 10000) {
+          message.warn(`${r.msg}, 状态码: ${r.status}`)
+        }
+      }
+    }).catch(() => {
+      message.error(`前端商品录入接口调取失败`)
+    })
+
+  }
+
+  // 增加箱内指定商品数量
+  changeProductNumber(type,productCode) {
+    let interfaceUrl = `/productManagement/`;
+    if (type === 'plus') interfaceUrl += `increaseProductNumber`;
+    else if (type === 'minus') interfaceUrl += `decreaseProductNumber`;
+    const { selectBox, boxesList, } = this.state;
+    fetch(`${window.fandianUrl}${interfaceUrl}`,{
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        parcelNo: selectBox,
+        productCode: productCode,
+      })
+    }).then(r => r.json()).then(r => {
+      // console.log(r);
+      if (!r.data && !r.msg) {
+        message.error(`后端返回数据错误`)
+      } else {
+        if (r.status === 10000) {
+          for (let n in boxesList) if (boxesList[n].parcelNo === selectBox) {
+            let dataList = boxesList;
+            dataList[n].parcelProductVoList = r.data;
+            this.setState({boxesList: dataList})
+          }
+          message.success(`${type === 'plus' ? '增加' : '减少'}商品数量成功`)
+        } else if (r.status < 10000) {
+          message.warn(`${r.msg} 状态码:${r.status}`)
+        } else if (r.status > 10000) {
+          message.error(`${r.msg} 状态码:${r.status}`)
+        }
+      }
+    }).catch(() => {
+      message.error(`前端商品录入接口调取失败`)
+    })
   }
 
   // 商品录入
@@ -89,7 +155,7 @@ class commoditiesPackaging extends React.Component{
         wechatName: nickname,
       })
     }).then(r => r.json()).then(r => {
-      console.log(r);
+      // console.log(r);
       if (!r.data && !r.msg) {
         message.error(`后端返回数据错误`)
       } else {
@@ -168,7 +234,20 @@ class commoditiesPackaging extends React.Component{
             } else if (ruleBox.test(inputValue)) {
               // 箱号判断, 调取接口添加箱子至该用户名下
               if (inputValue.length === 14) {
-                console.log(`箱号: ${inputValue}`)
+                console.log(`箱号: ${inputValue}`);
+                // 判断是否已有该箱子
+                let hasThisBox = false,boxNum = null
+                const { boxesList, } = this.state;
+                for (let n in boxesList) if (boxesList[n].parcelNo === inputValue) {
+                  hasThisBox = true;
+                  boxNum = n;
+                }
+                if (hasThisBox) {
+                  this.setState({selectBox:inputValue},()=>{
+                    window.location.hash = `box_${boxNum}`;
+                    message.success(`选中 箱子${inputValue}`)
+                  })
+                } else if (!hasThisBox) this.generateParcel(inputValue);
               }
             }
             clearData();
@@ -192,6 +271,7 @@ class commoditiesPackaging extends React.Component{
 
   render() {
     const { isFocusOnWindow, loadingShow, nickname, boxesList, selectBox, } = this.state;
+    const isInputing = false;
     return (
       <div className="commoditiesPackaging ">
         {/*这里存放公共信息, 用于表示登陆用户, 以及退出登陆*/}
@@ -224,15 +304,27 @@ class commoditiesPackaging extends React.Component{
                     <Col span={3}> {boxKey+1} 号箱</Col>
                     <Col span={8}> 箱号: {boxItem.parcelNo}</Col>
                     <Col span={5}>
-                      <span className="boxWeightInfo" style={{color:'rgba(255,0,0,.8'}}>重量: </span>
-                      <InputNumber className="boxWeight"
-                                   max={99.9} min={0.1}
-                                   precision={0}
-                                   onChange={(v)=>{console.log(v)}}
-                                   onBlur={()=>{console.log(`onBlur ${boxKey} ${boxItem.parcelNo}`)}}
-                                   onFocus={()=>{console.log(`onFocus ${boxKey} ${boxItem.parcelNo}`)}}
-                      />
-                      <span className="boxWeightUnit">Kg</span>
+                      <div>
+                        <span className="boxWeightInfo" style={{color:'rgba(255,0,0,.8'}}>重量: </span>
+                        <InputNumber className="boxWeight"
+                                     max={99.9} min={0.1}
+                                     precision={0}
+                                     value={boxItem.parcelWeight}
+                                     onChange={(v)=>{console.log(v)}}
+                                     onBlur={()=>{
+                                       console.log(`onBlur ${boxKey} ${boxItem.parcelNo}`);
+                                       this.loadKeyListener();
+                                     }}
+                                     onFocus={()=>{
+                                       console.log(`onFocus ${boxKey} ${boxItem.parcelNo}`);
+                                       this.unloadKeyListener();
+                                     }}
+                        />
+                        <span className="boxWeightUnit">Kg</span>
+                      </div>
+                      <div>
+
+                      </div>
                     </Col>
                     <Col span={5}>
                       {boxItem.parcelNo === selectBox ? <span style={{color:'rgba(255,0,0,.6)'}}>当前所选箱子</span> : ``}
@@ -278,11 +370,13 @@ class commoditiesPackaging extends React.Component{
                             <Button shape="circle"
                                     // type="primary"
                                     icon="minus" style={{marginRight: 10}}
+                                    onClick={this.changeProductNumber.bind(this,'minus',commoditiesItem.productCode)}
                             />
                             {commoditiesItem.productNum}
                             <Button shape="circle"
                                     // type="primary"
                                     icon="plus" style={{marginLeft: 10}}
+                                    onClick={this.changeProductNumber.bind(this,'plus',commoditiesItem.productCode)}
                             />
                           </Col>
                         </Row>
