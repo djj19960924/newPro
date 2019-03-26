@@ -161,19 +161,22 @@ class commoditiesDataBase extends React.Component{
   exportExcel_record_1 () {
     let elt = document.getElementById('tableList_record_1');
     let wb = XLSX.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
-    XLSX.writeFile(wb, `商品资料库 (美渠).xlsx`);
+    XLSX.writeFile(wb, `商品资料库 (美渠) ${moment(new Date()).format('YYYYMMDD-HHmmss')}.xlsx`);
   }
   // 导出未备案excel
   exportExcel () {
     const { record, dataList, } = this.state;
     let elt = document.getElementById('tableList');
     let wb = XLSX.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
-    XLSX.writeFile(wb, (record === 3 ? `商品资料库备案表.xlsx` : `商品资料库.xlsx`));
+    XLSX.writeFile(wb, (record === 3 ? `商品资料库备案表 ${moment(new Date()).format('YYYYMMDD-HHmmss')}.xlsx` : `商品资料库 ${moment(new Date()).format('YYYYMMDD-HHmmss')}.xlsx`));
     // 导出的同时调取接口,将相应的商品状态改为备案中
     let dataArray = [],dataArrayAll = [];
     for (let i of dataList) {
       dataArray.push(i.skuCode);
-      dataArrayAll.push({ skuId: i.skuId, name: i.name, recordPrice: i.recordPrice, skuCode: i.skuCode, specificationType: i.specificationType, brand: i.brand, netWeight: i.netWeight, grossWeight: i.grossWeight })
+      dataArrayAll.push({ skuId: i.skuId, name: i.name, recordPrice: i.recordPrice,
+        // skuCode: i.skuCode,
+        skuCode: `${i.skuCode}`,
+        specificationType: i.specificationType, brand: i.brand, netWeight: i.netWeight, grossWeight: i.grossWeight })
     }
     // loading
     this.setState({isExport:true});

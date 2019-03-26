@@ -107,12 +107,12 @@ class commoditiesImgList extends React.Component {
     }
   }
   // 组件渲染值完成以后触发
-  componentDidUpdate() {
-    const { cameraModalVisible, isFileTooLarge, } = this.state;
-    // 这里根据摄像头页面弹出渲染完成以后, 触发调取摄像头
-    if (cameraModalVisible) this.getMedia();
-    if (isFileTooLarge) message.error('单个文件大小不能超过10m');
-  }
+  // componentDidUpdate() {
+  //   const { cameraModalVisible, isFileTooLarge, } = this.state;
+  //   // 这里根据摄像头页面弹出渲染完成以后, 触发调取摄像头
+  //   // if (cameraModalVisible) this.getMedia();
+  //   if (isFileTooLarge) message.error('单个文件大小不能超过10m');
+  // }
   // img图片转file
   makeImgToFile() {
     // 异步加载图片, img初始化设置, 这里放开头部验证, 防止canvas转码出现跨域问题
@@ -236,7 +236,9 @@ class commoditiesImgList extends React.Component {
       // 实际上在之前已经对该值进行了修正, 这里仅用作触发渲染
       // 虽然会多次 setState , 但实际上 setState 的机制并不会重复渲染, 而是统合同一时间的事件, 再同时渲染
       // 虽然不是官方做法, 但是可以成功只在渲染结束以后调取一次"文件超出10m"的提示
-      this.setState({isFileTooLarge: true});
+      this.setState({isFileTooLarge: true},()=>{
+        message.error('单个文件大小不能超过10m')
+      });
       // 当上传单个文件超过10m或文件列表中有任意文件大于10m时, 列表不予更新, 并且在渲染完成以后进行warn提示
     }
   }
@@ -244,6 +246,8 @@ class commoditiesImgList extends React.Component {
   openCamera() {
     this.setState({
       cameraModalVisible: true
+    },()=>{
+      this.getMedia()
     })
   }
   // 关闭摄像头弹窗
@@ -265,8 +269,12 @@ class commoditiesImgList extends React.Component {
     promise.then(function(MediaStream) {
       document.getElementById("video").srcObject = MediaStream;
       document.getElementById("video").play();
+      // console.log(`promise success`);
+      window.commoditiesImgList.setState({hasCamera:true});
     }).catch(function() {
-      message.error('调取摄像头失败, 请确保电脑已经成功链接摄像头, 并通过浏览器调用摄像头的申请!')
+      message.error('调取摄像头失败, 请确保电脑已经成功链接摄像头, 并通过浏览器调用摄像头的申请!');
+      // console.log(`promise error`);
+      window.commoditiesImgList.setState({hasCamera:false})
     })
   }
   // 拍照
