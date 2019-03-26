@@ -102,6 +102,18 @@ const menusLocalTest = [
       }
     ]
   },
+  {
+    title: 'BC清关',
+    icon: 'retweet',
+    key: '/bc-customsClearance' ,
+    subs: [
+      {
+        title: '圆通物流',
+        icon: 'sync',
+        key: '/BC_customsClearance/yuantong'
+      }
+    ]
+  },
   // 本地专用
   {
     title: '开发人员专用',
