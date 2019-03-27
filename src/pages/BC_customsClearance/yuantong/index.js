@@ -18,20 +18,37 @@ class yuant extends React.Component {
       pageTotal:0
     }
   }
-
+  formatDate(inputTime) {
+    var date = new Date(inputTime);
+    var y = date.getFullYear();
+    var m = date.getMonth() + 1;
+    m = m < 10 ? ('0' + m) : m;
+    var d = date.getDate();
+    d = d < 10 ? ('0' + d) : d;
+    var h = date.getHours();
+    h = h < 10 ? ('0' + h) : h;
+    var minute = date.getMinutes();
+    var second = date.getSeconds();
+    minute = minute < 10 ? ('0' + minute) : minute;
+    second = second < 10 ? ('0' + second) : second;
+    return y + '-' + m + '-' + d + ' ' + h + ':' + minute + ':' + second;
+  }
   componentDidMount() {
     this.setState({tableLoading:true})
     this.getOrderInfo(0);
   }
 
   getOrderInfo(status=this.state.status,pageNum=this.state.pageNum,pageSize=this.state.pageSize) {
-    fetch(window.testUrl + "/Yto/backendIsYto", {
+    fetch(window.apiUrl + "/Yto/backendIsYto", {
       method: "post",
       headers: {"Content-Type": "application/x-www-form-urlencoded"},
       body: "isYto=" + status+"&pageNum="+pageNum+"&pageSize="+pageSize
     }).then(r => r.json()).then((res) => {
       this.setState({tableLoading:false})
       if (res.status === 10000) {
+        for(let i=0 ; i<res.data.list.length;i++){
+          res.data.list[i].createTime=this.formatDate(res.data.list[i].createTime);
+        }
         message.success(`${res.status}:${res.msg}`)
         this.setState({data: res.data.list, selectedList: [], selectedIds: [],pageTotal:res.data.total, pageSizeOptions: [`100`,`200`,`500`,`${res.data.total > 1000 ? res.data.total : 1000}`]})
       } else {
@@ -51,6 +68,9 @@ class yuant extends React.Component {
     if (this.state.status !== e.target.value) {
       this.setState({status: e.target.value,tableLoading:true})
       this.getOrderInfo(e.target.value)
+      if(e.target.value===1){
+        this.setState({selectedIds:[]})
+      }
     }
   }
 
@@ -67,18 +87,24 @@ class yuant extends React.Component {
   }
 //上传
   uploadOrder (){
+    this.setState({tableIsLoading:true});
     let selectNo=[];
     for(let i=0;i<this.state.selectedIds.length;i++){
       selectNo[i]=this.state.selectedIds[i].split(":")[1];
     }
-    fetch(window.testUrl+"/Yto/uploadSelectToYto",{
+    fetch(window.apiUrl+"/Yto/uploadSelectToYto",{
       method:"post",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify(selectNo)
     }).then(r=>r.json()).then((res)=>{
       if(res.status===10000){
         this.getOrderInfo(0);
-        message.success(`${res.status}:${res.msg}`)
+        if(res.data.FailList.length===0){
+          message.success(`${res.status}:${res.msg}`)
+        }else{
+          message.error(`箱号为${res.data.FailList.join(",")}的箱子上传失败`)
+        }
+
       }else{
         message.success(`${res.status}:${res.msg}`)
       }
@@ -87,16 +113,16 @@ class yuant extends React.Component {
   render() {
     var columns = [
       {title: "箱号", dataIndex: "parcelNo", key: "parcelNo",width:50},
-      {title: "商品名称", dataIndex: "productName", key: "productName",width:100},
+      {title: "商品名称", dataIndex: "productName", key: "productName",width:200},
       {title: "收件人姓名", dataIndex: "recipientsName", key: "recipientsName",width:100},
       {title: "收件人手机", dataIndex: "recipientsPhone", key: "recipientsPhone",width:140},
       {title: "收件人省份", dataIndex: "recipientsProvince", key: "recipientsProvince",width:100},
       {title: "收件人城市", dataIndex: "recipientsCity", key: "recipientsCity",width:100},
       {title: "收件人区", dataIndex: "recipientsDistrict", key: "recipientsDistrict",width:100},
-      {title: "收件人详细地址", dataIndex: "recipientsAddress", key: "recipientsAddress",width:160},
+      {title: "收件人详细地址", dataIndex: "recipientsAddress", key: "recipientsAddress",width:260},
       {title: "用户微信昵称", dataIndex: "wechatName", key: "wechatName",width:100},
-      {title: "该包裹下商品件数", dataIndex: "productNum", key: "productNum",width:160},
-      {title: "包裹创建时间", dataIndex: "updateTime", key: "updateTime"}
+      {title: "数量", dataIndex: "productNum", key: "productNum",width:160},
+      {title: "包裹创建时间", dataIndex: "createTime", key: "createTime"}
     ];
     var columns1 = [
       {title: "绑定的面单号", dataIndex: "mailNo", key: "mailNo",width:130}
@@ -110,8 +136,8 @@ class yuant extends React.Component {
                     value={this.state.status}
                     onChange={this.logisticsStatus.bind(this)}
         >
-          <RadioButton value={0}>待发货</RadioButton>
-          <RadioButton value={1}>已发货</RadioButton>
+          <RadioButton value={0}>待上传</RadioButton>
+          <RadioButton value={1}>已上传</RadioButton>
         </RadioGroup>
         <Button type="primary" disabled={this.state.selectedIds.length === 0} onClick={this.uploadOrder.bind(this)}>发送所选订单</Button>
         <Table className="tableList"
@@ -128,7 +154,7 @@ class yuant extends React.Component {
                bordered
                loading={this.state.tableLoading}
                pagination={false}
-               scroll={{ y: 500 }}
+               scroll={{ x:1600, y: 500 }}
                rowKey={(record, index) => `id:${record.parcelNo}`}/>
         <Pagination className="tablePagination"
                     total={this.state.pageTotal}

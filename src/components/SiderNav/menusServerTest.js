@@ -97,6 +97,18 @@ const menusServerTest = [
       }
     ]
   },
+  {
+    title: 'BC清关',
+    icon: 'retweet',
+    key: '/bc-customsClearance' ,
+    subs: [
+      {
+        title: '圆通物流',
+        icon: 'sync',
+        key: '/BC_customsClearance/yuantong'
+      }
+    ]
+  }
 ];
 
 export default menusServerTest;
