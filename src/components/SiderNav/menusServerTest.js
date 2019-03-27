@@ -1,4 +1,4 @@
-const menusServerTest = [
+const menusLocalTest = [
   {
     title: '首页',
     icon: 'home',
@@ -94,6 +94,11 @@ const menusServerTest = [
         title: '商品资料库',
         icon: 'database',
         key: '/commodities-manage/commodities-database'
+      },
+      {
+        title: '商品打包',
+        icon: 'gift',
+        key: '/commodities-manage/commodities-packaging'
       }
     ]
   },
@@ -108,7 +113,7 @@ const menusServerTest = [
         key: '/BC_customsClearance/yuantong'
       }
     ]
-  }
+  },
 ];
 
-export default menusServerTest;
+export default menusLocalTest;
