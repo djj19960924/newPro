@@ -30,9 +30,25 @@
 
   .main {
     height: calc(100% - 100px);
+    position: relative;
+
+    .loading {
+      float: left;
+      position: absolute;
+      z-index: 999;
+      color: #40a9ff;
+      font-size: 36px;
+      line-height: 36px;
+      opacity: 1;
+      top: 180px;
+      margin-left: -18px;
+      left: 50%;
+    }
+
     .boxes {
       //width: 730px;
       height: calc(100% - 150px);
+      min-height: 400px;
       padding: 10px 10px 0 10px;
       background-color: #f8f8f8;
       overflow-y: auto;
@@ -65,34 +81,45 @@
             float: right;
             margin: 4px 12px 4px 0;
           }
-          .boxWeightInfo {
-            display: block;
-            float: left;
-            margin-right: 6px;
-            font-weight: normal;
-          }
-          .boxWeightUnit {
-            display: block;
-            float: left;
-            margin-left: 4px;
-            font-weight: normal;
-            font-size: 16px;
-          }
-          .boxWeight {
-            display: block;
-            float: left;
-            width: 50px;
-            height: 24px;
-            line-height: 24px;
-            margin: 4px 0;
+          .boxWeightLine {
+            overflow: hidden;
 
-            .ant-input-number-handler-wrap {
-              display: none;
+            .boxWeightInfo {
+              display: block;
+              float: left;
+              margin-right: 6px;
+              font-weight: normal;
             }
-            input {
+            .boxWeightUnit {
+              display: block;
+              float: left;
+              margin-left: 4px;
+              font-weight: normal;
+              font-size: 16px;
+            }
+            .boxWeight {
+              display: block;
+              float: left;
+              width: 50px;
               height: 24px;
               line-height: 24px;
+              margin: 4px 0;
+
+              .ant-input-number-handler-wrap {
+                display: none;
+              }
+              input {
+                height: 24px;
+                line-height: 24px;
+              }
             }
+          }
+          .boxWeightWarn {
+            color: rgba(255,0,0,.8);
+            font-size: 16px;
+            font-weight: normal;
+            line-height: 18px;
+            margin: 0;
           }
         }
 
@@ -122,7 +149,7 @@
           }
 
           .rowLineColor_light {
-
+            background-color: #fff;
           }
           .rowLineColor_dark {
             background-color: #fef8ff;
@@ -135,6 +162,8 @@
       height: 140px;
       margin-top: 10px;
       background-color: #eff;
+      padding: 10px;
+      font-size: 18px;
     }
   }
 
