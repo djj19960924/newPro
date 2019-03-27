@@ -136,7 +136,7 @@ class commoditiesPackaging extends React.Component{
 
   // 增加箱内指定商品数量
   changeProductNumber(type,productCode,parcelNo) {
-    console.log(parcelNo);
+    // console.log(parcelNo);
     const { boxesList, boxesIsLoading, } = this.state;
     if (!boxesIsLoading) {
       let interfaceUrl = `/productManagement/`;
@@ -298,6 +298,7 @@ class commoditiesPackaging extends React.Component{
             }
             clearData();
           }
+          return false;
         }
       }
     };
