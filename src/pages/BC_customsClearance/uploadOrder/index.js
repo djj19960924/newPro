@@ -17,6 +17,10 @@ class BCUploadOrder extends React.Component {
       isTableLoading: false,
       fetchNum: 0,
       showModal: false,
+      newModal: true,
+      isUpload: false,
+      success: 0,
+      fail: 0,
     };
     window.BCUploadOrder = this;
   }
@@ -27,42 +31,47 @@ class BCUploadOrder extends React.Component {
 
   // 导出推单模板excel
   exportExcel () {
-    const { tableDataList, } = this.state;
-    let dataList = [];
-    for (let v of tableDataList) {
-      dataList.push({})
-    }
+    this.setState({isUpload: true});
     let elt = document.getElementById('tableList');
     let wb = XLSX.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
     XLSX.writeFile(wb, `BC推单表 ${moment(new Date()).format('YYYYMMDD-HHmmss')}.xlsx`);
+    this.setState({newModal: false});
     this.setParcelProductIsBC();
   }
 
   // 推单到BC,导出excel时将商品状态置为已推单
   setParcelProductIsBC() {
-    fetch(`${window.fandianUrl}/bcManagement/queryParcelInfoToBc`,{
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-
-      }),
-    }).then(r => r.json()).then(r => {
-      if (!r.msg && !r.data) {
-        message.error(`后端数据错误`)
-      } else {
-        if (r.status === 10000) {
-
-        } else if (r.status < 10000) {
-          message.warn(`${r.msg} 状态码:${r.status}`)
-        } else if (r.status > 10000) {
-          message.error(`${r.msg} 错误码:${r.status}`)
+    const { tableDataList, fetchNum, success, } = this.state;
+    if (fetchNum < tableDataList.length) {
+      fetch(`${window.fandianUrl}/bcManagement/setParcelProductIsBC`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          productCode: tableDataList[fetchNum].productCode,
+          parcelNo: tableDataList[fetchNum].parcelNo,
+        }),
+      }).then(r => r.json()).then(r => {
+        if (!r.msg && !r.data) {
+          message.error(`后端数据错误`)
+        } else {
+          if (r.status === 10000) {
+            // message.success(`${r.msg}`)
+            this.setState({success:(success+1)})
+          } else {
+            message.error(`${r.msg} 错误码:${r.status}`);
+          }
         }
-      }
-      this.setState({isTableLoading: false});
-    }).catch(()=>{
-      message.error(`前端错误: 请求发送失败`);
-      this.setState({isTableLoading: false});
-    })
+        this.setState({fetchNum: (fetchNum+1)},()=>{
+          this.setParcelProductIsBC();
+        })
+      }).catch(() => {
+        message.error(`前端错误: 请求发送失败, 请重试`);
+        this.setState({isUpload: false,fetchNum: 0,})
+      })
+    } else {
+      this.setState({isUpload: false,fetchNum: 0,});
+      this.queryParcelInfoToBc();
+    }
   }
 
   // 获取需要导出到BC的推单商品信息
@@ -84,15 +93,17 @@ class BCUploadOrder extends React.Component {
           // console.log(r);
           this.setState({tableDataList: r.data.list,pageNum:r.data.pageNum,pageTotal:r.data.total,pageSize:r.data.pageSize,pageSizeOptions: ['50','100','200',`${r.data.total > 300 ? r.data.total : 300}`]});
         } else if (r.status < 10000) {
-          message.warn(`${r.msg} 状态码:${r.status}`)
+          message.warn(`${r.msg} 状态码:${r.status}`);
+          this.setState({tableDataList: []});
         } else if (r.status > 10000) {
-          message.error(`${r.msg} 错误码:${r.status}`)
+          message.error(`${r.msg} 错误码:${r.status}`);
+          this.setState({tableDataList: []});
         }
       }
       this.setState({isTableLoading: false});
     }).catch(()=>{
       message.error(`前端错误: 请求发送失败`);
-      this.setState({isTableLoading: false});
+      this.setState({isTableLoading: false,tableDataList: []});
     })
   }
 
@@ -130,12 +141,12 @@ class BCUploadOrder extends React.Component {
       {title: '毛重', dataIndex: 'grossWeight', key: 'grossWeight', width: 140},
       {title: '原产国', dataIndex: 'purchaseArea', key: 'purchaseArea2', width: 140},
     ];
-    const { tableDataList, pageTotal, pageSize, pageNum, pageSizeOptions, isTableLoading, } = this.state;
+    const { tableDataList, pageTotal, pageSize, pageNum, pageSizeOptions, isTableLoading, showModal, isUpload, success, fail, newModal, } = this.state;
     return (
       <div className="BCUploadOrder">
         <div className="btnLine">
           <Button type="primary"
-                  onClick={this.exportExcel.bind(this)}
+                  onClick={()=>this.setState({showModal: true,success:0,fail:0,})}
           >导出当前表格数据</Button>
         </div>
         <div className="TableMain">
@@ -173,6 +184,34 @@ class BCUploadOrder extends React.Component {
           onShowSizeChange={this.changePage.bind(this)}
           />
         </div>
+
+        <Modal title="导出推单模板"
+               visible={showModal}
+               onCancel={()=>{
+                 if (isUpload) {
+                   message.error(`操作完成前无法关闭窗口`);
+                 } else {
+                   this.setState({showModal: false});
+                   this.queryParcelInfoToBc();
+                 }
+               }}
+               bodyStyle={{textAlign: `center`,}}
+               footer={<div style={{textAlign: `center`}}>
+                 <Button type="primary"
+                         onClick={()=>{
+                           if (newModal) {
+                             this.exportExcel();
+                           } else {
+                             message.warn(`已导出, 请关闭窗口重试`)
+                           }
+                         }}
+                         loading={isUpload}
+                 >确定</Button>
+               </div>}
+        >
+          <p>点击确定, 导出当前页</p>
+          <p>成功 {success}/{tableDataList.length}, 失败{fail}</p>
+        </Modal>
       </div>
     )
   }
