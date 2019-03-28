@@ -54,6 +54,7 @@ class commoditiesPackaging extends React.Component{
     });
     this.loadKeyListener();
 
+    message.config({duration:4,maxCount:3});
     window.onblur = () => {
       // console.log(`失去焦点!`);
       this.setState({isFocusOnWindow: true})
@@ -203,7 +204,7 @@ class commoditiesPackaging extends React.Component{
               let dataList = boxesList;
               dataList[n].parcelProductVoList = r.data;
               this.setState({boxesList: dataList});
-              message.success(`商品已成功录入 ${parseInt(n)+1}号箱子 箱号为:${selectBox}`)
+              message.success(`商品已成功录入 ${parseInt(n)+1}号箱子 箱号为:${selectBox}`,5)
             }
           } else if (r.status < 10000) {
             message.warn(`${r.msg} 状态码:${r.status}`)
