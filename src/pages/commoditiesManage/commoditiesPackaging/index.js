@@ -274,7 +274,7 @@ class commoditiesPackaging extends React.Component{
             if (ruleBox.test(inputValue)) {
               // 箱号判断, 调取接口添加箱子至该用户名下
               if (inputValue.length === 14) {
-                message.success(`识别为箱号: ${inputValue}`);
+                // message.success(`识别为箱号: ${inputValue}`);
                 // 判断是否已有该箱子
                 let hasThisBox = false,boxNum = null;
                 const { boxesList, } = this.state;
@@ -289,11 +289,11 @@ class commoditiesPackaging extends React.Component{
                   })
                 } else if (!hasThisBox) this.generateParcel(inputValue);
               } else {
-                message.error(`识别为箱号, 长度不正确, 请重新扫描`);
+                message.error(`识别为箱号, 但是长度不正确, 请重新扫描`);
               }
             } else {
               // 商品条码判断, 调取接口添加商品进当前箱子
-              message.success(`识别为条形码: ${inputValue}`);
+              // message.success(`识别为条形码: ${inputValue}`);
               this.entryProductInfo(inputValue);
             }
             clearData();
@@ -655,7 +655,7 @@ class commoditiesPackaging extends React.Component{
                             >-</div>
                             {commoditiesItem.productNum}
                             <div className="btnPM" style={{marginLeft: 10}}
-                                 onClick={this.changeProductNumber.bind(this,'minus',commoditiesItem.productCode,boxItem.parcelNo)}
+                                 onClick={this.changeProductNumber.bind(this,'plus',commoditiesItem.productCode,boxItem.parcelNo)}
                             >+</div>
                           </Col>
                         </Row>
