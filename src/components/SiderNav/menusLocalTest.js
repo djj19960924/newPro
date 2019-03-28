@@ -113,7 +113,7 @@ const menusLocalTest = [
         key: '/BC_customsClearance/yuantong'
       },
       {
-        title: '导出订单',
+        title: 'BC推单',
         icon: 'file-excel',
         key: '/BC_customsClearance/upload-order'
       },
