@@ -91,8 +91,8 @@ class customerLogin extends React.Component{
 
     // 生成导向用户授权登陆的扫码页面
     let qrcode = new window.QRCode(this.refs.QRCodeShow, {
-      text: "http://api.maishoumiji.com/wechat/authorize?returnUrl=http%3A%2F%2Ftest3suyun.maishoumiji.com/wechat-login",
-      // text: `?openId=oFTRD1mNjqol2R3776_sYjNKN6hU&unionId=oD65q0zEahBqGk88VYAtsIKY4hSM&nickname=%E6%99%AE%E5%88%A9%E5%B0%BCsama&headimgurl=http://thirdwx.qlogo.cn/mmopen/vi_32/PiajxSqBRaEKLyfLeABlyeG0q3hEpr4MpKIyPI6DuoYxm5IdZwr0JZxac1DCk8VdK3d4osK9diaPgnZnmf7W2nqQ/132`,
+      text: "http://api.maishoumiji.com/wechat/authorize?returnUrl=http%3A%2F%2Ftestm.maishoumiji.com/logisticsstatus",
+      // text: "http://api.maishoumiji.com/wechat/authorize?returnUrl=http%3A%2F%2Ftest3suyun.maishoumiji.com/wechat-login",
       width: 200,
       height: 200,
       colorDark : "#000",

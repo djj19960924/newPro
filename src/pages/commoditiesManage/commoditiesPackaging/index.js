@@ -30,6 +30,8 @@ class commoditiesPackaging extends React.Component{
       showPayQRCode: false,
       // 二维码数据存放
       elementQRCode: null,
+      // 有未支付订单
+      needToPay: false,
     };
     window.commoditiesPackaging = this;
   }
@@ -52,7 +54,7 @@ class commoditiesPackaging extends React.Component{
     this.setState({unionId:unionId,nickname:nickname},()=>{
       this.getParcelProductListByUnionId();
     });
-    this.loadKeyListener();
+    // this.loadKeyListener();
 
     message.config({duration:4,maxCount:3});
     window.onblur = () => {
@@ -63,6 +65,7 @@ class commoditiesPackaging extends React.Component{
 
   // 根据unionId获取用户信息
   getParcelProductListByUnionId() {
+    this.loadKeyListener();
     const { selectBox, unionId, boxesIsLoading, } = this.state;
     if (!boxesIsLoading) {
       this.setState({boxesIsLoading: true});
@@ -78,8 +81,14 @@ class commoditiesPackaging extends React.Component{
           if (r.status === 10000) {
             this.setState({boxesList:r.data,selectBox:selectBox === '' ? r.data[0].parcelNo : selectBox})
           } else if (r.status === 10001) {
-            message.success(r.msg);
+            message.warn(r.msg);
             this.setState({boxesList: [],selectBox: ''});
+          } else if (r.status === 9999) {
+            message.warn(r.msg);
+            this.setState({boxesList: [],selectBox: '',needToPay: true},()=>{
+              this.createQRCode(document.querySelector(`#showQRCode`));
+              this.unloadKeyListener();
+            });
           } else {
             message.error(`${r.msg}, 错误码: ${r.status}`);
             this.setState({boxesList: [],selectBox: ''})
@@ -204,12 +213,12 @@ class commoditiesPackaging extends React.Component{
               let dataList = boxesList;
               dataList[n].parcelProductVoList = r.data;
               this.setState({boxesList: dataList});
-              message.success(`商品已成功录入 ${parseInt(n)+1}号箱子 箱号为:${selectBox}`,5)
+              message.success(`商品已成功录入 ${parseInt(n)+1}号箱`,5)
             }
           } else if (r.status < 10000) {
-            message.warn(`${r.msg} 状态码:${r.status}`)
+            message.warn(`${r.msg}`)
           } else if (r.status > 10000) {
-            message.error(`${r.msg} 状态码:${r.status}`)
+            message.error(`${r.msg}`)
           }
         }
         this.setState({boxesIsLoading: false});
@@ -355,7 +364,7 @@ class commoditiesPackaging extends React.Component{
           } else {
             if (r.status === 10000) {
               // 这里提示进行变更
-              message.success(`${Num+1}号箱 箱号为:${parcelNo} 重量更新成功`);
+              message.success(`${Num+1}号箱 重量更新成功`);
             } else {
               message.error(`${r.msg} 错误码:${r.status}`);
               resetWeight();
@@ -437,7 +446,7 @@ class commoditiesPackaging extends React.Component{
     for (let n in boxesList) {
       if (!boxesList[n].parcelWeight) {
         allWeightDone = false;
-        message.error(`箱子重量不能为空 ${parseInt(n)+1}号箱 重量为空 箱号:${boxesList[n].parcelNo}`)
+        message.error(`箱子重量不能为空 ${parseInt(n)+1}号箱 重量为空`)
       }
     }
     if (allWeightDone) if (boxesList.length > 0) {
@@ -468,7 +477,7 @@ class commoditiesPackaging extends React.Component{
         } else if (r.status > 10000) {
           message.error(`${r.msg} 错误码:${r.status}`);
         } else if (r.status < 10000) {
-          message.warn(`${r.msg} 状态码:${r.status}`);
+          message.warn(`${r.msg}`);
         }
       }
       this.setState({boxesIsLoading: false});
@@ -508,19 +517,7 @@ class commoditiesPackaging extends React.Component{
             message.success(`${r.msg}`);
             this.getParcelProductListByUnionId();
             this.setState({showPayQRCode: true},()=>{
-              document.querySelector(`#payQRCodeShow`).innerHTML = '';
-              let isTest = false;
-              if (window.isServerTest) isTest = true;
-              if (window.isLocalTest) isTest = true;
-              let qrcode = new window.QRCode(document.querySelector(`#payQRCodeShow`), {
-                text: `http://api.maishoumiji.com/wechat/authorize?returnUrl=http%3A%2F%2F${isTest ? 'test' : ''}m.maishoumiji.com/paymenttransfer`,
-                width: 200,
-                height: 200,
-                colorDark : "#000",
-                colorLight : "#fff",
-                correctLevel : window.QRCode.CorrectLevel.H
-              });
-              this.setState({elementQRCode:qrcode})
+              this.createQRCode(document.querySelector(`#payQRCodeShow`));
             });
           } else {
             message.error(`${r.msg} 错误码:${r.status}`);
@@ -536,8 +533,25 @@ class commoditiesPackaging extends React.Component{
     }
   }
 
+  // 生成二维码
+  createQRCode(Obj) {
+    Obj.innerHTML = '';
+    let isTest = false;
+    if (window.isServerTest) isTest = true;
+    if (window.isLocalTest) isTest = true;
+    let qrcode = new window.QRCode(Obj, {
+      text: `http://api.maishoumiji.com/wechat/authorize?returnUrl=http%3A%2F%2F${isTest ? 'test' : ''}m.maishoumiji.com/paymenttransfer`,
+      width: 200,
+      height: 200,
+      colorDark : "#000",
+      colorLight : "#fff",
+      correctLevel : window.QRCode.CorrectLevel.H
+    });
+    this.setState({elementQRCode:qrcode})
+  }
+
   render() {
-    const { isFocusOnWindow, loadingShow, nickname, boxesList, selectBox, isOnFocusInput, boxesIsLoading, orderMoney, productNum, showPayQRCode, } = this.state;
+    const { isFocusOnWindow, loadingShow, nickname, boxesList, selectBox, isOnFocusInput, boxesIsLoading, orderMoney, productNum, showPayQRCode, needToPay, } = this.state;
     return (
       <div className="commoditiesPackaging ">
         {/*这里存放公共信息, 用于表示登陆用户, 以及退出登陆*/}
@@ -561,6 +575,12 @@ class commoditiesPackaging extends React.Component{
 
           {/*这里用作箱子信息存放*/}
           <div className="boxes" style={{opacity:(boxesIsLoading ? .3 : 1)}}>
+            { needToPay &&
+              <div>
+                <div id="showQRCode"/>
+                <p>仍有订单未支付, 请先支付</p>
+              </div>
+            }
             {/*第一层遍历, 取出所有箱子信息, 将箱号与箱内数据取出并使用*/}
             {boxesList.map((boxItem,boxKey) => {
               // console.log(boxItem);
@@ -679,7 +699,7 @@ class commoditiesPackaging extends React.Component{
               <Button type="primary"
                       style={{marginLeft: 10}}
                       onClick={this.createOrder.bind(this)}
-                      disabled={boxesIsLoading}
+                      disabled={boxesIsLoading || isOnFocusInput || needToPay}
               >完成, 去支付</Button>
             </div>
           </div>
