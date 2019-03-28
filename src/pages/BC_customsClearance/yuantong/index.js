@@ -112,17 +112,17 @@ class yuant extends React.Component {
   }
   render() {
     var columns = [
-      {title: "箱号", dataIndex: "parcelNo", key: "parcelNo",width:50},
+      {title: "箱号", dataIndex: "parcelNo", key: "parcelNo",width:130},
       {title: "商品名称", dataIndex: "productName", key: "productName",width:200},
       {title: "收件人姓名", dataIndex: "recipientsName", key: "recipientsName",width:100},
       {title: "收件人手机", dataIndex: "recipientsPhone", key: "recipientsPhone",width:140},
       {title: "收件人省份", dataIndex: "recipientsProvince", key: "recipientsProvince",width:100},
       {title: "收件人城市", dataIndex: "recipientsCity", key: "recipientsCity",width:100},
       {title: "收件人区", dataIndex: "recipientsDistrict", key: "recipientsDistrict",width:100},
-      {title: "收件人详细地址", dataIndex: "recipientsAddress", key: "recipientsAddress",width:260},
+      {title: "收件人详细地址", dataIndex: "recipientsAddress", key: "recipientsAddress"},
       {title: "用户微信昵称", dataIndex: "wechatName", key: "wechatName",width:100},
-      {title: "数量", dataIndex: "productNum", key: "productNum",width:160},
-      {title: "包裹创建时间", dataIndex: "createTime", key: "createTime"}
+      {title: "数量", dataIndex: "productNum", key: "productNum",width:50},
+      {title: "包裹创建时间", dataIndex: "createTime", key: "createTime",width:130}
     ];
     var columns1 = [
       {title: "绑定的面单号", dataIndex: "mailNo", key: "mailNo",width:130}
