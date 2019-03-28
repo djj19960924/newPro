@@ -298,7 +298,6 @@ class commoditiesPackaging extends React.Component{
             }
             clearData();
           }
-          return false;
         }
       }
     };
@@ -651,17 +650,13 @@ class commoditiesPackaging extends React.Component{
                           <Col className="infoCol" span={6}>{commoditiesItem.productCode}</Col>
                           <Col className="infoCol" span={10} title={commoditiesItem.productName}>{commoditiesItem.productName}</Col>
                           <Col className="infoCol" span={5}>
-                            <Button shape="circle"
-                                    // type="primary"
-                                    icon="minus" style={{marginRight: 10}}
-                                    onClick={this.changeProductNumber.bind(this,'minus',commoditiesItem.productCode,boxItem.parcelNo)}
-                            />
+                            <div className="btnPM" style={{marginRight: 10}}
+                                 onClick={this.changeProductNumber.bind(this,'minus',commoditiesItem.productCode,boxItem.parcelNo)}
+                            >-</div>
                             {commoditiesItem.productNum}
-                            <Button shape="circle"
-                                    // type="primary"
-                                    icon="plus" style={{marginLeft: 10}}
-                                    onClick={this.changeProductNumber.bind(this,'plus',commoditiesItem.productCode,boxItem.parcelNo)}
-                            />
+                            <div className="btnPM" style={{marginLeft: 10}}
+                                 onClick={this.changeProductNumber.bind(this,'minus',commoditiesItem.productCode,boxItem.parcelNo)}
+                            >+</div>
                           </Col>
                         </Row>
                       )
