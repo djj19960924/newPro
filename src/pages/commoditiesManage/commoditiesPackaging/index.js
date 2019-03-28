@@ -447,6 +447,38 @@ class commoditiesPackaging extends React.Component{
     }
   }
 
+  // 删除箱子接口
+  deleteParcelByParcelNo(parcelNo,Num) {
+    const { boxesList,} = this.state;
+    fetch(`${window.fandianUrl}/parcelManagement/deleteParcelByParcelNo`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        parcelNo: parcelNo,
+      })
+    }).then(r => r.json()).then(r => {
+      if (!r.data && !r.msg) {
+        message.error(`后端返回数据错误`);
+      } else {
+        if (r.status === 10000) {
+          let dataList = boxesList;
+          dataList.splice(Num,1);
+          this.setState({boxesList: dataList});
+          message.success(`${r.msg}`);
+        } else if (r.status > 10000) {
+          message.error(`${r.msg} 错误码:${r.status}`);
+        } else if (r.status < 10000) {
+          message.warn(`${r.msg} 状态码:${r.status}`);
+        }
+      }
+      this.setState({boxesIsLoading: false});
+      this.calcAll();
+    }).catch(() => {
+      message.error(`前端商品录入接口调取失败`);
+      this.setState({boxesIsLoading: false});
+    })
+  }
+
   // 保存订单
   generateParcelOrder() {
     const { boxesList, boxesIsLoading, unionId, nickname, orderMoney, productNum, } = this.state;
@@ -576,7 +608,8 @@ class commoditiesPackaging extends React.Component{
                       <Button type="danger"
                               size="small"
                               className="delBox"
-                              disabled={true}
+                              disabled={!(boxItem.parcelProductVoList === null ? true : (boxItem.parcelProductVoList.length === 0))}
+                              onClick={this.deleteParcelByParcelNo.bind(this,boxItem.parcelNo,boxKey)}
                       ><Icon type="close-circle" />删除箱子</Button>
                     </Col>
                   </Row>

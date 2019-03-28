@@ -27,10 +27,12 @@ import commoditiesDataBase from '@pages/commoditiesManage/commoditiesDatabase/';
 import commoditiesCreateAndEdit from '@pages/commoditiesManage/commoditiesDatabase/commoditiesCreateAndEdit/';
 import commoditiesImgList from '@pages/commoditiesManage/commoditiesDatabase/commoditiesImgList/';
 // 商品打包
-import commoditiesPackaging from "../../pages/commoditiesManage/commoditiesPackaging";
-import customerLogin from "../../pages/commoditiesManage/commoditiesPackaging/customerLogin";
-//bc清关
-import yuant from "../../pages/BC_customsClearance/yuantong";
+import commoditiesPackaging from "@pages/commoditiesManage/commoditiesPackaging";
+import customerLogin from "@pages/commoditiesManage/commoditiesPackaging/customerLogin";
+// bc清关
+import yuant from "@pages/BC_customsClearance/yuantong";
+// bc推单
+import BCUploadOrder from "@pages/BC_customsClearance/uploadOrder"
 // 404页面
 import page404 from '@pages/system/page404/'
 
@@ -70,6 +72,7 @@ class ContentMain extends React.Component{
           <Route exact path="/commodities-manage/commodities-packaging/customer-login" component={customerLogin} />
           {/*bc清关*/}
           <Route exact path="/BC_customsClearance/yuantong" component={yuant} />
+          <Route exact path="/BC_customsClearance/upload-order" component={BCUploadOrder} />
           {/*首页*/}
           <Route exact path="/" component={Home} />
           {/*开发人员专用管理路由*/}

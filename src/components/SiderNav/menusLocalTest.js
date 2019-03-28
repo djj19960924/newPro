@@ -111,7 +111,12 @@ const menusLocalTest = [
         title: '圆通物流',
         icon: 'sync',
         key: '/BC_customsClearance/yuantong'
-      }
+      },
+      {
+        title: '导出订单',
+        icon: 'file-excel',
+        key: '/BC_customsClearance/upload-order'
+      },
     ]
   },
   // 本地专用
