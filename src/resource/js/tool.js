@@ -11,7 +11,7 @@ window.getQueryString = function (name) {
 
 // 获取全部search参数
 window.getAllQueryString = () => {
-  // if (!(window.location.search.split('?')[1])) return null;
+  if (!(window.location.search.split('?')[1])) return {};
   let dataObj = {};
   let searchList = window.location.search.split('?')[1].split('&');
   for (let i = 0; i < searchList.length; i++) {
