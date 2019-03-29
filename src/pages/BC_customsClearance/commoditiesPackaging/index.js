@@ -81,7 +81,7 @@ class commoditiesPackaging extends React.Component{
           if (r.status === 10000) {
             this.setState({boxesList:r.data,selectBox:selectBox === '' ? r.data[0].parcelNo : selectBox})
           } else if (r.status === 10001) {
-            message.warn(r.msg);
+            // message.warn(r.msg);
             this.setState({boxesList: [],selectBox: ''});
           } else if (r.status === 9999) {
             message.warn(r.msg);
