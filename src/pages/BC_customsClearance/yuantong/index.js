@@ -49,7 +49,7 @@ class yuant extends React.Component {
         for(let i=0 ; i<res.data.list.length;i++){
           res.data.list[i].createTime=this.formatDate(res.data.list[i].createTime);
         }
-        message.success(`${res.status}:${res.msg}`)
+        //message.success(`${res.msg}`)
         this.setState({data: res.data.list, selectedList: [], selectedIds: [],pageTotal:res.data.total, pageSizeOptions: [`100`,`200`,`500`,`${res.data.total > 1000 ? res.data.total : 1000}`]})
       } else {
         if(res.status===10002){
@@ -100,13 +100,13 @@ class yuant extends React.Component {
       if(res.status===10000){
         this.getOrderInfo(0);
         if(res.data.FailList.length===0){
-          message.success(`${res.status}:${res.msg}`)
+          message.success(`${res.msg}`)
         }else{
           message.error(`箱号为${res.data.FailList.join(",")}的箱子上传失败`)
         }
 
       }else{
-        message.success(`${res.status}:${res.msg}`)
+        message.error(`${res.status}:${res.msg}`)
       }
     })
   }
