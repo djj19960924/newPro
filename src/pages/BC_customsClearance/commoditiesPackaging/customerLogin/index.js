@@ -68,7 +68,7 @@ class customerLogin extends React.Component{
               // 如果长度也符合, 那么则可以模糊判定所获取到的信息为 unionId
               // 当符合条件的时候, 则可以进行接口操作, 根据 unionId 获取该用户下所有转运箱号资料
               message.success(`成功获取用户信息,即将跳转`);
-              this.props.history.push(`/commodities-manage/commodities-packaging/?unionId=${unionId}&nickname=${nickname}`)
+              this.props.history.push(`/BC-customsClearance/commodities-packaging/?unionId=${unionId}&nickname=${nickname}`)
             } else {
               message.error(`获取用户信息失败, 请重试`)
             }

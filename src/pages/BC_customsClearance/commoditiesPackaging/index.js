@@ -390,7 +390,7 @@ class commoditiesPackaging extends React.Component{
   loginOut() {
     window.delCookie('unionId');
     window.delCookie('nickname');
-    this.props.history.push(`/commodities-manage/commodities-packaging/customer-login`);
+    this.props.history.push(`/BC-customsClearance/commodities-packaging/customer-login`);
   }
 
   componentWillUnmount() {
