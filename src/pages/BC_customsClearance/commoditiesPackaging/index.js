@@ -216,7 +216,11 @@ class commoditiesPackaging extends React.Component{
               message.success(`商品已成功录入 ${parseInt(n)+1}号箱`,5)
             }
           } else if (r.status < 10000) {
-            message.warn(`${r.msg}`)
+            if (r.status === 9999) {
+              message.warn(`请尝试重新扫描该条码, 商品可能未备案`)
+            } else {
+              message.warn(`${r.msg}`)
+            }
           } else if (r.status > 10000) {
             message.error(`${r.msg}`)
           }
