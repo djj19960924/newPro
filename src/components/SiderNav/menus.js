@@ -94,7 +94,29 @@ const menus = [
         title: '商品资料库',
         icon: 'database',
         key: '/commodities-manage/commodities-database'
-      }
+      },
+    ]
+  },
+  {
+    title: 'BC清关',
+    icon: 'retweet',
+    key: '/BC-customsClearance' ,
+    subs: [
+      {
+        title: '扫码录入商品',
+        icon: 'gift',
+        key: '/BC-customsClearance/commodities-packaging'
+      },
+      {
+        title: '圆通物流',
+        icon: 'sync',
+        key: '/BC-customsClearance/yuantong'
+      },
+      {
+        title: 'BC推单',
+        icon: 'file-excel',
+        key: '/BC-customsClearance/upload-order'
+      },
     ]
   },
 ];

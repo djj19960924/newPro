@@ -1,4 +1,4 @@
-const menusLocalTest = [
+const menusServerTest = [
   {
     title: '首页',
     icon: 'home',
@@ -121,4 +121,4 @@ const menusLocalTest = [
   },
 ];
 
-export default menusLocalTest;
+export default menusServerTest;
