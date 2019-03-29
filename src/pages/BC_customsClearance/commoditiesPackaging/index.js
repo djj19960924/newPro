@@ -217,7 +217,7 @@ class commoditiesPackaging extends React.Component{
             }
           } else if (r.status < 10000) {
             if (r.status === 9999) {
-              message.warn(`请尝试重新扫描该条码, 商品可能未备案`)
+              message.warn(`扫码失败或商品未备案, 请尝试重新扫描该条码`)
             } else {
               message.warn(`${r.msg}`)
             }
