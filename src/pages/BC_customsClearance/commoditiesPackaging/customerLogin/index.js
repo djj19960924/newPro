@@ -89,9 +89,12 @@ class customerLogin extends React.Component{
       // console.log(`获得焦点!`);
     // };
 
+    let isTest = false;
+    if (window.isServerTest) isTest = true;
+    if (window.isLocalTest) isTest = true;
     // 生成导向用户授权登陆的扫码页面
     let qrcode = new window.QRCode(this.refs.QRCodeShow, {
-      text: `http://api.maishoumiji.com/wechat/authorize?returnUrl=http%3A%2F%2F${(window.isLocalTest || window.isServerTest) ? 'test' : ''}m.maishoumiji.com/logisticsstatus`,
+      text: `http://api.maishoumiji.com/wechat/authorize?returnUrl=http%3A%2F%2F${isTest ? 'test' : ''}m.maishoumiji.com/logisticsstatus`,
       width: 200,
       height: 200,
       colorDark : "#000",
