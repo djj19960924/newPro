@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Button, Pagination, message, Modal, } from 'antd';
+import { Radio, Table, Button, Pagination, message, Modal, } from 'antd';
 import XLSX from 'xlsx';
 import moment from 'moment';
 
@@ -21,6 +21,8 @@ class BCUploadOrder extends React.Component {
       isUpload: false,
       success: 0,
       fail: 0,
+      // BC推送状态
+      BCStatus: 0,
     };
     window.BCUploadOrder = this;
   }
@@ -76,9 +78,9 @@ class BCUploadOrder extends React.Component {
 
   // 获取需要导出到BC的推单商品信息
   queryParcelInfoToBc() {
-    const { pageNum, pageSize, } = this.state;
+    const { pageNum, pageSize, BCStatus, } = this.state;
     this.setState({isTableLoading: true});
-    fetch(`${window.fandianUrl}/bcManagement/queryParcelInfoToBc`,{
+    fetch(`${window.fandianUrl}/bcManagement/${BCStatus === 0 ? 'queryParcelInfoToBc' : 'queryParcelInfoIsBc'}`,{
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
@@ -93,7 +95,8 @@ class BCUploadOrder extends React.Component {
           // console.log(r);
           this.setState({tableDataList: r.data.list,pageNum:r.data.pageNum,pageTotal:r.data.total,pageSize:r.data.pageSize,pageSizeOptions: ['50','100','200',`${r.data.total > 300 ? r.data.total : 300}`]});
         } else if (r.status < 10000) {
-          message.warn(`${r.msg} 状态码:${r.status}`);
+          // message.warn(`${r.msg} 状态码:${r.status}`);
+          message.warn(`${r.msg}`);
           this.setState({tableDataList: []});
         } else if (r.status > 10000) {
           message.error(`${r.msg} 错误码:${r.status}`);
@@ -141,12 +144,29 @@ class BCUploadOrder extends React.Component {
       {title: '毛重', dataIndex: 'grossWeight', key: 'grossWeight', width: 140},
       {title: '原产国', dataIndex: 'purchaseArea', key: 'purchaseArea2', width: 140},
     ];
-    const { tableDataList, pageTotal, pageSize, pageNum, pageSizeOptions, isTableLoading, showModal, isUpload, success, fail, newModal, } = this.state;
+    const RadioButton = Radio.Button, RadioGroup = Radio.Group;
+    const { tableDataList, pageTotal, pageSize, pageNum, pageSizeOptions, isTableLoading, showModal, isUpload, success, fail, newModal, BCStatus, } = this.state;
     return (
       <div className="BCUploadOrder">
+        <div className="tadioLine">
+          {/*查询条件单选行*/}
+          <RadioGroup buttonStyle="solid"
+                      className="radioBtn"
+                      value={BCStatus}
+                      onChange={(e)=>{
+                        this.setState({BCStatus:e.target.value},()=>{
+                          this.queryParcelInfoToBc();
+                        });
+                      }}
+          >
+            <RadioButton value={0}>未推送</RadioButton>
+            <RadioButton value={1}>已推送</RadioButton>
+          </RadioGroup>
+        </div>
         <div className="btnLine">
           <Button type="primary"
                   onClick={()=>this.setState({showModal: true,success:0,fail:0,})}
+                  disabled={!BCStatus}
           >导出当前表格数据</Button>
         </div>
         <div className="TableMain">
@@ -158,14 +178,6 @@ class BCUploadOrder extends React.Component {
                  pagination={false}
                  loading={isTableLoading}
                  bordered
-                 // rowSelection={{
-                 //   selectedRowKeys: selectedIds,
-                 //   // 选择框变化时触发
-                 //   onChange: (selectedRowKeys, selectedRows) => {
-                 //     this.setState({selectedList: selectedRows,selectedIds: selectedRowKeys});
-                 //     // console.log(selectedRowKeys, selectedRows)
-                 //   },
-                 // }}
                  scroll={{ y: 500, x: 800 }}
                  rowKey={(record, index) => `id_${index}`}
           />
