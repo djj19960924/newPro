@@ -425,7 +425,7 @@ class commoditiesPackaging extends React.Component{
       let W = Math.ceil(weight);
       if (W < 5) {
         price += (60*W)
-      } else if (W > 5 && W <= 7) {
+      } else if (W >= 5 && W <= 7) {
         price += (60*W)
       } else if (W > 7) {
         price += (50*W)
