@@ -12,6 +12,7 @@
 /build
 
 /.ideal
+.ideal/
 
 # misc
 .DS_Store
