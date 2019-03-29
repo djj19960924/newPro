@@ -95,11 +95,6 @@ const menusLocalTest = [
         icon: 'database',
         key: '/commodities-manage/commodities-database'
       },
-      {
-        title: '商品打包',
-        icon: 'gift',
-        key: '/commodities-manage/commodities-packaging'
-      }
     ]
   },
   {
@@ -107,6 +102,11 @@ const menusLocalTest = [
     icon: 'retweet',
     key: '/bc-customsClearance' ,
     subs: [
+      {
+        title: '扫码录入商品',
+        icon: 'gift',
+        key: '/BC_customsClearance/commodities-packaging'
+      },
       {
         title: '圆通物流',
         icon: 'sync',

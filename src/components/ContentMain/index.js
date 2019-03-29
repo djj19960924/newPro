@@ -27,8 +27,8 @@ import commoditiesDataBase from '@pages/commoditiesManage/commoditiesDatabase/';
 import commoditiesCreateAndEdit from '@pages/commoditiesManage/commoditiesDatabase/commoditiesCreateAndEdit/';
 import commoditiesImgList from '@pages/commoditiesManage/commoditiesDatabase/commoditiesImgList/';
 // 商品打包
-import commoditiesPackaging from "@pages/commoditiesManage/commoditiesPackaging";
-import customerLogin from "@pages/commoditiesManage/commoditiesPackaging/customerLogin";
+import commoditiesPackaging from "@pages/BC_customsClearance/commoditiesPackaging";
+import customerLogin from "@pages/BC_customsClearance/commoditiesPackaging/customerLogin";
 // bc清关
 import yuant from "@pages/BC_customsClearance/yuantong";
 // bc推单
