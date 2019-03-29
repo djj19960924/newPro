@@ -100,22 +100,22 @@ const menusLocalTest = [
   {
     title: 'BC清关',
     icon: 'retweet',
-    key: '/bc-customsClearance' ,
+    key: '/BC-customsClearance' ,
     subs: [
       {
         title: '扫码录入商品',
         icon: 'gift',
-        key: '/BC_customsClearance/commodities-packaging'
+        key: '/BC-customsClearance/commodities-packaging'
       },
       {
         title: '圆通物流',
         icon: 'sync',
-        key: '/BC_customsClearance/yuantong'
+        key: '/BC-customsClearance/yuantong'
       },
       {
         title: 'BC推单',
         icon: 'file-excel',
-        key: '/BC_customsClearance/upload-order'
+        key: '/BC-customsClearance/upload-order'
       },
     ]
   },

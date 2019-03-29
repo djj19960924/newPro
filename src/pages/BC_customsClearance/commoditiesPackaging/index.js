@@ -48,7 +48,7 @@ class commoditiesPackaging extends React.Component{
       window.setCookie('nickname',nickname,7200);
     } else {
       message.warn(`请用户登陆`);
-      this.props.history.push(`/commodities-manage/commodities-packaging/customer-login`);
+      this.props.history.push(`/BC-customsClearance/commodities-packaging/customer-login`);
       return false
     }
     this.setState({unionId:unionId,nickname:nickname},()=>{

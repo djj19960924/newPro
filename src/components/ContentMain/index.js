@@ -68,11 +68,11 @@ class ContentMain extends React.Component{
           <Route exact path="/commodities-manage/commodities-database" component={commoditiesDataBase} />
           <Route exact path="/commodities-manage/commodities-database/create-and-edit" component={commoditiesCreateAndEdit} />
           <Route exact path="/commodities-manage/commodities-database/commodities-img-list" component={commoditiesImgList} />
-          <Route exact path="/commodities-manage/commodities-packaging" component={commoditiesPackaging} />
-          <Route exact path="/commodities-manage/commodities-packaging/customer-login" component={customerLogin} />
           {/*bc清关*/}
-          <Route exact path="/BC_customsClearance/yuantong" component={yuant} />
-          <Route exact path="/BC_customsClearance/upload-order" component={BCUploadOrder} />
+          <Route exact path="/BC-customsClearance/commodities-packaging" component={commoditiesPackaging} />
+          <Route exact path="/BC-customsClearance/commodities-packaging/customer-login" component={customerLogin} />
+          <Route exact path="/BC-customsClearance/yuantong" component={yuant} />
+          <Route exact path="/BC-customsClearance/upload-order" component={BCUploadOrder} />
           {/*首页*/}
           <Route exact path="/" component={Home} />
           {/*开发人员专用管理路由*/}
