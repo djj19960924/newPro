@@ -132,7 +132,7 @@ class commoditiesDataBase extends React.Component{
     fetch(`${window.fandianUrl}/sku/getSku`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body:JSON.stringify({choice:record,pageNum:pageNum,pageSize:pageSize,searchParm:searchValue}),
+      body:JSON.stringify({choice:record,pageNum:pageNum,pageSize:pageSize,searchParm:searchValue.trim()}),
     }).then(r => r.json()).then(r => {
       this.setState({tableIsLoading:false,dataList: []});
       if (r.status) {
