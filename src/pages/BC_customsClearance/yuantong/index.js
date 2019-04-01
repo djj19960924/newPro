@@ -101,6 +101,7 @@ class yuant extends React.Component {
         this.getOrderInfo(0);
         if(res.data.FailList.length===0){
           message.success(`${res.msg}`)
+          this.setState({selectedIds:[]})
         }else{
           message.error(`箱号为${res.data.FailList.join(",")}的箱子上传失败`)
         }
