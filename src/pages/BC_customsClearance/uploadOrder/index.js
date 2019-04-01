@@ -166,7 +166,7 @@ class BCUploadOrder extends React.Component {
         <div className="btnLine">
           <Button type="primary"
                   onClick={()=>this.setState({showModal: true,success:0,fail:0,})}
-                  disabled={!BCStatus}
+                  disabled={BCStatus}
           >导出当前表格数据</Button>
         </div>
         <div className="TableMain">
