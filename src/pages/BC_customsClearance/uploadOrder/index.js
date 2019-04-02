@@ -141,7 +141,8 @@ class BCUploadOrder extends React.Component {
       {title: '商品规格', dataIndex: 'specificationType', key: 'specificationType', width: 140},
       {title: '品牌', dataIndex: 'brand', key: 'brand', width: 140},
       {title: '净重', dataIndex: 'netWeight', key: 'netWeight', width: 140},
-      {title: '毛重', dataIndex: 'grossWeight', key: 'grossWeight', width: 140},
+      // {title: '毛重', dataIndex: 'grossWeight', key: 'grossWeight', width: 140},
+      {title: '毛重', dataIndex: 'parcelWeight', key: 'parcelWeight', width: 140},
       {title: '原产国', dataIndex: 'purchaseArea', key: 'purchaseArea2', width: 140},
     ];
     const RadioButton = Radio.Button, RadioGroup = Radio.Group;
