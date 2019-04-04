@@ -183,7 +183,7 @@ class commoditiesDataBase extends React.Component {
   exportExcel_record_1() {
     let elt = document.getElementById('tableList_record_1');
     let wb = XLSX.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
-    XLSX.writeFile(wb, `商品资料库 (美渠) ${moment(new Date()).format('YYYYMMDD-HHmmss')}.xlsx`);
+    XLSX.writeFile(wb, `商品资料库 (美渠) ${moment(new Date()).format('YYYY-MM-DD HH:mm:ss')}.xlsx`);
   }
 
   // 导出未备案excel
@@ -191,7 +191,7 @@ class commoditiesDataBase extends React.Component {
     const {record, dataList,} = this.state;
     let elt = document.getElementById('tableList');
     let wb = XLSX.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
-    XLSX.writeFile(wb, (record === 3 ? `商品资料库备案表 ${moment(new Date()).format('YYYYMMDD-HHmmss')}.xlsx` : `商品资料库 ${moment(new Date()).format('YYYYMMDD-HHmmss')}.xlsx`));
+    XLSX.writeFile(wb, (record === 3 ? `商品资料库备案表 ${moment(new Date()).format('YYYY-MM-DD HH:mm:ss')}.xlsx` : `商品资料库 ${moment(new Date()).format('YYYY-MM-DD HH:mm:ss')}.xlsx`));
     // 导出的同时调取接口,将相应的商品状态改为备案中
     let dataArray = [], dataArrayAll = [];
     for (let i of dataList) {
@@ -513,7 +513,20 @@ class commoditiesDataBase extends React.Component {
       {title: `行邮税名称`, dataIndex: `行邮税名称`, key: `行邮税名称`, width: 80},
       {title: `净重`, dataIndex: `netWeight`, key: `netWeight`, width: 80},
       {title: `毛重`, dataIndex: `grossWeight`, key: `grossWeight`, width: 80},
-      {title: `原产国`, dataIndex: `原产国`, key: `原产国`, width: 80},
+      {title: `原产国`, dataIndex: `purchaseArea`, key: `purchaseArea`, width: 80,
+        render: (text, record) => (
+          // 这里调用方法判断行邮方式
+          <div>{
+            record.purchaseArea ? (()=>{
+              let code = null;
+              for (let n in Country) {
+                if (Country[n] === record.purchaseArea) code = n;
+              }
+              return code;
+            })() : ''
+          }</div>
+        ),
+      },
       {title: `生产厂家`, dataIndex: `brand`, key: `brandOrigin`, width: 80},
       {title: `商检备案号`, dataIndex: `商检备案号`, key: `商检备案号`, width: 50},
       {title: `这行不能修改任何名称`, dataIndex: `这行不能修改任何名称`, key: `这行不能修改任何名称`},
