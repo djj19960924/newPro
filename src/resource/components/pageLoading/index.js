@@ -8,7 +8,7 @@ class PageLoading extends React.Component {
     super(props)
   }
   componentDidMount() {
-    const { loadingTxt, } = this.props;
+    const { loadingTxt, percentage} = this.props;
     this.changeMarginbyTxtChanged()
   }
 
@@ -26,12 +26,14 @@ class PageLoading extends React.Component {
   }
 
   render() {
-    const { loadingTxt, } = this.props;
+    const { loadingTxt,percentage } = this.props;
     return (
       <div className="pageLoading">
         <div className="loadingTxt" ref="loadingTxt">
           <Icon type="loading" className="loadingIcon"/>
-          <span className="loadingMain">{loadingTxt ? loadingTxt : `Loading...`}</span>
+          <span className="loadingMain">{loadingTxt ? loadingTxt : `Loading...`}
+            {percentage ? <span>{percentage}</span> : "" }
+          </span>
         </div>
         <div className="shadowLayer">
         </div>
