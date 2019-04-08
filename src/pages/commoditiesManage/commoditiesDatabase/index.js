@@ -20,6 +20,8 @@ class commoditiesDataBase extends React.Component {
       count:0,//当前下载图片的数目
       skuCodeList: [],//保存当前页的商品码
       picList:[],//下载图片的数据
+      dowmloadFailPic:[],//图片下载失败
+      downloadVisible:false,//下载图片弹窗
       input: null,
       importModalVisible: false,
       exportModalVisible: false,
@@ -400,6 +402,7 @@ class commoditiesDataBase extends React.Component {
       //zip.file(`123.png`, "213", {base64: true});
       zip.file(`${window.commoditiesDataBase.state.picList[window.commoditiesDataBase.state.count].skuCode}.png`, data, {base64: true});
       if(window.commoditiesDataBase.state.count == window.commoditiesDataBase.state.picList.length){
+        this.setState({downloadVisible: true})
         var file_name = 'pic.zip'
         zip.generateAsync({type: "blob"}).then(function (content) {
           // see FileSaver.js
@@ -414,12 +417,9 @@ class commoditiesDataBase extends React.Component {
       }
     }
     image.onerror = () => {
-      var base64 = window.commoditiesDataBase.getBase64Image(image);
-      //that.dataURLtoFile(base64);
-      //console.error(base64.split(',')[1]) ;
-      var data = base64.split(',')[1];
-      zip.file(`${window.commoditiesDataBase.state.picList[window.commoditiesDataBase.state.count].skuCode}.png`, data, {base64: true});
+      window.commoditiesDataBase.state.dowmloadFailPic.push(window.commoditiesDataBase.state.picList[window.commoditiesDataBase.state.count].skuCode);
       if(window.commoditiesDataBase.state.count == window.commoditiesDataBase.state.picList.length-1){
+        this.setState({downloadVisible: true})
         var file_name = 'pic.zip'
         zip.generateAsync({type: "blob"}).then(function (content) {
           // see FileSaver.js
@@ -436,10 +436,12 @@ class commoditiesDataBase extends React.Component {
     }
     image.src = src + '?v=' + Math.random(); // 处理缓存
   }
-
+  downloadPicModal (){
+    this.setState({downloadVisible: false})
+  }
   render() {
     const RadioButton = Radio.Button, RadioGroup = Radio.Group;
-    const {dataList, searchValue, pageNum, pageSize, pageTotal, pageSizeOptions, record, loadingTxt, importModalVisible, input, errorList, isSubmit, failList, failListNum, excelDataList, successList, tableIsLoading, exportModalVisible, isExport,} = this.state;
+    const {dataList, searchValue, pageNum, pageSize, pageTotal, pageSizeOptions, record, loadingTxt, importModalVisible, dowmloadFailPic,downloadVisible,input, errorList, isSubmit, failList, failListNum, excelDataList, successList, tableIsLoading, exportModalVisible, isExport,} = this.state;
     const Search = Input.Search;
     // 表单头
     const columns = [
@@ -600,7 +602,22 @@ class commoditiesDataBase extends React.Component {
             ))}
           </div>
         </Modal>
-
+        {/*下载图片弹窗*/}
+        <Modal title="下载图片"
+               className="exportModal"
+               visible={downloadVisible}
+               onOk={this.downloadPicModal.bind(this)}
+               onCancel={this.downloadPicModal.bind(this)}
+        >
+          <p>下载失败的商品条码为:</p>
+          {
+            dowmloadFailPic.map((item,index)=>{
+              return (
+                <p key={index} style={{color: `red`, opacity: .8}} >{item}</p>
+                )
+            })
+          }
+        </Modal>
         {/*查询条件单选行*/}
         <RadioGroup value={record}
                     buttonStyle="solid"
