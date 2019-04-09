@@ -5,7 +5,6 @@ import moment from 'moment';
 import PageLoading from '@components/pageLoading/';
 import Country from "@js/countryForCD";
 import JsZip from 'jszip';
-
 import './index.less';
 
 let zip = new JsZip();//*****创建实例，zip是对象实例
@@ -53,7 +52,6 @@ class commoditiesDataBase extends React.Component {
 
     // window.moment = moment;
   }
-
   // 这里需要在组件即将加载时优先生成input
   componentWillMount() {
     // 创建导入用input
@@ -157,10 +155,13 @@ class commoditiesDataBase extends React.Component {
       this.setState({tableIsLoading: false, dataList: []});
       if (r.status) {
         if (r.status === 10000) {
+          let skuCodeList=[];
           for (let i = 0; i < r.data.list.length; i++) {
-            this.state.skuCodeList.push(r.data.list[i].skuCode);
+            skuCodeList.push(r.data.list[i].skuCode);
           }
+
           this.setState({
+            skuCodeList:skuCodeList,
             dataList: r.data.list,
             pageNum: r.data.pageNum,
             pageSize: r.data.pageSize,
@@ -366,7 +367,7 @@ class commoditiesDataBase extends React.Component {
   //下载图片
   downLoadPic() {
     var that = this;
-    this.setState({loadingTxt: '图片下载中...'});
+    this.setState({loadingTxt: '图片下载中...',count: 0,dowmloadFailPic:[]});
     fetch(`${window.fandianUrl}/sku/selectNoRecord`, {
       method: 'post',
       headers: {'Content-Type': 'application/json'},
@@ -400,10 +401,11 @@ class commoditiesDataBase extends React.Component {
       //console.error(base64.split(',')[1]) ;
       var data = base64.split(',')[1];
       //zip.file(`123.png`, "213", {base64: true});
-      zip.file(`${window.commoditiesDataBase.state.picList[window.commoditiesDataBase.state.count].skuCode}.png`, data, {base64: true});
-      if(window.commoditiesDataBase.state.count == window.commoditiesDataBase.state.picList.length){
-        this.setState({downloadVisible: true})
-        var file_name = 'pic.zip'
+      zip.file(`JD${window.commoditiesDataBase.state.picList[window.commoditiesDataBase.state.count].skuCode}.jpg`, data, {base64: true});
+      if(window.commoditiesDataBase.state.count == window.commoditiesDataBase.state.picList.length-1){
+        window.commoditiesDataBase.setState({downloadVisible: true})
+
+        var file_name = `未备案商品图片(${moment(new Date()).format('YYYY-MM-DD HH:mm:ss')}).zip`;
         zip.generateAsync({type: "blob"}).then(function (content) {
           // see FileSaver.js
           //console.error(content);
@@ -420,7 +422,7 @@ class commoditiesDataBase extends React.Component {
       window.commoditiesDataBase.state.dowmloadFailPic.push(window.commoditiesDataBase.state.picList[window.commoditiesDataBase.state.count].skuCode);
       if(window.commoditiesDataBase.state.count == window.commoditiesDataBase.state.picList.length-1){
         this.setState({downloadVisible: true})
-        var file_name = 'pic.zip'
+        var file_name = `未备案商品图片(${moment(new Date()).format('YYYY-MM-DD HH:mm:ss')}).zip`;
         zip.generateAsync({type: "blob"}).then(function (content) {
           // see FileSaver.js
           //console.error(content);
@@ -609,7 +611,7 @@ class commoditiesDataBase extends React.Component {
                onOk={this.downloadPicModal.bind(this)}
                onCancel={this.downloadPicModal.bind(this)}
         >
-          <p>下载失败的商品条码为:</p>
+          {this.state.dowmloadFailPic.length===0 ? <p>下载成功</p> : <p>下载失败的商品条码为:</p>}
           {
             dowmloadFailPic.map((item,index)=>{
               return (
@@ -648,7 +650,7 @@ class commoditiesDataBase extends React.Component {
                                    className="exportExcelBtn"
                                    onClick={() => this.setState({exportModalVisible: true})}
           >excel导出</Button>}
-
+          {record === 2 && <Button type="primary" className="importExcelBtn" onClick={this.downLoadPic.bind(this)}>下载图片</Button>}
           {(record === 3 && (window.isLocalTest || window.isServerTest)) &&
           <Button type="primary"
                   onClick={this.clickIT.bind(this)}
@@ -662,7 +664,7 @@ class commoditiesDataBase extends React.Component {
             // 保存搜索框值
                   onChange={(e) => this.setState({searchValue: e.target.value})}
           />
-          <Button className="importExcelBtn" onClick={this.downLoadPic.bind(this)}>下载图片</Button>
+
         </div>
 
         {/*表单主体*/}
