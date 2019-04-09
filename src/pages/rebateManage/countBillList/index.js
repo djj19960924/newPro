@@ -1,6 +1,7 @@
 import React from 'react';
 import { Radio, Table, Button, Modal, message, Pagination, } from 'antd';
-// import XLSX from 'xlsx';
+import XLSX from 'xlsx';
+import moment from 'moment';
 // xlsx转blob
 // import '@js/FileSaver.min.js';
 
@@ -21,14 +22,14 @@ class countBillList extends React.Component{
       // 分页
       pageTotal: 0,
       pageNum: 1,
-      pageSize: 2000,
-      // pageSizeOptions: [`30`,`50`,`80`,`100`],
+      pageSize: 200,
+      pageSizeOptions: [`100`,`200`,`300`,`500`],
       // 图片弹窗
       previewVisible: false,
       previewImage: '',
       isLoading: false,
     };
-    // window.countBillList = this;
+    window.countBillList = this;
     // window.XLSX = XLSX;
   }
   // 默认读取表格
@@ -56,7 +57,13 @@ class countBillList extends React.Component{
             for (let i in r.data.list) {
               r.data.list[i].id = (parseInt(i)+1)
             }
-            this.setState({tableDataList: r.data.list, pageTotal: r.data.total})
+            this.setState({
+              tableDataList: r.data.list,
+              pageTotal: r.data.total,
+              pageSizeOptions: [`100`,`200`,`300`,`${r.data.total > 500 ? r.data.total : 500}`],
+              selectedList: [],
+              selectedIds: [],
+            })
           } else {
             this.setState({pageSize: r.data.total}, () => {
               this.getReciptByVerify()
@@ -89,11 +96,24 @@ class countBillList extends React.Component{
       previewImage: ''
     })
   }
+  changePage(pageNum,pageSize) {
+    this.setState({
+      pageNum: pageNum,
+      pageSize: pageSize,
+    },()=>{
+      this.getReciptByVerify()
+    })
+  }
   // 发送
   submit() {
     const { selectedList, selectedIds, } = this.state;
     if (selectedList.length > 0 && selectedIds.length > 0) {
       this.setState({isLoading: true});
+
+      let elt = document.getElementById('tableListForExport');
+      let wb = XLSX.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
+      XLSX.writeFile(wb, `对账表单 ${moment(new Date()).format('YYYY-MM-DD HH:mm:ss')}.xlsx`);
+
       let data = {};
       data.list = [];
       data.reciptIdList = selectedIds;
@@ -155,6 +175,12 @@ class countBillList extends React.Component{
       // {title: '小票购买时间', dataIndex: 'consumeDate', key: 'consumeDate', width: 140},
       // {title: '小票金额', dataIndex: 'consumeMoney', key: 'consumeMoney', width: 140},
     ];
+    const columnsForExport = [
+      {title: `序号`, dataIndex: `id`, key: 'id', width: 50},
+      {title: '小票照片', dataIndex: 'pictureUrl', key: 'pictureUrl', width: 140},
+      {title: '护照号码', dataIndex: 'passportNum', key: 'passportNum', width: 140},
+      {title: '护照首页照片', dataIndex: 'passport', key: 'passport', width: 140},
+    ];
     const { tableDataList, verifyStatus, previewVisible, previewImage, isLoading, selectedList, selectedIds, pageTotal, pageSize, pageNum, pageSizeOptions} = this.state;
     return (
       <div className="countBillList">
@@ -188,6 +214,15 @@ class countBillList extends React.Component{
           <img alt="example" style={{ width: '100%' }} src={previewImage} />
         </Modal>
 
+        {/*导出用表单*/}
+        <Table className="tableListForExport"
+               id="tableListForExport"
+               dataSource={selectedList}
+               columns={columnsForExport}
+               pagination={false}
+               style={{display: `none`}}
+        />
+
         {/*表单主体*/}
         <Table className="tableList"
                dataSource={tableDataList}
@@ -207,19 +242,19 @@ class countBillList extends React.Component{
                rowKey={(record, index) => `${record.reciptId}`}
         />
         {/*分页*/}
-        {/*<Pagination className="tablePagination"*/}
-                    {/*total={pageTotal}*/}
-                    {/*pageSize={pageSize}*/}
-                    {/*current={pageNum}*/}
-                    {/*showTotal={(total, range) =>*/}
-                      {/*`${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`*/}
-                    {/*}*/}
-                    {/*style={{float:'right',marginRight:20,marginTop:10,marginBottom: 20}}*/}
-                    {/*// onChange={this.changePage.bind(this)}*/}
-                    {/*showSizeChanger*/}
-                    {/*pageSizeOptions={pageSizeOptions}*/}
-                    {/*// onShowSizeChange={this.changePage.bind(this)}*/}
-        {/*/>*/}
+        <Pagination className="tablePagination"
+                    total={pageTotal}
+                    pageSize={pageSize}
+                    current={pageNum}
+                    showTotal={(total, range) =>
+                      `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`
+                    }
+                    style={{float:'right',marginRight:20,marginTop:10,marginBottom: 20}}
+                    onChange={this.changePage.bind(this)}
+                    showSizeChanger
+                    pageSizeOptions={pageSizeOptions}
+                    onShowSizeChange={this.changePage.bind(this)}
+        />
       </div>
     )
   }
