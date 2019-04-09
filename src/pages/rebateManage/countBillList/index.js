@@ -27,7 +27,8 @@ class countBillList extends React.Component{
       // 图片弹窗
       previewVisible: false,
       previewImage: '',
-      isLoading: false,
+      btnIsLoading: false,
+      tableIsLoading: false,
     };
     window.countBillList = this;
     // window.XLSX = XLSX;
@@ -46,6 +47,7 @@ class countBillList extends React.Component{
   }
   // 根据发送状态获取对账表
   getReciptByVerify(n = this.state.verifyStatus, pageNum = this.state.pageNum, pageSize = this.state.pageSize) {
+    this.setState({tableIsLoading: true});
     fetch(`${window.fandianUrl}/recipt/getReciptByVerify`,{
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -79,7 +81,11 @@ class countBillList extends React.Component{
         else { message.error(`后端数据错误`);
           this.setState({tableDataList: [],pageTotal: 0}) }
       }
-    }).catch(()=>{message.error(`前端错误: 对账表信息接口调取失败`); this.setState({tableDataList: [],pageTotal: 0})})
+      this.setState({tableIsLoading: false});
+    }).catch(()=>{
+      message.error(`前端错误: 对账表信息接口调取失败`);
+      this.setState({tableDataList: [],pageTotal: 0,tableIsLoading: false})
+    })
   }
   // 打开弹窗
   openPreview(url) {
@@ -108,7 +114,7 @@ class countBillList extends React.Component{
   submit() {
     const { selectedList, selectedIds, } = this.state;
     if (selectedList.length > 0 && selectedIds.length > 0) {
-      this.setState({isLoading: true});
+      this.setState({btnIsLoading: true});
 
       let elt = document.getElementById('tableListForExport');
       let wb = XLSX.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
@@ -135,7 +141,7 @@ class countBillList extends React.Component{
         if (r.status === 10000) {
           message.success(r.data);
           this.setState({
-            isLoading: false,
+            btnIsLoading: false,
             selectedList: [],
             selectedIds: [],
           });
@@ -181,7 +187,7 @@ class countBillList extends React.Component{
       {title: '护照号码', dataIndex: 'passportNum', key: 'passportNum', width: 140},
       {title: '护照首页照片', dataIndex: 'passport', key: 'passport', width: 140},
     ];
-    const { tableDataList, verifyStatus, previewVisible, previewImage, isLoading, selectedList, selectedIds, pageTotal, pageSize, pageNum, pageSizeOptions} = this.state;
+    const { tableDataList, verifyStatus, previewVisible, previewImage, btnIsLoading, selectedList, selectedIds, pageTotal, pageSize, pageNum, pageSizeOptions, tableIsLoading, } = this.state;
     return (
       <div className="countBillList">
         {/*查询条件单选行*/}
@@ -200,7 +206,7 @@ class countBillList extends React.Component{
         <div className="btnLine" style={{marginLeft: 10}}>
           {verifyStatus === 0 && <Button type="primary"
                                          onClick={this.submit.bind(this)}
-                                         loading={isLoading}
+                                         loading={btnIsLoading}
                                          disabled={selectedList.length === 0}
           >发送所选小票</Button>}
         </div>
@@ -228,7 +234,7 @@ class countBillList extends React.Component{
                dataSource={tableDataList}
                columns={columns}
                pagination={false}
-               // loading
+               loading={tableIsLoading}
                bordered
                rowSelection={verifyStatus === 0 ? {
                  selectedRowKeys: selectedIds,
