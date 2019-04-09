@@ -9,18 +9,22 @@ class Home extends React.Component{
 
   render() {
     return (
-      <div className="Home"
-           style={{width: '100%',
-             height: '100%',
-             backgroundColor: '#fff',
-             fontSize: '48px',
-             textAlign: 'center',
-           }}
-      >
-        <p style={{paddingTop: 260,
-          margin: 0
-        }}
-        >欢迎使用BuyersHouse后台管理系统!</p>
+      <div className="Home">
+        <p className="title" >
+          <span>欢迎使用BuyersHouse后台管理系统</span>
+        </p>
+
+        <div className="dividingLine" />
+
+        <div className="main">
+          <div className="updateInfo">
+            <div className="infoTitle" >2019-04-09 更新</div>
+            <div className="dividingLine shot" />
+            <p>
+              <span className="content">商品资料库－待到出备案，支持下载图片包</span>
+            </p>
+          </div>
+        </div>
       </div>
     )
   }
