@@ -181,6 +181,7 @@ class countBillList extends React.Component{
       // {title: '小票购买时间', dataIndex: 'consumeDate', key: 'consumeDate', width: 140},
       // {title: '小票金额', dataIndex: 'consumeMoney', key: 'consumeMoney', width: 140},
     ];
+    const columnsAdd = {title: '更新时间', dataIndex: 'updateTime', key: 'updateTime', width: 140,};
     const columnsForExport = [
       {title: `序号`, dataIndex: `id`, key: 'id', width: 50},
       {title: '小票照片', dataIndex: 'pictureUrl', key: 'pictureUrl', width: 140},
@@ -232,7 +233,7 @@ class countBillList extends React.Component{
         {/*表单主体*/}
         <Table className="tableList"
                dataSource={tableDataList}
-               columns={columns}
+               columns={verifyStatus === 0 ? columns : columns.concat(columnsAdd)}
                pagination={false}
                loading={tableIsLoading}
                bordered
