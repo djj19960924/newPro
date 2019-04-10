@@ -2,7 +2,7 @@ import React from 'react';
 import './index.less';
 import {Radio, Button, Table, message,Pagination} from 'antd';
 
-class yuant extends React.Component {
+class YTO extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -34,43 +34,48 @@ class yuant extends React.Component {
     return y + '-' + m + '-' + d + ' ' + h + ':' + minute + ':' + second;
   }
   componentDidMount() {
-    this.setState({tableLoading:true})
     this.getOrderInfo(0);
   }
 
   getOrderInfo(status=this.state.status,pageNum=this.state.pageNum,pageSize=this.state.pageSize) {
+    this.setState({tableLoading:true});
     fetch(window.apiUrl + "/Yto/backendIsYto", {
       method: "post",
       headers: {"Content-Type": "application/x-www-form-urlencoded"},
       body: "isYto=" + status+"&pageNum="+pageNum+"&pageSize="+pageSize
     }).then(r => r.json()).then((res) => {
-      this.setState({tableLoading:false})
-      if (res.status === 10000) {
-        for(let i=0 ; i<res.data.list.length;i++){
-          res.data.list[i].createTime=this.formatDate(res.data.list[i].createTime);
+      if (!res.msg && !res.data) {
+        if (res.status === 10000) {
+          for(let i=0 ; i<res.data.list.length;i++){
+            res.data.list[i].createTime=this.formatDate(res.data.list[i].createTime);
+          }
+          //message.success(`${res.msg}`)
+          this.setState({data: res.data.list, selectedList: [], selectedIds: [],pageTotal:res.data.total, pageSizeOptions: [`100`,`200`,`500`,`${res.data.total > 1000 ? res.data.total : 1000}`]})
+        } else {
+          if(res.status===10002){
+            message.warning(`${res.status}:${res.msg}`)
+            this.setState({data:[]});
+          }else{
+            message.error(`${res.status}:${res.msg}`)
+            this.setState({data:[]});
+          }
         }
-        //message.success(`${res.msg}`)
-        this.setState({data: res.data.list, selectedList: [], selectedIds: [],pageTotal:res.data.total, pageSizeOptions: [`100`,`200`,`500`,`${res.data.total > 1000 ? res.data.total : 1000}`]})
       } else {
-        if(res.status===10002){
-          message.warning(`${res.status}:${res.msg}`)
-          this.setState({data:[]});
-        }else{
-          message.error(`${res.status}:${res.msg}`)
-          this.setState({data:[]});
-        }
+        message.error(`后端数据错误`)
       }
+      this.setState({tableLoading:false});
+    }).catch(()=>{
+      message.error(`前端接口调取错误`);
+      this.setState({tableLoading:false});
     })
   }
 
   logisticsStatus(e) {
-    console.log(e.target.value)
+    // console.log(e.target.value);
     if (this.state.status !== e.target.value) {
-      this.setState({status: e.target.value,tableLoading:true})
-      this.getOrderInfo(e.target.value)
-      if(e.target.value===1){
-        this.setState({selectedIds:[]})
-      }
+      this.setState({status: e.target.value,tableLoading:true});
+      this.getOrderInfo(e.target.value);
+      if(e.target.value===1) this.setState({selectedIds:[]})
     }
   }
 
@@ -100,7 +105,7 @@ class yuant extends React.Component {
       if(res.status===10000){
         this.getOrderInfo(0);
         if(res.data.FailList.length===0){
-          message.success(`${res.msg}`)
+          message.success(`${res.msg}`);
           this.setState({selectedIds:[]})
         }else{
           message.error(`箱号为${res.data.FailList.join(",")}的箱子上传失败`)
@@ -140,16 +145,19 @@ class yuant extends React.Component {
           <RadioButton value={0}>待上传</RadioButton>
           <RadioButton value={1}>已上传</RadioButton>
         </RadioGroup>
-        <Button type="primary" disabled={this.state.selectedIds.length === 0} onClick={this.uploadOrder.bind(this)}>发送所选订单</Button>
+        <Button type="primary"
+                disabled={this.state.selectedIds.length === 0}
+                onClick={this.uploadOrder.bind(this)}
+        >发送所选订单</Button>
         <Table className="tableList"
-          columns={this.state.status === 0 ? columns : columns1}
+               columns={this.state.status === 0 ? columns : columns1}
                dataSource={this.state.data}
                rowSelection={this.state.status === 0 ? {
                  selectedRowKeys: this.state.selectedIds,
                  // 选择框变化时触发c
                  onChange: (selectedRowKeys, selectedRows) => {
                    this.setState({selectedIds: selectedRowKeys});
-                   console.log(selectedRowKeys)
+                   // console.log(selectedRowKeys)
                  },
                } : null}
                bordered
@@ -175,4 +183,4 @@ class yuant extends React.Component {
   }
 }
 
-export default yuant;
+export default YTO;

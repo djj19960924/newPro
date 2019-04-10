@@ -110,7 +110,7 @@ const menus = [
       {
         title: '圆通物流',
         icon: 'sync',
-        key: '/BC-customsClearance/yuantong'
+        key: '/BC-customsClearance/YTO'
       },
       {
         title: 'BC推单',

@@ -30,7 +30,7 @@ import commoditiesImgList from '@pages/commoditiesManage/commoditiesDatabase/com
 import commoditiesPackaging from "@pages/BC_customsClearance/commoditiesPackaging";
 import customerLogin from "@pages/BC_customsClearance/commoditiesPackaging/customerLogin";
 // bc清关
-import yuant from "@pages/BC_customsClearance/yuantong";
+import YTO from "@pages/BC_customsClearance/YTO";
 // bc推单
 import BCUploadOrder from "@pages/BC_customsClearance/uploadOrder"
 // 404页面
@@ -71,7 +71,7 @@ class ContentMain extends React.Component{
           {/*bc清关*/}
           <Route exact path="/BC-customsClearance/commodities-packaging" component={commoditiesPackaging} />
           <Route exact path="/BC-customsClearance/commodities-packaging/customer-login" component={customerLogin} />
-          <Route exact path="/BC-customsClearance/yuantong" component={yuant} />
+          <Route exact path="/BC-customsClearance/YTO" component={YTO} />
           <Route exact path="/BC-customsClearance/upload-order" component={BCUploadOrder} />
           {/*首页*/}
           <Route exact path="/" component={Home} />
