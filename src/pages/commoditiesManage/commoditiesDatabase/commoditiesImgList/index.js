@@ -261,7 +261,7 @@ class commoditiesImgList extends React.Component {
   // 获取摄像头
   getMedia() {
     let constraints = {
-      video: {width: 480, height: 360},
+      video: {width: 480, height: 480},
       audio: true
     };
     // 获取摄像头内容,显示在video中
@@ -271,8 +271,10 @@ class commoditiesImgList extends React.Component {
       document.getElementById("video").play();
       // console.log(`promise success`);
       window.commoditiesImgList.setState({hasCamera:true});
-    }).catch(function() {
+    }).catch(function(error) {
       message.error('调取摄像头失败, 请确保电脑已经成功链接摄像头, 并通过浏览器调用摄像头的申请!');
+      console.log(error.name);
+      console.log(error.message);
       // console.log(`promise error`);
       window.commoditiesImgList.setState({hasCamera:false})
     })
@@ -283,7 +285,7 @@ class commoditiesImgList extends React.Component {
     let video = document.getElementById("video");
     let canvas = document.getElementById("canvas");
     let ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, 480, 360);
+    ctx.drawImage(video, 0, 0, 480, 480);
     let file = this.dataURLtoFile(canvas.toDataURL("image/jpeg"),'照片.jpg');
     // 将数据保存为 antd 的 upload 所支持的格式
     this.setState({
@@ -514,14 +516,14 @@ class commoditiesImgList extends React.Component {
             <div className="cameraMain">
               <video id="video"
                      width={480}
-                     height={360}
+                     height={480}
                      // 禁音
                      muted
                      autoPlay="autoplay"
               />
               <canvas id="canvas"
                       width={480}
-                      height={360}
+                      height={480}
                       style={{marginLeft: 10}}
               />
               <div className="takePhotoLine"
