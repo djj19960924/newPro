@@ -10,11 +10,6 @@ const menusLocalTest = [
     key: '/logistics-manage',
     subs: [
       {
-        title: '预约上门打包',
-        icon: 'solution',
-        key: '/logistics-manage/appointment-info',
-      },
-      {
         title: '未匹配订单',
         icon: 'file-unknown',
         key: '/logistics-manage/unmatched'
@@ -82,7 +77,12 @@ const menusLocalTest = [
         title: '预约接送机',
         icon: 'exclamation-circle',
         key: '/reservation-service/airport-transfer'
-      }
+      },
+      {
+        title: '预约上门打包',
+        icon: 'solution',
+        key: '/reservation-service/appointment-info',
+      },
     ]
   },
   {

@@ -7,10 +7,10 @@ import Home from '@pages/Home/';
 // 订单
 import orderMatched from '@pages/logisticsManage/matched/';
 import orderUnmatched from '@pages/logisticsManage/unmatched/';
-// 预约
-import appointmentInfo from '@pages/logisticsManage/appointmentInfo/';
 // 接送机
 import airportTransfer from '@pages/reservationService/airportTransfer/';
+// 预约
+import appointmentInfo from '@pages/reservationService/appointmentInfo/';
 // 返点
 import adoptExaminePaid from '@pages/rebateManage/adoptExaminePaid/';
 import adoptExamineUnpaid from '@pages/rebateManage/adoptExamineUnpaid/';
@@ -52,7 +52,6 @@ class ContentMain extends React.Component{
           {/*物流管理*/}
           <Route exact path="/logistics-manage/unmatched" component={orderUnmatched} />
           <Route exact path="/logistics-manage/matched" component={orderMatched} />
-          <Route exact path="/logistics-manage/appointment-info" component={appointmentInfo} />
           {/*返点管理*/}
           <Route exact path="/rebate-manage/awaiting-examine" component={awaitingExamine} />
           <Route exact path="/rebate-manage/adopt-examine-unpaid" component={adoptExamineUnpaid} />
@@ -64,6 +63,7 @@ class ContentMain extends React.Component{
           <Route exact path="/rebate-manage/update-QR-code" component={updateQRCode} />
           {/*服务预定管理*/}
           <Route exact path="/reservation-service/airport-transfer" component={airportTransfer} />
+          <Route exact path="/reservation-service/appointment-info" component={appointmentInfo} />
           {/*商品管理*/}
           <Route exact path="/commodities-manage/commodities-database" component={commoditiesDataBase} />
           <Route exact path="/commodities-manage/commodities-database/create-and-edit" component={commoditiesCreateAndEdit} />
