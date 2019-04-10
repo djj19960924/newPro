@@ -10,9 +10,26 @@ const menusServerTest = [
     key: '/logistics-manage',
     subs: [
       {
-        title: '预约上门打包',
-        icon: 'solution',
-        key: '/logistics-manage/appointment-info',
+        title: 'BC清关',
+        icon: 'retweet',
+        key: '/logistics-manage/BC-customsClearance' ,
+        subs: [
+          {
+            title: '扫码录入商品',
+            icon: 'gift',
+            key: '/logistics-manage/BC-customsClearance/commodities-packaging'
+          },
+          {
+            title: '圆通物流',
+            icon: 'sync',
+            key: '/logistics-manage/BC-customsClearance/YTO'
+          },
+          {
+            title: 'BC推单',
+            icon: 'file-excel',
+            key: '/logistics-manage/BC-customsClearance/upload-order'
+          },
+        ]
       },
       {
         title: '未匹配订单',
@@ -82,7 +99,12 @@ const menusServerTest = [
         title: '预约接送机',
         icon: 'exclamation-circle',
         key: '/reservation-service/airport-transfer'
-      }
+      },
+      {
+        title: '预约上门打包',
+        icon: 'solution',
+        key: '/reservation-service/appointment-info',
+      },
     ]
   },
   {
@@ -94,28 +116,6 @@ const menusServerTest = [
         title: '商品资料库',
         icon: 'database',
         key: '/commodities-manage/commodities-database'
-      },
-    ]
-  },
-  {
-    title: 'BC清关',
-    icon: 'retweet',
-    key: '/BC-customsClearance' ,
-    subs: [
-      {
-        title: '扫码录入商品',
-        icon: 'gift',
-        key: '/BC-customsClearance/commodities-packaging'
-      },
-      {
-        title: '圆通物流',
-        icon: 'sync',
-        key: '/BC-customsClearance/YTO'
-      },
-      {
-        title: 'BC推单',
-        icon: 'file-excel',
-        key: '/BC-customsClearance/upload-order'
       },
     ]
   },

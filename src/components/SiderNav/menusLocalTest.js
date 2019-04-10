@@ -10,6 +10,28 @@ const menusLocalTest = [
     key: '/logistics-manage',
     subs: [
       {
+        title: 'BC清关',
+        icon: 'retweet',
+        key: '/logistics-manage/BC-customsClearance' ,
+        subs: [
+          {
+            title: '扫码录入商品',
+            icon: 'gift',
+            key: '/logistics-manage/BC-customsClearance/commodities-packaging'
+          },
+          {
+            title: '圆通物流',
+            icon: 'sync',
+            key: '/logistics-manage/BC-customsClearance/YTO'
+          },
+          {
+            title: 'BC推单',
+            icon: 'file-excel',
+            key: '/logistics-manage/BC-customsClearance/upload-order'
+          },
+        ]
+      },
+      {
         title: '未匹配订单',
         icon: 'file-unknown',
         key: '/logistics-manage/unmatched'
@@ -95,28 +117,6 @@ const menusLocalTest = [
         icon: 'database',
         key: '/commodities-manage/commodities-database'
       }
-    ]
-  },
-  {
-    title: 'BC清关',
-    icon: 'retweet',
-    key: '/BC-customsClearance' ,
-    subs: [
-      {
-        title: '扫码录入商品',
-        icon: 'gift',
-        key: '/BC-customsClearance/commodities-packaging'
-      },
-      {
-        title: '圆通物流',
-        icon: 'sync',
-        key: '/BC-customsClearance/YTO'
-      },
-      {
-        title: 'BC推单',
-        icon: 'file-excel',
-        key: '/BC-customsClearance/upload-order'
-      },
     ]
   },
   // 本地专用
