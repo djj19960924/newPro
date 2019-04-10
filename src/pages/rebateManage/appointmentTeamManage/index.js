@@ -1,5 +1,5 @@
 import React from 'react';
-import { Radio, Table, Button, Modal, message, Pagination, Input, } from 'antd';
+import { Radio, Table, Button, Modal, message, Pagination, Input, DatePicker, } from 'antd';
 import moment from 'moment';
 
 import './index.less';
@@ -11,9 +11,9 @@ class appointmentTeamManage extends React.Component {
       // 预约状态
       appointmentStatus: 0,
       pageNum: 1,
-      pageSize: 30,
+      pageSize: 100,
       pageTotal: 0,
-      pageSizeOptions: [`10`,`20`,`30`,`40`],
+      pageSizeOptions: [`50`,`100`,`200`,`300`],
       // 表格所选行
       selectedList: [],
       selectedIds: [],
@@ -28,6 +28,7 @@ class appointmentTeamManage extends React.Component {
       isLoading: false,
       // input输入框
       inputValue: {},
+      tableIsLoading: false,
     };
     // window.appointmentTeamManage = this;
   }
@@ -36,24 +37,33 @@ class appointmentTeamManage extends React.Component {
   }
   // 搜索预约信息
   getAppointmentByStatus(status = this.state.appointmentStatus,pageNum = this.state.pageNum, pageSize = this.state.pageSize) {
-    if (status === 3) {
+    this.setState({tableIsLoading: true});
+    if (status === 4) {
       fetch(`${window.fandianUrl}/AppointmentMangement/getMassNoByMallName`,{
         method: `POST`,
       }).then(r => r.json()).then(r => {
-        if (r.status === 10000) {
-          let dataObj = {};
-          for (let n in r.data) dataObj[`input_${n}`] = r.data[n].massNo;
-          this.setState({
-            dataList: r.data,
-            inputValue: dataObj,
-          })
+        if (!r.msg && !r.data) {
+          message.error(`后端数据错误`)
         } else {
-          if (r.status) {
-            message.error(`${r.msg} 错误码: ${r.status}`)
+          if (r.status === 10000) {
+            let dataObj = {};
+            for (let n in r.data) dataObj[`input_${n}`] = r.data[n].massNo;
+            this.setState({
+              dataList: r.data,
+              inputValue: dataObj,
+            })
           } else {
-            message.error(`后端数据错误`)
+            if (r.status) {
+              message.error(`${r.msg} 错误码: ${r.status}`)
+            } else {
+              message.error(`后端数据错误`)
+            }
           }
         }
+        this.setState({tableIsLoading: false});
+      }).catch(()=>{
+        message.error(`前端接口调取出错`);
+        this.setState({tableIsLoading: false});
       })
     } else {
       fetch(`${window.fandianUrl}/AppointmentMangement/getAppointmentByStatus`,{
@@ -61,24 +71,32 @@ class appointmentTeamManage extends React.Component {
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: `status=${status}&pageNum=${pageNum}&pageSize=${pageSize}`,
       }).then(r => r.json()).then(r => {
-        if (r.status === 10000) {
-          let dataObj = {};
-          if (!!r.data.list) if (!!r.data.list[0].massNo) for (let n in r.data.list) dataObj[`input_${n}`] = r.data.list[n].massNo;
-          this.setState({
-            inputValue: dataObj,
-            dataList: r.data.list,
-            pageSizeOptions: [`10`,`20`,`30`,(r.data.total > 40 ? r.data.total.toString() : `40`)],
-            pageTotal: r.data.total,
-          })
+        if (!r.msg && !r.data) {
+          message.error(`后端数据错误`)
         } else {
-          if (r.status) {
-            message.error(`${r.msg} 错误码: ${r.status}`)
+          if (r.status === 10000) {
+            let dataObj = {};
+            if (!!r.data.list) if (!!r.data.list[0].massNo) for (let n in r.data.list) dataObj[`input_${n}`] = r.data.list[n].massNo;
+            this.setState({
+              inputValue: dataObj,
+              dataList: r.data.list,
+              pageSizeOptions: [`50`,`100`,`200`, `${r.data.total > 300 ? r.data.total : 300}`],
+              pageTotal: r.data.total,
+              selectedList: [],
+              selectedIds: [],
+            })
           } else {
-            message.error(`后端数据错误`)
+            if (r.status) {
+              message.error(`${r.msg} 错误码: ${r.status}`)
+            } else {
+              message.error(`后端数据错误`)
+            }
           }
         }
+        this.setState({tableIsLoading: false});
       }).catch(()=>{
-        message.error(`接口调取失败`)
+        message.error(`接口调取失败`);
+        this.setState({tableIsLoading: false});
       });
     }
   }
@@ -118,25 +136,33 @@ class appointmentTeamManage extends React.Component {
     }
   }
   // 更改团号
-  submitMassNo(i,v) {
+  submitMassNo(i,v,momentDate,Date) {
     const { inputValue, appointmentStatus, } = this.state;
     if (!!inputValue[`input_${i}`]) {
-      if (appointmentStatus === 3) {
+      if (appointmentStatus === 4) {
+        let dataObj = {mallName: v,};
+        // 如果由日期选择插件调用, 则会带入Date参数, 以此为依据判断修改 massNo 还是 deadline
+        if (!!Date) { dataObj.deadline = Date
+        } else { dataObj.massNo = inputValue[`input_${i}`] }
         fetch(`${window.fandianUrl}/AppointmentMangement/editMassNoByMallName`, {
           method: `POST`,
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({mallName:v,massNo:inputValue[`input_${i}`]}),
+          body: JSON.stringify(dataObj),
         }).then(r => r.json()).then(r => {
           // console.log(r);
-          if (r.status === 10000) {
-            message.success(r.data);
-            this.getAppointmentByStatus();
-            this.toggleEdit(i,false);
+          if (!r.msg && !r.data) {
+            message.error(`后端数据错误`)
           } else {
-            if (r.status) {
-              message.error(`${r.msg} 错误码: ${r.status}`)
+            if (r.status === 10000) {
+              message.success(r.data);
+              this.getAppointmentByStatus();
+              this.toggleEdit(i, false);
             } else {
-              message.error(`后端数据错误`)
+              if (r.status) {
+                message.error(`${r.msg} 错误码: ${r.status}`)
+              } else {
+                message.error(`后端数据错误`)
+              }
             }
           }
         }).catch(()=>{
@@ -148,15 +174,19 @@ class appointmentTeamManage extends React.Component {
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({id:v,massNo:inputValue[`input_${i}`]}),
         }).then(r => r.json()).then(r => {
-          if (r.status === 10000) {
-            message.success(r.data);
-            this.getAppointmentByStatus();
-            this.toggleEdit(i,false);
+          if (!r.msg && !r.data) {
+            message.error(`后端数据错误`)
           } else {
-            if (r.status) {
-              message.error(`${r.msg} 错误码: ${r.status}`)
+            if (r.status === 10000) {
+              message.success(r.data);
+              this.getAppointmentByStatus();
+              this.toggleEdit(i, false);
             } else {
-              message.error(`后端数据错误`)
+              if (r.status) {
+                message.error(`${r.msg} 错误码: ${r.status}`)
+              } else {
+                message.error(`后端数据错误`)
+              }
             }
           }
         }).catch(()=>{
@@ -181,16 +211,37 @@ class appointmentTeamManage extends React.Component {
   }
   // 换页
   changePage(pageNum,pageSize) {
-    this.getAppointmentByStatus(undefined,pageNum,pageSize);
-    this.setState({pageNum:pageNum,pageSize:pageSize})
+    this.setState({pageNum:pageNum,pageSize:pageSize},()=>{
+      this.getAppointmentByStatus();
+    })
   }
   // 更改状态
   changeAppointmentStatus(v) {
-    this.getAppointmentByStatus(v.target.value,1,30);
     this.setState({
-      appointmentStatus: v.target.value,
-      pageNum: 1,
-      pageSize: 30
+      appointmentStatus: v.target.value,pageNum: 1,pageSize: 30
+    },()=>{
+      this.getAppointmentByStatus();
+    })
+  }
+  // 驳回用户的预约挂团数据
+  apointmentToRejected(id) {
+    fetch(`${window.fandianUrl}/AppointmentMangement/apointmentToRejected`, {
+      method: `POST`,
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({id: id}),
+    }).then(r => r.json()).then(r => {
+      if (!r.msg && !r.data) {
+        message.error(`后端数据错误`)
+      } else {
+        if (r.status === 10000) {
+          message.success(`${r.msg}`);
+          this.getAppointmentByStatus();
+        } else {
+          message.error(`${r.msg} 错误码: ${r.status}`)
+        }
+      }
+    }).catch(()=>{
+      message.error(`前端接口调取失败`)
     })
   }
   // 发送申请
@@ -218,11 +269,7 @@ class appointmentTeamManage extends React.Component {
         if (r.status === 10000) {
           message.success(`${r.data}`);
           this.getAppointmentByStatus();
-          this.setState({
-            isLoading: false,
-            selectedList: [],
-            selectedIds: [],
-          })
+          this.setState({isLoading: false})
         } else {
           if (r.status) {
             message.error(`${r.msg} 错误码: ${r.status}`)
@@ -240,7 +287,7 @@ class appointmentTeamManage extends React.Component {
 
   render() {
     const RadioButton = Radio.Button, RadioGroup = Radio.Group;
-    const {dataList, pageTotal, pageSize, pageNum, pageSizeOptions, appointmentStatus, previewVisible, previewImage, showEdit, selectedIds, isLoading, inputValue, selectedList, } = this.state;
+    const {dataList, pageTotal, pageSize, pageNum, pageSizeOptions, appointmentStatus, previewVisible, previewImage, showEdit, selectedIds, isLoading, inputValue, selectedList, tableIsLoading, } = this.state;
     // 表单头
     const columnsNoMassNo = [
       {title: '姓名', dataIndex: 'passportName', key: 'passportName', width: 120},
@@ -341,20 +388,45 @@ class appointmentTeamManage extends React.Component {
               </div>}
           </div>
         )
+      },
+      {
+        title: '失效时间', dataIndex: 'date', key: 'date', width: 160,
+        render: (text, record, index) => (
+          <div>
+            <DatePicker style={{width: 130}}
+                        dropdownClassName="datePickerPopup"
+                        allowClear={false}
+                        value={moment(record.deadline)}
+                        onChange={this.submitMassNo.bind(this,index,record.mallName)}
+            />
+          </div>
+        )
       }
     ];
+    const columnsAdd = {
+      title: '操作', dataIndex: 'operation', key: 'operation', width: 90,
+      render: (text, record, index) => (
+        <div>
+          <Button type="danger"
+                  onClick={this.apointmentToRejected.bind(this,record.id)}
+          >驳回</Button>
+        </div>
+      )
+    };
     return (
       <div className="appointmentTeamManage">
         {/*查询条件单选行*/}
         <RadioGroup defaultValue={0}
                     buttonStyle="solid"
                     className="radioBtn"
+                    value={appointmentStatus}
                     onChange={this.changeAppointmentStatus.bind(this)}
         >
           <RadioButton value={0}>申请挂团</RadioButton>
           <RadioButton value={1}>待反馈团号</RadioButton>
           <RadioButton value={2}>已反馈团号</RadioButton>
-          <RadioButton value={3}>编辑商场团号</RadioButton>
+          <RadioButton value={3}>已驳回团号</RadioButton>
+          <RadioButton value={4}>编辑商场团号</RadioButton>
         </RadioGroup>
 
         {/*按钮行*/}
@@ -365,27 +437,29 @@ class appointmentTeamManage extends React.Component {
                   loading={isLoading}
                   disabled={selectedList.length === 0}
           >发送所选申请</Button>}
-          {/*{appointmentStatus === 1 &&*/}
-          {/*<div>*/}
-            {/*<Button type="primary"*/}
-            {/*>导出excel</Button>*/}
-            {/*<Button type="primary"*/}
-                    {/*style={{marginLeft: 10}}*/}
-            {/*>导入excel</Button>*/}
-          {/*</div>}*/}
         </div>
 
         {/*这里给出表单和分页最大宽度, 防止 table 过宽*/}
         <div className="main"
-             style={{maxWidth: (appointmentStatus === 3 ? 500 : 1250)}}
+             style={{maxWidth: (appointmentStatus === 4 ? 660
+                 : (appointmentStatus === 1 ? 1350
+                   : 1250))}}
         >
           {/*表单主体*/}
           <Table className="tableList"
                  dataSource={dataList}
-                 columns={(appointmentStatus === 0 ? columnsNoMassNo : ( appointmentStatus === 3 ? columnsMallMassNo : columns ))}
+                 columns={(appointmentStatus === 0 || appointmentStatus === 3 ?
+                   columnsNoMassNo
+                   : ( appointmentStatus === 4 ?
+                     columnsMallMassNo
+                     : (appointmentStatus === 1 ? columns.concat(columnsAdd)
+                       : columns )))}
                  pagination={false}
+                 loading={tableIsLoading}
                  bordered
-                 scroll={{ y: 600, x: (appointmentStatus === 3 ? 400 : 1200) }}
+                 scroll={{ y: 540, x: (appointmentStatus === 4 ? 560
+                     : (appointmentStatus === 1 ? 1300
+                       : 1150))}}
                  rowKey={(record, index) => `${record.id}`}
                  rowSelection={appointmentStatus === 0 ? {
                    selectedRowKeys: selectedIds,
@@ -397,14 +471,14 @@ class appointmentTeamManage extends React.Component {
           />
 
           {/*分页*/}
-          {appointmentStatus === 3 || <Pagination className="tablePagination"
+          {appointmentStatus === 4 || <Pagination className="tablePagination"
                       total={pageTotal}
                       pageSize={pageSize}
                       current={pageNum}
                       showTotal={(total, range) =>
                         `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`
                       }
-                      style={{float:'right',marginRight:'20px',marginTop:'10px'}}
+                      style={{float:'right',marginRight:20,marginTop:10,paddingBottom:20}}
                       onChange={this.changePage.bind(this)}
                       showSizeChanger
                       pageSizeOptions={pageSizeOptions}
