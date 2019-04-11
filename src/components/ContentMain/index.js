@@ -10,12 +10,12 @@ import page404 from '@pages/system/page404/'
 
 //物流管理
   // bc商品打包
-  import commoditiesPackaging from "@pages/BC_customsClearance/commoditiesPackaging";
-  import customerLogin from "@pages/BC_customsClearance/commoditiesPackaging/customerLogin";
+  import commoditiesPackaging from "@pages/logisticsManage/BC_customsClearance/commoditiesPackaging";
+  import customerLogin from "@pages/logisticsManage/BC_customsClearance/commoditiesPackaging/customerLogin";
   // bc清关
-  import YTO from "@pages/BC_customsClearance/YTO";
+  import YTO from "@pages/logisticsManage/BC_customsClearance/YTO";
   // bc推单
-  import BCUploadOrder from "@pages/BC_customsClearance/uploadOrder";
+  import BCUploadOrder from "@pages/logisticsManage/BC_customsClearance/uploadOrder";
 
   // ETK订单
   import orderMatched from '@pages/logisticsManage/ETK/matched/';
