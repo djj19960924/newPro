@@ -45,6 +45,8 @@ class YTO extends React.Component {
       body: "isYto=" + status+"&pageNum="+pageNum+"&pageSize="+pageSize
     }).then(r => r.json()).then((res) => {
       if (!res.msg && !res.data) {
+        message.error(`后端数据错误`)
+      } else {
         if (res.status === 10000) {
           for(let i=0 ; i<res.data.list.length;i++){
             res.data.list[i].createTime=this.formatDate(res.data.list[i].createTime);
@@ -60,8 +62,6 @@ class YTO extends React.Component {
             this.setState({data:[]});
           }
         }
-      } else {
-        message.error(`后端数据错误`)
       }
       this.setState({tableLoading:false});
     }).catch(()=>{
