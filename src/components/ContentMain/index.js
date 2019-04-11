@@ -8,43 +8,61 @@ import Home from '@pages/Home/';
 // 404页面
 import page404 from '@pages/system/page404/'
 
-//物流管理
-  // bc商品打包
-  import commoditiesPackaging from "@pages/logisticsManage/BC_customsClearance/commoditiesPackaging";
-  import customerLogin from "@pages/logisticsManage/BC_customsClearance/commoditiesPackaging/customerLogin";
-  // bc清关
-  import YTO from "@pages/logisticsManage/BC_customsClearance/YTO";
-  // bc推单
-  import BCUploadOrder from "@pages/logisticsManage/BC_customsClearance/uploadOrder";
-
-  // ETK订单
-  import orderMatched from '@pages/logisticsManage/ETK/matched/';
-  import orderUnmatched from '@pages/logisticsManage/ETK/unmatched/';
-
-// 预约接送机
-import airportTransfer from '@pages/reservationService/airportTransfer/';
-// 预约打包
-import appointmentInfo from '@pages/reservationService/appointmentInfo/';
-
-// 返点
-import adoptExaminePaid from '@pages/rebateManage/adoptExaminePaid/';
-import adoptExamineUnpaid from '@pages/rebateManage/adoptExamineUnpaid/';
-import rejectExamine from '@pages/rebateManage/rejectExamine/';
-import updateQRCode from '@pages/rebateManage/updateQRCode/';
-// 审核小票
-import awaitingExamine from '@pages/rebateManage/awaitingExamine/';
-// 设置返点
-import setRebate from '@pages/rebateManage/setRebate/';
-import countBillList from '@pages/rebateManage/countBillList/';
-import appointmentTeamManage from '@pages/rebateManage/appointmentTeamManage/';
-
-// 商品管理
-import commoditiesDataBase from '@pages/commoditiesManage/commoditiesDatabase/';
-import commoditiesCreateAndEdit from '@pages/commoditiesManage/commoditiesDatabase/commoditiesCreateAndEdit/';
-import commoditiesImgList from '@pages/commoditiesManage/commoditiesDatabase/commoditiesImgList/';
-
 // 开发人员专用调试
 import importExcel from '@pages/developerPages/importExcel/';
+
+//物流管理
+  // bc清关
+    // bc商品打包
+    import commoditiesPackaging from "@pages/logisticsManage/BC_customsClearance/commoditiesPackaging/";
+    // 打包登陆用户
+    import customerLogin from "@pages/logisticsManage/BC_customsClearance/commoditiesPackaging/customerLogin/";
+    // bc清关
+    import YTO from "@pages/logisticsManage/BC_customsClearance/YTO/";
+    // bc推单
+    import BCUploadOrder from "@pages/logisticsManage/BC_customsClearance/uploadOrder/";
+
+  // ETK订单
+    // 已匹配
+    import orderMatched from '@pages/logisticsManage/ETK/matched/';
+    // 未匹配
+    import orderUnmatched from '@pages/logisticsManage/ETK/unmatched/';
+
+  // 邮政订单
+    // 已推送
+    import orderPushed from '@pages/logisticsManage/postal/pushed/';
+    // 未推送
+    import orderNotPushed from '@pages/logisticsManage/postal/notPushed/';
+
+// 预约
+  // 预约接送机
+  import airportTransfer from '@pages/reservationService/airportTransfer/';
+  // 预约打包
+  import appointmentInfo from '@pages/reservationService/appointmentInfo/';
+
+// 返点
+  // 已支付
+  import adoptExaminePaid from '@pages/rebateManage/adoptExaminePaid/';
+  // 未支付
+  import adoptExamineUnpaid from '@pages/rebateManage/adoptExamineUnpaid/';
+  // 驳回
+  import rejectExamine from '@pages/rebateManage/rejectExamine/';
+  // 更新二维码
+  import updateQRCode from '@pages/rebateManage/updateQRCode/';
+  // 审核小票
+  import awaitingExamine from '@pages/rebateManage/awaitingExamine/';
+  // 设置返点
+  import setRebate from '@pages/rebateManage/setRebate/';
+  // 对账
+  import countBillList from '@pages/rebateManage/countBillList/';
+  // 挂团
+  import appointmentTeamManage from '@pages/rebateManage/appointmentTeamManage/';
+
+// 商品管理
+  // 商品数据库
+  import commoditiesDataBase from '@pages/commoditiesManage/commoditiesDatabase/';
+  import commoditiesCreateAndEdit from '@pages/commoditiesManage/commoditiesDatabase/commoditiesCreateAndEdit/';
+  import commoditiesImgList from '@pages/commoditiesManage/commoditiesDatabase/commoditiesImgList/';
 
 @withRouter
 class ContentMain extends React.Component{
@@ -70,6 +88,9 @@ class ContentMain extends React.Component{
             {/*ETK*/}
             <Route exact path="/logistics-manage/ETK/unmatched" component={orderUnmatched} />
             <Route exact path="/logistics-manage/ETK/matched" component={orderMatched} />
+            {/*邮政*/}
+            <Route exact path="/logistics-manage/postal/pushed/" component={orderPushed} />
+            <Route exact path="/logistics-manage/postal/not-pushed/" component={orderNotPushed} />
 
           {/*返点管理*/}
           <Route exact path="/rebate-manage/awaiting-examine" component={awaitingExamine} />
