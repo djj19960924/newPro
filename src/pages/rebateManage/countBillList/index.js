@@ -228,6 +228,7 @@ class countBillList extends React.Component{
                columns={columnsForExport}
                pagination={false}
                style={{display: `none`}}
+               rowKey={(record, index) => `${index}`}
         />
 
         {/*表单主体*/}
@@ -246,7 +247,7 @@ class countBillList extends React.Component{
                  },
                } : null}
                scroll={{ y: 600, x: 800 }}
-               rowKey={(record, index) => `${record.reciptId}`}
+               rowKey={(record, index) => `${index}`}
         />
         {/*分页*/}
         <Pagination className="tablePagination"
