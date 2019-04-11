@@ -186,7 +186,7 @@ class commoditiesDataBase extends React.Component {
   exportExcel_record_1() {
     let elt = document.getElementById('tableList_record_1');
     let wb = XLSX.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
-    XLSX.writeFile(wb, `商品资料库 (美渠) ${moment(new Date()).format('YYYY-MM-DD HH:mm:ss')}.xlsx`);
+    XLSX.writeFile(wb, `商品资料库 (美渠) ${moment(new Date()).format('YYYY-MM-DD_HH.mm.ss')}.xlsx`);
   }
 
   // 导出未备案excel
@@ -194,7 +194,7 @@ class commoditiesDataBase extends React.Component {
     const {record, dataList,} = this.state;
     let elt = document.getElementById('tableList');
     let wb = XLSX.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
-    XLSX.writeFile(wb, (record === 3 ? `商品资料库备案表 ${moment(new Date()).format('YYYY-MM-DD HH:mm:ss')}.xlsx` : `商品资料库 ${moment(new Date()).format('YYYY-MM-DD HH:mm:ss')}.xlsx`));
+    XLSX.writeFile(wb, (record === 3 ? `商品资料库备案表 ${moment(new Date()).format('YYYY-MM-DD_HH.mm.ss')}.xlsx` : `商品资料库 ${moment(new Date()).format('YYYY-MM-DD_HH.mm.ss')}.xlsx`));
     // 导出的同时调取接口,将相应的商品状态改为备案中
     let dataArray = [], dataArrayAll = [];
     for (let i of dataList) {
@@ -405,7 +405,7 @@ class commoditiesDataBase extends React.Component {
       if(window.commoditiesDataBase.state.count == window.commoditiesDataBase.state.picList.length-1){
         window.commoditiesDataBase.setState({downloadVisible: true})
 
-        var file_name = `未备案商品图片(${moment(new Date()).format('YYYY-MM-DD HH:mm:ss')}).zip`;
+        var file_name = `未备案商品图片(${moment(new Date()).format('YYYY-MM-DD_HH.mm.ss')}).zip`;
         zip.generateAsync({type: "blob"}).then(function (content) {
           // see FileSaver.js
           //console.error(content);
@@ -422,7 +422,7 @@ class commoditiesDataBase extends React.Component {
       window.commoditiesDataBase.state.dowmloadFailPic.push(window.commoditiesDataBase.state.picList[window.commoditiesDataBase.state.count].skuCode);
       if(window.commoditiesDataBase.state.count == window.commoditiesDataBase.state.picList.length-1){
         this.setState({downloadVisible: true})
-        var file_name = `未备案商品图片(${moment(new Date()).format('YYYY-MM-DD HH:mm:ss')}).zip`;
+        var file_name = `未备案商品图片(${moment(new Date()).format('YYYY-MM-DD_HH.mm.ss')}).zip`;
         zip.generateAsync({type: "blob"}).then(function (content) {
           // see FileSaver.js
           //console.error(content);

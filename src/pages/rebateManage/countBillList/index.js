@@ -118,7 +118,7 @@ class countBillList extends React.Component{
 
       let elt = document.getElementById('tableListForExport');
       let wb = XLSX.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
-      XLSX.writeFile(wb, `对账表单 ${moment(new Date()).format('YYYY-MM-DD HH:mm:ss')}.xlsx`);
+      XLSX.writeFile(wb, `对账表单 ${moment(new Date()).format('YYYY-MM-DD_HH.mm.ss')}.xlsx`);
 
       let data = {};
       data.list = [];
