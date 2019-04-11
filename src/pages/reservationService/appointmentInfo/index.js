@@ -1,5 +1,5 @@
 import React from 'react';
-import {Table,Button } from 'antd';
+import { Table, } from 'antd';
 import './index.less';
 import columns from './columns';
 
@@ -8,7 +8,6 @@ class appointmentInfo extends React.Component{
     super(props);
     this.state = {
       dataSource: [],
-      selection: 0,
     };
   }
   componentDidMount() {
@@ -25,31 +24,9 @@ class appointmentInfo extends React.Component{
       });
     })
   }
-  allBook (){
-    this.setState({selection:0});
-    this.allInformation()
-  }
-  airport (){
-    fetch(window.apiUrl+"/appointment/getAppointmentByisFlight",{
-      method:"GET",
-      headers:{'Content-Type': 'application/x-www-form-urlencoded'},
-    }).then(response=>response.json()).then(r=>{
-      this.setState({dataSource:r,selection:1})
-    })
-  }
   render() {
     return (
       <div className="appointmentInfo">
-        <p className="topBtn">
-          <Button className="election"
-                  type={this.state.selection===0 ? "primary":""}
-                  onClick={this.allBook.bind(this)}
-          >全部</Button >
-          <Button className="election"
-                  type={this.state.selection===1 ? "primary":""}
-                  onClick={this.airport.bind(this)}
-          >接机</Button>
-        </p>
         <Table className="tableList"
                dataSource={this.state.dataSource}
                columns={columns}
