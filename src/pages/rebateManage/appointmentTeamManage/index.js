@@ -1,13 +1,15 @@
 import React from 'react';
 import { Radio, Table, Button, Modal, message, Pagination, Input, DatePicker, } from 'antd';
 import moment from 'moment';
-
+import XLSX from 'xlsx';
 import './index.less';
 
 class appointmentTeamManage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      rejectVisible: false,//驳回modal
+      rejectId: null,//驳回挂团信息id
       // 预约状态
       appointmentStatus: 0,
       pageNum: 1,
@@ -223,6 +225,17 @@ class appointmentTeamManage extends React.Component {
       this.getAppointmentByStatus();
     })
   }
+  //显示驳回modal
+  rejectRegiment (id){
+    this.setState({rejectVisible:true,rejectId:id});
+  }
+  sureReject (){
+    this.apointmentToRejected(this.state.rejectId);
+    this.setState({rejectVisible:false});
+  }
+  cancelReject (){
+    this.setState({rejectVisible:false});
+  }
   // 驳回用户的预约挂团数据
   apointmentToRejected(id) {
     fetch(`${window.fandianUrl}/AppointmentMangement/apointmentToRejected`, {
@@ -260,6 +273,10 @@ class appointmentTeamManage extends React.Component {
     }
     if (selectedList.length > 0) {
       this.setState({isLoading: true});
+      let elt = document.getElementById('tableListForExport');
+      let wb = XLSX.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
+      XLSX.writeFile(wb, `预约挂团 ${moment(new Date()).format('YYYY-MM-DD_HH.mm.ss')}.xlsx`);
+
       fetch(`${window.fandianUrl}/AppointmentMangement/sendAppointmentInselected`, {
         method: `POST`,
         headers: {'Content-Type': 'application/json'},
@@ -291,6 +308,7 @@ class appointmentTeamManage extends React.Component {
     // 表单头
     const columnsNoMassNo = [
       {title: '姓名', dataIndex: 'passportName', key: 'passportName', width: 120},
+      {title: '出生年月日', dataIndex: 'birthday', key: 'birthday', width: 160,},
       {title: '护照号码', dataIndex: 'passportNum', key: 'passportNum', width: 140},
       {title: '性别', dataIndex: 'sex', key: 'sex', width: 120,
         render: (text, record) => (
@@ -302,35 +320,11 @@ class appointmentTeamManage extends React.Component {
           </p>
         ),
       },
-      {title: '出生年月日', dataIndex: 'birthday', key: 'birthday', width: 160,
-        // render: (text, record) => (
-        //   <div>
-        //     {record.frenchTicket === null
-        //       ? <Button type="default"
-        //                 onClick={this.openPreview.bind(this,record.airTicket)}
-        //         >点击查看</Button>
-        //       : <div>
-        //           <Button type="default"
-        //                   onClick={this.openPreview.bind(this,record.airTicket)}
-        //           >返程</Button>
-        //           <Button type="default"
-        //                   style={{marginLeft: 8}}
-        //                   onClick={this.openPreview.bind(this,record.frenchTicket)}
-        //           >去程</Button>
-        //         </div>
-        //     }
-        //   </div>
-        // ),
-      },
-      {title: '商场', dataIndex: 'mallName', key: 'mallName', width: 140},
-      {title: '预约时间', dataIndex: 'createTime', key: 'createTime', width: 160,
-        render: (text, record) => (
-          <div>{!!record.createTime ? moment(record.createTime).format('YYYY-MM-DD HH:mm:ss') : ''}</div>
-        )
-      },
       {title: '护照到期日', dataIndex: 'maturityDate', key: 'maturityDate', width: 140},
       {title: '入店日期', dataIndex: 'arrivalDate', key: 'arrivalDate', width: 140},
-      {title: '出境日期', dataIndex: 'outboundDate', key: 'outboundDate', width: 140}
+      {title: '出境日期', dataIndex: 'outboundDate', key: 'outboundDate', width: 140},
+      {title: '航班号', dataIndex: 'flightNo', key: 'flightNo', width: 160,},
+      {title: '商场', dataIndex: 'mallName', key: 'mallName', width: 140},
     ];
     const columns = [];
     for (let v of columnsNoMassNo) {
@@ -411,10 +405,11 @@ class appointmentTeamManage extends React.Component {
     ];
     const columnsAdd = {
       title: '操作', dataIndex: 'operation', key: 'operation', width: 90,
+      fixed: 'right',
       render: (text, record, index) => (
         <div>
           <Button type="danger"
-                  onClick={this.apointmentToRejected.bind(this,record.id)}
+                  onClick={this.rejectRegiment.bind(this,record.id)}
           >驳回</Button>
         </div>
       )
@@ -434,7 +429,15 @@ class appointmentTeamManage extends React.Component {
           <RadioButton value={3}>已驳回团号</RadioButton>
           <RadioButton value={4}>编辑商场团号</RadioButton>
         </RadioGroup>
-
+        {/*驳回*/}
+        <Modal
+          title="是否驳回"
+          visible={this.state.rejectVisible}
+          onOk={this.sureReject.bind(this)}
+          onCancel={this.cancelReject.bind(this)}
+        >
+          <p>是否驳回</p>
+        </Modal>
         {/*按钮行*/}
         <div className="btnLine">
           {appointmentStatus === 0 &&
@@ -442,7 +445,7 @@ class appointmentTeamManage extends React.Component {
                   onClick={this.submitAppointment.bind(this)}
                   loading={isLoading}
                   disabled={selectedList.length === 0}
-          >发送所选申请</Button>}
+          >导出挂团信息</Button>}
         </div>
 
         {/*这里给出表单和分页最大宽度, 防止 table 过宽*/}
@@ -451,6 +454,15 @@ class appointmentTeamManage extends React.Component {
                  : (appointmentStatus === 1 ? 1350
                    : 1250))}}
         >
+          {/*导出用表单*/}
+          <Table className="tableListForExport"
+                 id="tableListForExport"
+                 dataSource={selectedList}
+                 columns={columnsNoMassNo}
+                 pagination={false}
+                 style={{display: `none`}}
+                 rowKey={(record, index) => `${index}`}
+          />
           {/*表单主体*/}
           <Table className="tableList"
                  dataSource={dataList}
@@ -458,8 +470,7 @@ class appointmentTeamManage extends React.Component {
                    columnsNoMassNo
                    : ( appointmentStatus === 4 ?
                      columnsMallMassNo
-                     : (appointmentStatus === 0 ? columns.concat(columnsAdd)
-                       : columns ))))}
+                     :  columns )))}
                  pagination={false}
                  loading={tableIsLoading}
                  bordered
