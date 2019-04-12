@@ -292,39 +292,45 @@ class appointmentTeamManage extends React.Component {
     const columnsNoMassNo = [
       {title: '姓名', dataIndex: 'passportName', key: 'passportName', width: 120},
       {title: '护照号码', dataIndex: 'passportNum', key: 'passportNum', width: 140},
-      {title: '护照首页照片', dataIndex: 'passport', key: 'passport', width: 120,
+      {title: '性别', dataIndex: 'sex', key: 'sex', width: 120,
         render: (text, record) => (
-          <Button type="default"
-                  onClick={this.openPreview.bind(this,record.passport)}
-          >点击查看</Button>
+          <p>
+            {text==0 ? "男" :(text ==1 ? "女" : "")}
+          {/*<Button type="default"*/}
+                  {/*onClick={this.openPreview.bind(this,record.passport)}*/}
+          {/*>点击查看</Button>*/}
+          </p>
         ),
       },
-      {title: '查看机票', dataIndex: 'airTicket', key: 'airTicket', width: 160,
-        render: (text, record) => (
-          <div>
-            {record.frenchTicket === null
-              ? <Button type="default"
-                        onClick={this.openPreview.bind(this,record.airTicket)}
-                >点击查看</Button>
-              : <div>
-                  <Button type="default"
-                          onClick={this.openPreview.bind(this,record.airTicket)}
-                  >返程</Button>
-                  <Button type="default"
-                          style={{marginLeft: 8}}
-                          onClick={this.openPreview.bind(this,record.frenchTicket)}
-                  >去程</Button>
-                </div>
-            }
-          </div>
-        ),
+      {title: '出生年月日', dataIndex: 'birthday', key: 'birthday', width: 160,
+        // render: (text, record) => (
+        //   <div>
+        //     {record.frenchTicket === null
+        //       ? <Button type="default"
+        //                 onClick={this.openPreview.bind(this,record.airTicket)}
+        //         >点击查看</Button>
+        //       : <div>
+        //           <Button type="default"
+        //                   onClick={this.openPreview.bind(this,record.airTicket)}
+        //           >返程</Button>
+        //           <Button type="default"
+        //                   style={{marginLeft: 8}}
+        //                   onClick={this.openPreview.bind(this,record.frenchTicket)}
+        //           >去程</Button>
+        //         </div>
+        //     }
+        //   </div>
+        // ),
       },
       {title: '商场', dataIndex: 'mallName', key: 'mallName', width: 140},
       {title: '预约时间', dataIndex: 'createTime', key: 'createTime', width: 160,
         render: (text, record) => (
           <div>{!!record.createTime ? moment(record.createTime).format('YYYY-MM-DD HH:mm:ss') : ''}</div>
         )
-      }
+      },
+      {title: '护照到期日', dataIndex: 'maturityDate', key: 'maturityDate', width: 140},
+      {title: '入店日期', dataIndex: 'arrivalDate', key: 'arrivalDate', width: 140},
+      {title: '出境日期', dataIndex: 'outboundDate', key: 'outboundDate', width: 140}
     ];
     const columns = [];
     for (let v of columnsNoMassNo) {
@@ -448,12 +454,12 @@ class appointmentTeamManage extends React.Component {
           {/*表单主体*/}
           <Table className="tableList"
                  dataSource={dataList}
-                 columns={(appointmentStatus === 0 || appointmentStatus === 3 ?
+                 columns={(appointmentStatus === 0 ? columnsNoMassNo.concat(columnsAdd) :(appointmentStatus === 3 ?
                    columnsNoMassNo
                    : ( appointmentStatus === 4 ?
                      columnsMallMassNo
-                     : (appointmentStatus === 1 ? columns.concat(columnsAdd)
-                       : columns )))}
+                     : (appointmentStatus === 0 ? columns.concat(columnsAdd)
+                       : columns ))))}
                  pagination={false}
                  loading={tableIsLoading}
                  bordered
