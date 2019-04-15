@@ -307,10 +307,11 @@ class appointmentTeamManage extends React.Component {
     const {dataList, pageTotal, pageSize, pageNum, pageSizeOptions, appointmentStatus, previewVisible, previewImage, showEdit, selectedIds, isLoading, inputValue, selectedList, tableIsLoading, } = this.state;
     // 表单头
     const columnsNoMassNo = [
-      {title: '姓名', dataIndex: 'passportName', key: 'passportName', width: 120},
-      {title: '出生年月日', dataIndex: 'birthday', key: 'birthday', width: 160,},
+      {title: '姓名', dataIndex: 'passportName', key: 'passportName', width: 180},
+      {title: '出生年月日', dataIndex: 'birthday', key: 'birthday', width: 200,},
+      {title: '国籍', dataIndex: 'nationality', key: 'nationality', width: 100},
       {title: '护照号码', dataIndex: 'passportNum', key: 'passportNum', width: 140},
-      {title: '性别', dataIndex: 'sex', key: 'sex', width: 120,
+      {title: '性别', dataIndex: 'sex', key: 'sex', width: 100,
         render: (text, record) => (
           <p>
             {text==0 ? "男" :(text ==1 ? "女" : "")}
@@ -320,11 +321,13 @@ class appointmentTeamManage extends React.Component {
           </p>
         ),
       },
-      {title: '护照到期日', dataIndex: 'maturityDate', key: 'maturityDate', width: 140},
-      {title: '入店日期', dataIndex: 'arrivalDate', key: 'arrivalDate', width: 140},
-      {title: '出境日期', dataIndex: 'outboundDate', key: 'outboundDate', width: 140},
+      {title: '护照到期日', dataIndex: 'maturityDate', key: 'maturityDate', width: 240},
+      {title: '入店日期', dataIndex: 'arrivalDate', key: 'arrivalDate', width: 240},
+      {title: '出境日期', dataIndex: 'outboundDate', key: 'outboundDate', width: 240},
+      {title: '出境时间', dataIndex: 'outboundDatetime', key: 'outboundDatetime', width: 180},
       {title: '航班号', dataIndex: 'flightNo', key: 'flightNo', width: 160,},
-      {title: '商场', dataIndex: 'mallName', key: 'mallName', width: 140},
+      {title: '机场', dataIndex: 'airportTerminal', key: 'airportTerminal', width: 160,},
+      {title: '商场', dataIndex: 'mallName', key: 'mallName', width: 250},
     ];
     const columns = [];
     for (let v of columnsNoMassNo) {
