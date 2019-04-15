@@ -439,7 +439,7 @@ class appointmentTeamManage extends React.Component {
           onOk={this.sureReject.bind(this)}
           onCancel={this.cancelReject.bind(this)}
         >
-          <p>是否驳回</p>
+          <p>该申请不符合标准</p>
         </Modal>
         {/*按钮行*/}
         <div className="btnLine">

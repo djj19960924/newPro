@@ -133,7 +133,11 @@ class BCUploadOrder extends React.Component {
               <div>{moment(record.createTime).format(`YYYY/MM/DD`)}</div>
             ),
       },
-      {title: '商品货号', dataIndex: 'productCode', key: 'productCode', width: 140},
+      {title: '商品货号', dataIndex: 'productCode', key: 'productCode', width: 140,
+        render: (text, record) => (
+          <div>{`JD${record.productCode}`}</div>
+        ),
+      },
       {title: '商品名称', dataIndex: 'productName', key: 'productName', width: 140},
       {title: '数量', dataIndex: 'productNum', key: 'productNum', width: 140},
       {title: '成本价', dataIndex: 'costPrice', key: 'costPrice', width: 140},
