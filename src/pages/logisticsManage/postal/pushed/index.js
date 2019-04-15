@@ -58,7 +58,7 @@ class orderPushed extends React.Component{
         headers: {'Content-Type': 'application/json'},
         body:JSON.stringify({
           boxCode: fileDate[Num].箱号,
-          waybillNo: fileDate[Num].邮政单号,
+          waybillNo: fileDate[Num].运单号,
         }),
       }).then(r => r.json()).then(r => {
         console.log(r);
