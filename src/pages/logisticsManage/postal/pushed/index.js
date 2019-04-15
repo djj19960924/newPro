@@ -72,7 +72,7 @@ class orderPushed extends React.Component{
           } else {
             message.error(`${r.msg} 错误码: ${r.status}`);
             let dataList = errorList;
-            dataList.push({msg:r.msg,status:r.status,boxCode: fileDate[Num].箱号,waybillNo: fileDate[Num].邮政单号,});
+            dataList.push({msg:r.msg,status:r.status,boxCode: fileDate[Num].箱号,waybillNo: fileDate[Num].运单号,});
             this.setState({errorList:dataList});
           }
           this.setState({Num:(Num+1)},()=>{
@@ -182,12 +182,15 @@ class orderPushed extends React.Component{
                  isImport ? message.warn(`导入结束前请勿关闭页面`)
                  : this.setState({importVisible:false,Num:0,fileDate:[],errorList:[],success:0,})
                }}
+               width={650}
         >
           <div>成功数据: {success}/{fileDate.length}</div>
           <div>错误数据:</div>
           {errorList.map((item,i) => (
             <div>{item.msg}, 错误码:{item.status}, 箱号:{item.boxCode}, 运单号:{item.waybillNo}</div>
           ))}
+          {errorList.length === 0 ? ''
+            : <div style={{color:'rgba(255,0,0,.7)'}}>请留存错误数据, 以便处理失败单号</div>}
         </Modal>
 
         {/*表单主体*/}
