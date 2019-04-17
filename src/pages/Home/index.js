@@ -18,12 +18,18 @@ class Home extends React.Component{
 
         <div className="main">
           <div className="updateInfo">
+            <div className="infoTitle" >2019－4-16 更新</div>
+            <div className="dividingLine shot" />
+            <p>对账管理：发送excel优化为下载图片包（护照＋小票）</p>
+          </div>
+          <div className="updateInfo">
             <div className="infoTitle" >2019-04-15 更新</div>
             <div className="dividingLine shot" />
-            <p>Excel表格导出页面－优化导出Excel表格名称格式</p>
-            <p>预约打包页面－去掉接机服务功能, 该功能已迁移至预约接送机</p>
-            <p>预约挂团－更新分页, 驳回, 商场团号添加失效时间等相关功能</p>
-            <p>邮路推单－加入一键导入Excel功能</p>
+            <p>1.邮路整体功能上线</p>
+            <p>2.预约挂团：</p>
+            <p>1）增加驳回功能</p>
+            <p>2）新罗新世界商场团号增加失效时间设置</p>
+            <p>3）挂团导出Excel字段调整</p>
             <p style={{color:'#aaa'}}>开发相关－优化部分项目结构, 优化部分功能方法, 优化部分报错样式以及逻辑</p>
           </div>
           <div className="updateInfo">
