@@ -142,7 +142,7 @@ class countBillList extends React.Component {
     })
   }
 
-  downloadPassport(src, passportNum, length) {
+  downloadPassport(src, passportNum, length,id) {
     const {selectedList, passportCount, passportNumList} = this.state;
     let that = this;
     if (!(passportNumList.includes(passportNum))) {
@@ -271,7 +271,7 @@ class countBillList extends React.Component {
       // let wb = XLSX.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
       // XLSX.writeFile(wb, `对账表单 ${moment(new Date()).format('YYYY-MM-DD_HH.mm.ss')}.xlsx`);
       console.log(selectedList);
-      this.downloadPassport(selectedList[passportCount].passport.replace('http:', "https:"), selectedList[passportCount].passportNum, selectedList.length)
+      this.downloadPassport(selectedList[passportCount].passport.replace('http:', "https:"), selectedList[passportCount].passportNum, selectedList.length,selectedList[passportCount].id)
       this.downloadTicket(selectedList[ticketCount].pictureUrl.replace('http:', "https:"), selectedList[ticketCount].passportNum, selectedList[ticketCount].updateTime, selectedList[ticketCount].mallName, selectedList.length,selectedList[ticketCount].id)
 
     } else {
