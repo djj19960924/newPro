@@ -22,8 +22,8 @@ import 'antd/dist/antd.less';
 import App from './App';
 
 const testapi = 'http://testapi.maishoumiji.com';
-// const testapi = 'http://fandian.maishoulm.com';
-// const testapi = 'http://192.168.3.32:8000';
+//const testapi = 'http://fandian.maishoulm.com';
+//const testapi = 'http://192.168.3.32:8000';
 window.apiUrl = window.fandianUrl = window.testUrl = testapi;
 window.isLocalTest = true;
 document.getElementsByTagName("title")[0].innerText = `后台管理系统 - 本地版`;

@@ -25,12 +25,12 @@ import App from './App';
 window.apiUrl = '//api.maishoumiji.com';
 window.fandianUrl = '//fandian.maishoumiji.com';
 
-// 测试版:
-window.isServerTest = true; // 服务端测试版开口
-if (window.isServerTest) {
-  window.apiUrl = window.fandianUrl = 'http://testapi.maishoumiji.com';
-  document.getElementsByTagName("title")[0].innerText = `后台管理系统 - 测试版`;
-}
+//测试版:
+// window.isServerTest = true; // 服务端测试版开口
+// if (window.isServerTest) {
+//   window.apiUrl = window.fandianUrl = 'http://testapi.maishoumiji.com';
+//   document.getElementsByTagName("title")[0].innerText = `后台管理系统 - 测试版`;
+// }
 
 ReactDOM.render(
   <BrowserRouter>
