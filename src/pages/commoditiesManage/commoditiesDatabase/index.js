@@ -427,7 +427,7 @@ class commoditiesDataBase extends React.Component {
           // see FileSaver.js
           //console.error(content);
           window.commoditiesDataBase.setState({loadingTxt: ''});
-          saveAs(content, file_name);
+          window.saveAs(content, file_name);
         });
       }else{
         window.commoditiesDataBase.setState({count:window.commoditiesDataBase.state.count+1},function () {
@@ -651,7 +651,7 @@ class commoditiesDataBase extends React.Component {
                                    onClick={() => this.setState({exportModalVisible: true})}
           >excel导出</Button>}
           {record === 2 && <Button type="primary" className="importExcelBtn" onClick={this.downLoadPic.bind(this)}>下载图片</Button>}
-          {(record === 3 && (window.isLocalTest || window.isServerTest)) &&
+          {record === 3 &&
           <Button type="primary"
                   onClick={this.clickIT.bind(this)}
                   className="importExcelBtn"

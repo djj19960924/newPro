@@ -18,6 +18,11 @@ class Home extends React.Component{
 
         <div className="main">
           <div className="updateInfo">
+            <div className="infoTitle" >2019－4-19 更新</div>
+            <div className="dividingLine shot" />
+            <p>商品资料库－备案中：支持自助导入已备案的excel表格，更新备案信息（商品货号需真实有效，SDM区别字段请加在商品名称之前，如   [SDM] kiss me 眼线笔   ）</p>
+          </div>
+          <div className="updateInfo">
             <div className="infoTitle" >2019－4-16 更新</div>
             <div className="dividingLine shot" />
             <p>对账管理：发送excel优化为下载图片包（护照＋小票）</p>

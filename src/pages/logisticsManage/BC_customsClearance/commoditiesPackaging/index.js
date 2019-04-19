@@ -544,7 +544,7 @@ class commoditiesPackaging extends React.Component{
     if (window.isServerTest) isTest = true;
     if (window.isLocalTest) isTest = true;
     let qrcode = new window.QRCode(Obj, {
-      text: `http://api.maishoumiji.com/wechat/authorize?returnUrl=http%3A%2F%2F${isTest ? 'test' : ''}m.maishoumiji.com/paymenttransfer`,
+      text: `http://api.maishoumiji.com/wechat/authorize?returnUrl=http%3A%2F%2F${isTest ? 'test' : ''}m.maishoumiji.com/%23/paymenttransfer`,
       width: 200,
       height: 200,
       colorDark : "#000",
