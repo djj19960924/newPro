@@ -1,37 +1,51 @@
 import React from 'react';
-import {Radio, Table, Button, Modal, message, Pagination,} from 'antd';
-import XLSX from 'xlsx';
+import {Radio, Table, Button, Modal, message, Pagination, Icon,} from 'antd';
 import moment from 'moment';
 import JsZip from 'jszip';
-// xlsx转blob
-// import '@js/FileSaver.min.js';
 
 import './index.less';
-
-let zip = new JsZip();
-var passport = zip.folder("护照(由于图片相同,显示的图片数量可能小于下载的图片)");
-var ticket = zip.folder("小票");
 
 class countBillList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      //护照下载失败
-      passportError: [],
-      //小票下载失败
-      ticketError: [],
-      //保存下载的护照号
-      passportNumList: [],
-      //下载图片modal
-      downloadVisible: false,
-      //当前小票图片下载的数目
-      ticketCount: 0,
-      //当前护照图片下载的数目
-      passportCount: 0,
-      //判断是否护照下载完成
-      passportIsSuccess: false,
-      //判断是否小票下载完成
-      ticketIsSuccess: false,
+      // 压缩组件, 初始化
+      zip: new JsZip(),
+      // 护照文件夹
+      passportFolder: null,
+      // 小票文件夹
+      ticketFolder: null,
+      // 自增整数
+      Num: 0,
+      // 下载图片弹窗
+      downloadModalVisible: false,
+      // 小票下载成功列表
+      ticketSuccessList: [],
+      // 小票下载成功id列表
+      ticketSuccessIdList: [],
+      // 小票下载失败列表
+      ticketErrorList: [],
+      // 护照下载成功列表
+      passportSuccessList: [],
+      // 护照下载失败列表
+      passportErrorList: [],
+      // 确认键加载状态
+      isOkLoading: false,
+      // 加载文本列表
+      loadingTextList: [
+        '正在下载图片,请稍后...',
+        '正在发送小票,请稍后...'
+      ],
+      // 弹窗提示类型
+      textType: 0,
+      // 弹窗提示列表
+      textInfoList: [
+        "点击确认按钮, 下载并压缩所选小票图片以及护照图片",
+        "如需继续操作, 请关闭窗口, 重新选择小票",
+      ],
+      // 是否可以关闭弹窗
+      closeIsAllowed: true,
+
       // 选择条件
       verifyStatus: 0,
       // 表格数据
@@ -40,11 +54,13 @@ class countBillList extends React.Component {
       selectedList: [],
       // 选中条目ID
       selectedIds: [],
+
       // 分页
       pageTotal: 0,
       pageNum: 1,
       pageSize: 200,
       pageSizeOptions: [`100`, `200`, `300`, `500`],
+
       // 图片弹窗
       previewVisible: false,
       previewImage: '',
@@ -52,22 +68,24 @@ class countBillList extends React.Component {
       tableIsLoading: false,
     };
     window.countBillList = this;
-    // window.XLSX = XLSX;
   }
 
   // 默认读取表格
   componentDidMount() {
+    const { zip } = this.state;
+    // 载入zip组件
+    this.setState({passportFolder: zip.folder("护照"),ticketFolder: zip.folder("小票")});
     // 默认载入表格数据
-    //console.log(this.state.passportError.length === 0);
-    this.getReciptByVerify()
+    this.getReciptByVerify();
   }
 
   // 改变发送状态
   changeVerifyStatus(e) {
     this.setState({
       verifyStatus: e.target.value
+    },()=>{
+      this.getReciptByVerify()
     });
-    this.getReciptByVerify(e.target.value)
   }
 
   // 根据发送状态获取对账表
@@ -98,25 +116,42 @@ class countBillList extends React.Component {
           }
         } else {
           message.warn(`${r.msg}`);
-          this.setState({tableDataList: [], pageTotal: 0})
+          this.setState({tableDataList: [],
+            pageTotal: 0,
+            selectedList: [],
+            selectedIds: [],
+          })
         }
       } else {
         if (r.state) {
           message.error(`${r.msg}, 错误码: ${r.status}`);
-          this.setState({tableDataList: [], pageTotal: 0})
+          this.setState({tableDataList: [],
+            pageTotal: 0,
+            selectedList: [],
+            selectedIds: [],
+          })
         } else {
           message.error(`后端数据错误`);
-          this.setState({tableDataList: [], pageTotal: 0})
+          this.setState({tableDataList: [],
+            pageTotal: 0,
+            selectedList: [],
+            selectedIds: [],
+          })
         }
       }
       this.setState({tableIsLoading: false});
     }).catch(() => {
       message.error(`前端错误: 对账表信息接口调取失败`);
-      this.setState({tableDataList: [], pageTotal: 0, tableIsLoading: false})
+      this.setState({tableDataList: [],
+        pageTotal: 0,
+        tableIsLoading: false,
+        selectedList: [],
+        selectedIds: [],
+      })
     })
   }
 
-  // 打开弹窗
+  // 打开图片预览弹窗
   openPreview(url) {
     // console.log(url)
     this.setState({
@@ -125,7 +160,7 @@ class countBillList extends React.Component {
     })
   }
 
-  // 关闭弹窗
+  // 关闭图片预览弹窗
   closePreview() {
     this.setState({
       previewVisible: false,
@@ -142,140 +177,124 @@ class countBillList extends React.Component {
     })
   }
 
-  downloadPassport(src, passportNum, length,id) {
-    const {selectedList, passportCount, passportNumList} = this.state;
-    let that = this;
-    if (!(passportNumList.includes(passportNum))) {
-      passportNumList.push(passportNum);
-      fetch(src, {
-        method: 'get',
+  // 发送所选小票接口
+  sendReciptInSelected() {
+    const { ticketSuccessIdList, ticketSuccessList, } = this.state;
+    let data = {};
+    data.list = [];
+    data.reciptIdList = ticketSuccessIdList;
+    for (let v of ticketSuccessList) {
+      data.list.push({
+        passport: v.passport,
+        passportNum: v.passportNum,
+        pictureUrl: v.pictureUrl,
+      });
+    }
+    if (data.list.length > 0 && data.reciptIdList.length > 0) {
+      fetch(`${window.fandianUrl}/recipt/sendReciptInSelected`, {
+        method: 'POST',
         headers: {'Content-Type': 'application/json'},
-      }).then(r => r.blob()).then(res => {
-        passport.file(`${passportNum}.jpg`, res);
-        if (passportCount === length - 1) {
-          that.setState({passportIsSuccess: true})
+        body: JSON.stringify(data),
+      }).then(r => r.json()).then(r => {
+        if (!r.data && !r.message) {
+          message.error(`后端数据错误`);
         } else {
-          that.setState({passportCount: passportCount + 1}, function () {
-            that.downloadPassport(selectedList[that.state.passportCount].passport.replace(selectedList[that.state.passportCount].pictureUrl.split('//')[0], ''), selectedList[that.state.passportCount].passportNum, selectedList.length,selectedList[that.state.passportCount].id)
-          })
-        }
-      }).catch(() => {
-          let error = that.state.passportError;
-          error.push(id);
-          that.setState({passportError: error});
-          if (passportCount === length - 1) {
-            that.setState({passportIsSuccess: true})
+          if (r.status === 10000) {
+            message.success(r.data);
+            this.setState({textType: 2});
+            this.getReciptByVerify();
           } else {
-            that.setState({passportCount: passportCount + 1}, function () {
-              that.downloadPassport(selectedList[that.state.passportCount].passport.replace(selectedList[that.state.passportCount].pictureUrl.split('//')[0], ''), selectedList[that.state.passportCount].passportNum, selectedList.length,selectedList[that.state.passportCount].id)
-            })
+            message.error(`${r.data} 错误码: ${r.status}`);
           }
         }
-      )
+        this.setState({isOkLoading: false, closeIsAllowed: true});
+      }).catch(() => {
+        message.error(`前端错误: 请求发送失败`);
+        this.setState({isOkLoading: false, closeIsAllowed: true});
+      })
     } else {
-      if (passportCount === length - 1) {
-        that.setState({passportIsSuccess: true})
-      } else {
-        that.setState({passportCount: passportCount + 1}, function () {
-          that.downloadPassport(selectedList[that.state.passportCount].passport.replace(selectedList[that.state.passportCount].pictureUrl.split('//')[0], ''), selectedList[that.state.passportCount].passportNum, selectedList.length,selectedList[that.state.passportCount].id)
-        })
-      }
+
     }
   }
 
-  downloadTicket(src, passportNum, time, mallName, length,id) {
-    let that = this;
-    const {selectedList, ticketCount} = this.state;
-    fetch(src, {
-      method: 'get',
-      headers: {'Content-Type': 'application/json'},
-    }).then(r => r.blob()).then(res => {
-      ticket.file(`${passportNum}---${time}${mallName}(第${ticketCount + 1}张).jpg`, res);
-      if (ticketCount === length - 1) {
-        that.setState({ticketIsSuccess: true})
-        var file_name = `对账管理${moment(new Date()).format('YYYY-MM-DD_HH.mm.ss')}.zip`;
-        zip.generateAsync({type: "blob"}).then(function (content) {
-          saveAs(content, file_name);
-          let data = {};
-          data.list = [];
-          data.reciptIdList = that.state.selectedIds;
-          for (let v of that.state.selectedList) {
-            data.list.push({
-              // consumeDate: v.consumeDate,
-              // consumeMoney: `${v.consumeMoney}`,
-              passport: v.passport,
-              passportNum: v.passportNum,
-              pictureUrl: v.pictureUrl,
-            });
-          }
-          if(that.state.ticketError.length ===0 && that.state.passportError.length===0){
-            fetch(`${window.fandianUrl}/recipt/sendReciptInSelected`, {
-              method: 'POST',
-              headers: {'Content-Type': 'application/json'},
-              body: JSON.stringify(data),
-            }).then(r => r.json()).then(r => {
-              if (r.status === 10000) {
-                message.success(r.data);
-                that.setState({
-                  btnIsLoading: false,
-                  selectedIds: [],
-                });
-                that.getReciptByVerify();
-              } else {
-                if (r.status) {
-                  message.error(`${r.data} 错误码: ${r.status}`)
-                } else {
-                  message.error(`后端数据错误`)
-                }
-              }
-            }).catch(() => {
-              message.error(`前端错误: 请求发送失败`)
-            })
-          }
-        });
-      } else {
-        that.setState({ticketCount: ticketCount + 1}, function () {
-          that.downloadTicket(selectedList[that.state.ticketCount].pictureUrl.replace(selectedList[that.state.ticketCount].pictureUrl.split('//')[0], ''), selectedList[that.state.ticketCount].passportNum, selectedList[that.state.ticketCount].updateTime, selectedList[that.state.ticketCount].mallName, selectedList.length, selectedList[that.state.ticketCount].id)
-        })
-      }
-    }).catch(() => {
-        let error = that.state.ticketError;
-        error.push(id);
-        that.setState({ticketError: error});
-        if (ticketCount === length - 1) {
-          that.setState({ticketIsSuccess: true})
-          var file_name = `对账管理${moment(new Date()).format('YYYY-MM-DD_HH.mm.ss')}.zip`;
-          zip.generateAsync({type: "blob"}).then(function (content) {
-            saveAs(content, file_name);
-          });
+  // 弹窗确定按钮方法
+  clickOkBtn() {
+    const { textType, } = this.state;
+    if (textType === 0) {
+      this.setState({isOkLoading: true,closeIsAllowed: false},()=>{
+        this.downloadAndZipFiles();
+      });
+    } else {
+      message.warn(`小票已成功发送, 请关闭窗口重新选择新的小票`);
+    }
+  }
+
+  // 下载并压缩图片文件
+  downloadAndZipFiles() {
+    const { selectedList, Num, ticketFolder, passportFolder, zip, passportSuccessList, ticketSuccessList, ticketSuccessIdList, ticketErrorList, passportErrorList, } = this.state;
+    if (Num < selectedList.length) {
+      // 获取地址
+      let dataObj = selectedList[Num];
+
+      // 处理护照链接以及护照图片类型
+      let passport = `//${dataObj.passport.split('//')[1]}`,
+        passportTypeList = dataObj.passport.split('.'),
+        passportType = passportTypeList[(passportTypeList.length - 1)];
+
+      // 处理小票链接以及小票图片类型
+      let pictureUrl = `//${dataObj.pictureUrl.split('//')[1]}`,
+        pictureTypeList = dataObj.pictureUrl.split('.'),
+        pictureType = pictureTypeList[(pictureTypeList.length - 1)];
+
+      // 自增Num, 并重新调用本体方法
+      let addNum = () => this.setState({Num:(Num+1)},()=>{this.downloadAndZipFiles()});
+
+      // 处理护照下载压缩, 逻辑判断是否进行
+      let downloadPassport = () => {
+        if (passportSuccessList.includes(passport)) {
+          addNum()
         } else {
-          that.setState({ticketCount: ticketCount + 1}, function () {
-            that.downloadTicket(selectedList[that.state.ticketCount].pictureUrl.replace(selectedList[that.state.ticketCount].pictureUrl.split('//')[0], ''), selectedList[that.state.ticketCount].passportNum, selectedList[that.state.ticketCount].updateTime, selectedList[that.state.ticketCount].mallName, selectedList.length,selectedList[that.state.ticketCount].id)
-          })
+          fetch(passport).then(r => r.blob()).then(r => {
+            // 成功调取接口, 创建小票文件
+            passportFolder.file(`护照号_${dataObj.passportNum}.${passportType}`, r);
+            passportSuccessList.push(passport);
+            addNum();
+          }).catch(() => {
+            // 前端报错
+            message.error(`前端错误: 获取护照图片失败`);
+            passportErrorList.push(dataObj.passportNum);
+            addNum();
+          });
         }
-      }
-    )
-  }
+      };
 
-  //关闭下载图片modal
-  downloadPicModal() {
-    this.setState({downloadVisible: false})
-  }
-
-  // 发送
-  submit() {
-    const {selectedList, selectedIds, passportCount, ticketCount} = this.state;
-    if (selectedList.length > 0 && selectedIds.length > 0) {
-      this.setState({btnIsLoading: true, downloadVisible: true});
-      // let elt = document.getElementById('tableListForExport');
-      // let wb = XLSX.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
-      // XLSX.writeFile(wb, `对账表单 ${moment(new Date()).format('YYYY-MM-DD_HH.mm.ss')}.xlsx`);
-      console.log(selectedList);
-      this.downloadPassport(selectedList[passportCount].passport.replace('http:', "https:"), selectedList[passportCount].passportNum, selectedList.length,selectedList[passportCount].id)
-      this.downloadTicket(selectedList[ticketCount].pictureUrl.replace('http:', "https:"), selectedList[ticketCount].passportNum, selectedList[ticketCount].updateTime, selectedList[ticketCount].mallName, selectedList.length,selectedList[ticketCount].id)
+      // 处理小票下载压缩
+      fetch(pictureUrl).then(r => r.blob()).then(r => {
+        // 成功调取接口, 创建小票文件
+        ticketFolder.file(`护照号_${dataObj.passportNum} - 小票id_${dataObj.reciptId}.${pictureType}`, r);
+        ticketSuccessList.push(dataObj);
+        ticketSuccessIdList.push(dataObj.reciptId);
+        downloadPassport();
+      }).catch(()=>{
+        // 前端报错
+        message.error(`前端错误: 获取id为${dataObj.reciptId}小票图片失败`);
+        ticketErrorList.push(dataObj);
+        downloadPassport();
+      });
 
     } else {
-      message.error('未选择小票')
+      // 下载所有图片完成, 导出zip文件
+      let fileName = `对账管理${moment(new Date()).format('YYYY-MM-DD_HH.mm.ss')}.zip`;
+      zip.generateAsync({type: "blob"}).then((file) => {
+        window.saveAs(file, fileName);
+        this.setState({textType: 1},()=>{
+          this.sendReciptInSelected();
+        });
+      }).catch(r=>{
+        console.error(r);
+        message.error(`前端错误: 下载/压缩失败`);
+        this.setState({isOkLoading: false,textType: 0});
+      });
     }
   }
 
@@ -283,33 +302,21 @@ class countBillList extends React.Component {
     const RadioButton = Radio.Button, RadioGroup = Radio.Group;
     // 表单头
     const columns = [
-      {title: `序号`, dataIndex: `id`, key: 'id', width: 50},
-      {
-        title: '小票照片', dataIndex: 'pictureUrl', key: 'pictureUrl', width: 140,
+      {title: `小票ID`, dataIndex: `reciptId`, key: 'reciptId', width: 50},
+      {title: '小票照片', dataIndex: 'pictureUrl', key: 'pictureUrl', width: 140,
         render: (text, record) => (
           <Button onClick={this.openPreview.bind(this, record.pictureUrl)}
           >点击查看</Button>
-        ),
-      },
+        )},
       {title: '护照号码', dataIndex: 'passportNum', key: 'passportNum', width: 140},
-      {
-        title: '护照首页照片', dataIndex: 'passport', key: 'passport', width: 140,
+      {title: '护照首页照片', dataIndex: 'passport', key: 'passport', width: 140,
         render: (text, record) => (
           <Button onClick={this.openPreview.bind(this, record.passport)}
           >点击查看</Button>
-        ),
-      },
-      // {title: '小票购买时间', dataIndex: 'consumeDate', key: 'consumeDate', width: 140},
-      // {title: '小票金额', dataIndex: 'consumeMoney', key: 'consumeMoney', width: 140},
+        )},
     ];
     const columnsAdd = {title: '更新时间', dataIndex: 'updateTime', key: 'updateTime', width: 140,};
-    const columnsForExport = [
-      {title: `序号`, dataIndex: `id`, key: 'id', width: 50},
-      {title: '小票照片', dataIndex: 'pictureUrl', key: 'pictureUrl', width: 140},
-      {title: '护照号码', dataIndex: 'passportNum', key: 'passportNum', width: 140},
-      {title: '护照首页照片', dataIndex: 'passport', key: 'passport', width: 140},
-    ];
-    const {tableDataList, verifyStatus, previewVisible, previewImage, btnIsLoading, selectedList, selectedIds, pageTotal, pageSize, pageNum, pageSizeOptions, tableIsLoading, downloadVisible, passportCount, ticketCount, passportIsSuccess, ticketIsSuccess, passportError, ticketError} = this.state;
+    const {tableDataList, verifyStatus, previewVisible, previewImage, selectedList, selectedIds, pageTotal, pageSize, pageNum, pageSizeOptions, tableIsLoading, downloadModalVisible, isOkLoading, textInfoList, textType, ticketSuccessList, passportSuccessList, closeIsAllowed, loadingTextList, ticketErrorList, passportErrorList, } = this.state;
     return (
       <div className="countBillList">
         {/*查询条件单选行*/}
@@ -326,34 +333,52 @@ class countBillList extends React.Component {
 
         {/*执行行*/}
         <div className="btnLine" style={{marginLeft: 10}}>
-          {verifyStatus === 0 && <Button type="primary"
-                                         onClick={this.submit.bind(this)}
-                                         loading={btnIsLoading}
-                                         disabled={selectedList.length === 0}
-          >发送所选小票</Button>}
+          {verifyStatus === 0 &&
+            <Button type="primary"
+                    onClick={()=>{this.setState({ downloadModalVisible: true, textType: 0})}}
+                    disabled={selectedList.length === 0}
+            >下载所选小票图片</Button>
+          }
         </div>
+
         {/*下载图片*/}
-        <Modal title="下载图片"
-               className="exportModal"
-               visible={downloadVisible}
-               closable={false}
-               onOk={() => {
-                 this.getReciptByVerify();
-                 this.setState({downloadVisible: false, selectedList: []})
-               }}
-               confirmLoading={!(passportIsSuccess && ticketIsSuccess)}
+        <Modal title="下载并发送所选图片"
+               wrapClassName="downloadAndZipFilesModal"
+               visible={downloadModalVisible}
+               onOk={this.clickOkBtn.bind(this)}
+               confirmLoading={isOkLoading}
                onCancel={() => {
-                 (passportIsSuccess && ticketIsSuccess) ? this.setState({
-                   downloadVisible: false,
-                   selectedList: []
-                 }) : message.warn(`图片下载中,请勿关闭`)
+                 closeIsAllowed ? this.setState({downloadModalVisible: false})
+                   : message.warn(`图片下载中, 请勿关闭`)
                }}
         >
-          <p>护照图片下载{passportCount + 1}/{selectedList.length}</p>
-          <p>小票图片下载{ticketCount + 1}/{selectedList.length}</p>
-          <p>护照下载图片失败:{passportError.length === 0 ? 0 : passportError.join(",")}</p>
-          <p>小票下载图片失败:{ticketError.length === 0 ? 0 : ticketError.join(",")}</p>
+          {/*确定按钮提示*/}
+          <p style={{color:'rgba(255,0,0,.7)'}}>{textInfoList[textType]}</p>
+          {/*加载状态显示*/}
+          {isOkLoading &&
+            <div style={{fontSize:'24px',color:'rgba(255,0,0,.7)'}}>
+              <Icon type="loading" style={{paddingRight:'10px'}}/>
+              {loadingTextList[textType]}
+            </div>
+          }
+          {/*图片下载成功条数提示*/}
+          {(textType !== 2) &&
+            <div>
+              <p>当前小票成功下载条数: {ticketSuccessList.length}/{selectedIds.length}</p>
+              <p>当前护照成功下载条数: {passportSuccessList.length}</p>
+            </div>
+          }
+          {/*报错提示*/}
+          <p>小票下载错误信息: {ticketErrorList.length === 0 ? '无'
+            : ticketErrorList.map(item =>
+              <span style={{color:'rgba(255,0,0,.7)'}}>下载出错小票ID: {item.reciptId}</span>)}
+          </p>
+          <p>护照下载错误信息: {passportErrorList.length === 0 ? '无'
+              : passportErrorList.map(item =>
+              <span style={{color:'rgba(255,0,0,.7)'}}>下载出错护照号: {item}</span>)}
+          </p>
         </Modal>
+
         {/*图片预览弹窗*/}
         <Modal visible={previewVisible}
                width={800}
@@ -362,16 +387,6 @@ class countBillList extends React.Component {
         >
           <img alt="example" style={{width: '100%'}} src={previewImage}/>
         </Modal>
-
-        {/*导出用表单*/}
-        <Table className="tableListForExport"
-               id="tableListForExport"
-               dataSource={selectedList}
-               columns={columnsForExport}
-               pagination={false}
-               style={{display: `none`}}
-               rowKey={(record, index) => `${index}`}
-        />
 
         {/*表单主体*/}
         <Table className="tableList"
@@ -385,12 +400,12 @@ class countBillList extends React.Component {
                  // 选择框变化时触发
                  onChange: (selectedRowKeys, selectedRows) => {
                    this.setState({selectedList: selectedRows, selectedIds: selectedRowKeys});
-                   // console.log(selectedRowKeys, selectedRows)
                  },
                } : null}
                scroll={{y: 600, x: 800}}
                rowKey={(record, index) => `${record.reciptId}`}
         />
+
         {/*分页*/}
         <Pagination className="tablePagination"
                     total={pageTotal}
