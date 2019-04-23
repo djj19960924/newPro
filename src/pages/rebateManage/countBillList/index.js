@@ -67,7 +67,7 @@ class countBillList extends React.Component {
       btnIsLoading: false,
       tableIsLoading: false,
     };
-    window.countBillList = this;
+    // window.countBillList = this;
   }
 
   // 默认读取表格
