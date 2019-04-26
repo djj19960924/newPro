@@ -47,7 +47,7 @@ class commoditiesPackaging extends React.Component{
       window.setCookie('unionId',unionId,7200);
       window.setCookie('nickname',nickname,7200);
     } else {
-      message.warn(`请用户登陆`);
+      message.warn(`请用户登录`);
       this.props.history.push(`/logistics-manage/BC-customsClearance/commodities-packaging/customer-login`);
       return false
     }
@@ -572,7 +572,7 @@ class commoditiesPackaging extends React.Component{
     const { isFocusOnWindow, loadingShow, nickname, boxesList, selectBox, isOnFocusInput, boxesIsLoading, orderMoney, productNum, showPayQRCode, needToPay, } = this.state;
     return (
       <div className="commoditiesPackaging ">
-        {/*这里存放公共信息, 用于表示登陆用户, 以及退出登陆*/}
+        {/*这里存放公共信息, 用于表示登录用户, 以及退出登录*/}
         <div className="titleLine">
           <h1 className="title">商品录入,箱子打包</h1>
           <div className="nickName">当前用户: {nickname}</div>
