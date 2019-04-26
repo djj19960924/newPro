@@ -105,6 +105,14 @@ class commoditiesPackaging extends React.Component{
     }
   }
 
+  // 强弹框报错
+  showWarningModal(text) {
+    Modal.warning({
+      title: '警告',
+      content: text,
+    })
+  }
+
   // 增加箱子
   generateParcel(parcelNo) {
     const { unionId, nickname, boxesIsLoading, } = this.state;
@@ -174,6 +182,9 @@ class commoditiesPackaging extends React.Component{
             message.success(`${type === 'plus' ? '增加' : '减少'}商品数量成功`)
           } else if (r.status < 10000) {
             message.warn(`${r.msg} 状态码:${r.status}`)
+          } else if (r.status === 10002) {
+            // 单独提示 货值超过2000
+            this.showWarningModal(r.msg);
           } else if (r.status > 10000) {
             message.error(`${r.msg} 状态码:${r.status}`)
           }
@@ -221,6 +232,9 @@ class commoditiesPackaging extends React.Component{
             } else {
               message.warn(`${r.msg}`)
             }
+          } else if (r.status === 10002) {
+            // 单独提示 货值超过2000
+            this.showWarningModal(r.msg);
           } else if (r.status > 10000) {
             message.error(`${r.msg}`)
           }

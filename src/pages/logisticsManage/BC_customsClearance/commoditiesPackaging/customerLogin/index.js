@@ -89,19 +89,19 @@ class customerLogin extends React.Component{
       // console.log(`获得焦点!`);
     // };
 
-    let isTest = false;
-    if (window.isServerTest) isTest = true;
-    if (window.isLocalTest) isTest = true;
+    // let isTest = false;
+    // if (window.isServerTest) isTest = true;
+    // if (window.isLocalTest) isTest = true;
     // 生成导向用户授权登陆的扫码页面
-    let qrcode = new window.QRCode(this.refs.QRCodeShow, {
-      text: `http://api.maishoumiji.com/wechat/authorize?returnUrl=http%3A%2F%2F${isTest ? 'test' : ''}m.maishoumiji.com/%23/logisticsstatus`,
-      width: 200,
-      height: 200,
-      colorDark : "#000",
-      colorLight : "#fff",
-      correctLevel : window.QRCode.CorrectLevel.H
-    });
-    this.setState({elementQRCode:qrcode})
+    // let qrcode = new window.QRCode(this.refs.QRCodeShow, {
+    //   text: `http://api.maishoumiji.com/wechat/authorize?returnUrl=http%3A%2F%2F${isTest ? 'test' : ''}m.maishoumiji.com/%23/logisticsstatus`,
+    //   width: 200,
+    //   height: 200,
+    //   colorDark : "#000",
+    //   colorLight : "#fff",
+    //   correctLevel : window.QRCode.CorrectLevel.H
+    // });
+    // this.setState({elementQRCode:qrcode})
   }
 
   componentWillUnmount() {
@@ -114,12 +114,12 @@ class customerLogin extends React.Component{
     return (
       <div className="customerLogin">
         <h1 className="title">客户登陆</h1>
-        <h2 className="subtitle">请用户展示登陆二维码</h2>
+        <h2 className="subtitle">请用户打开BuyersHouse公众号, 找到身份码并展示</h2>
 
-        <h2 className="info">可以用微信扫下方二维码, 进入授权登陆界面</h2>
-        <div className="QRCodeShow"
-             ref="QRCodeShow"
-        />
+        {/*<h2 className="info">可以用微信扫下方二维码, 进入授权登陆界面</h2>*/}
+        {/*<div className="QRCodeShow"*/}
+             {/*ref="QRCodeShow"*/}
+        {/*/>*/}
 
         {isFocusOnWindow &&
           // 遮罩层, 用于保证用户焦点停留于该页面中, 否则显示该遮罩, 并提示需要点击
