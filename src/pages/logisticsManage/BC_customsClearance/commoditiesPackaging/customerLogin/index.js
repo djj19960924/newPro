@@ -73,7 +73,7 @@ class customerLogin extends React.Component{
               message.error(`获取用户信息失败, 请重试`)
             }
           } else {
-            message.error(`二维码格式错误, 请确保用户登陆二维码正确, 并重试`);
+            message.error(`二维码格式错误, 请确保用户登录二维码正确, 并重试`);
             clearData()
           }
         }
@@ -92,7 +92,7 @@ class customerLogin extends React.Component{
     // let isTest = false;
     // if (window.isServerTest) isTest = true;
     // if (window.isLocalTest) isTest = true;
-    // 生成导向用户授权登陆的扫码页面
+    // 生成导向用户授权登录的扫码页面
     // let qrcode = new window.QRCode(this.refs.QRCodeShow, {
     //   text: `http://api.maishoumiji.com/wechat/authorize?returnUrl=http%3A%2F%2F${isTest ? 'test' : ''}m.maishoumiji.com/%23/logisticsstatus`,
     //   width: 200,
@@ -113,10 +113,10 @@ class customerLogin extends React.Component{
     const { isFocusOnWindow, loadingShow, } = this.state;
     return (
       <div className="customerLogin">
-        <h1 className="title">客户登陆</h1>
+        <h1 className="title">客户登录</h1>
         <h2 className="subtitle">请用户打开BuyersHouse公众号, 找到身份码并展示</h2>
 
-        {/*<h2 className="info">可以用微信扫下方二维码, 进入授权登陆界面</h2>*/}
+        {/*<h2 className="info">可以用微信扫下方二维码, 进入授权登录界面</h2>*/}
         {/*<div className="QRCodeShow"*/}
              {/*ref="QRCodeShow"*/}
         {/*/>*/}
