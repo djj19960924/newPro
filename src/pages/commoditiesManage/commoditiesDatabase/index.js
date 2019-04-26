@@ -1,74 +1,167 @@
 import React from 'react';
 import {Radio, Table, Pagination, Button, Input, message, Modal, Icon,} from 'antd';
 import XLSX from 'xlsx';
-import moment from 'moment';
-import PageLoading from '@components/pageLoading/';
-import Country from "@js/countryForCD";
+import moment from 'moment/';
+import Country from '@js/countryForCD/';
 import JsZip from 'jszip';
 import './index.less';
 
-let zip = new JsZip();//*****创建实例，zip是对象实例
-
-let image = new Image();
-// image.setAttribute("crossOrigin",'Anonymous')
-image.crossOrigin = "*";  // 支持跨域图片
 class commoditiesDataBase extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      count:0,//当前下载图片的数目
-      skuCodeList: [],//保存当前页的商品码
-      picList:[],//下载图片的数据
-      dowmloadFailPic:[],//图片下载失败
-      downloadVisible:false,//下载图片弹窗
+      // 图片下载压缩相关
+      // zip组件
+      zip: new JsZip(),
+      // 商品图片文件夹
+      imageFolder: null,
+      // 图片下载弹窗
+      downloadImageVisible: false,
+      // 弹窗加载状态
+      imageLoading: false,
+      // 图片成功列表
+      imageSuccessList: [],
+      // 图片失败列表
+      imageFailList: [],
+      // 图片是否已完成下载
+      imageIsDownload: false,
+
+      // 文件加载
       input: null,
+      // 导入导出弹框显示
       importModalVisible: false,
       exportModalVisible: false,
+      // 导入excel文件存储
       excelDataListOrigin: [],
       excelDataList: [],
+      // excel错误列表
       errorList: [],
-      // 自增用序列号
+      // excel自增用序列号
       Num: 0,
+      // 失败列表
       failList: [],
       failListNum: [],
+      // 成功列表
       successList: [],
+
       // 表单数据
       dataList: [],
       // 搜索字段
       searchValue: '',
       // 搜索备案类型
       record: 0,
+      // 分页状态
       pageNum: 1,
       pageSize: 100,
       pageTotal: 0,
       // 每页显示数据条数选择框
       pageSizeOptions: [`50`, `100`, `200`, `300`],
-      loadingTxt: ``,
+      // 表单加载中显示
       tableIsLoading: false,
+
+      // 提交状态
       isSubmit: false,
+      // 导出状态
       isExport: false,
     };
     window.commoditiesDataBase = this;
-
     // window.moment = moment;
+    // window.React = React;
   }
   // 这里需要在组件即将加载时优先生成input
   componentWillMount() {
+    const {zip} = this.state;
     // 创建导入用input
     let input = document.createElement(`input`);
     input.type = `file`;
     input.className = "inputImport";
     input.onchange = this.showModal.bind(this);
-    this.setState({input: input});
+    this.setState({input: input,imageFolder: zip.folder('商品图片')});
   }
 
   // 默认读取表格
   componentDidMount() {
     // 默认载入表格数据
     const record = window.getQueryString('record');
-    this.setState({tableIsLoading: true, record: record && record !== 'null' ? parseInt(record) : 0}, () => {
+    this.setState({
+      tableIsLoading: true,
+      record: record && (record !== 'null') ? parseInt(record) : 0
+    },() => {
       this.getSku();
     });
+  }
+
+  // 确定下载/压缩图片
+  downloadImages() {
+    const { dataList, imageSuccessList, imageFailList, imageFolder, zip, } = this.state;
+    this.setState({imageLoading: true,imageIsDownload: true});
+
+    let picNum = 0;
+    let addPicNum = () => {
+      // console.log(imageFailList);
+      picNum += 1;
+      downloadPic();
+    };
+    let downloadPic = () => {
+      if (picNum === dataList.length) {
+        // 图片下载结束, 导出zip文件
+        let fileName = `未备案商品图片${moment(new Date()).format('YYYY-MM-DD_HH.mm.ss')}.zip`;
+        zip.generateAsync({type: "blob"}).then((file) => {
+          window.saveAs(file, fileName);
+          message.success('图片下载/压缩成功');
+          this.setState({imageLoading: false});
+        }).catch(r=>{
+          console.error(r);
+          message.error(`前端错误: 下载/压缩失败`);
+        });
+      } else {
+        // 图片继续下载
+        if (dataList[picNum].imgUrl === null) {
+          // 该商品图片为空
+          imageFailList.push({skuCode:dataList[picNum].skuCode,errorReason:'商品图片地址为空'});
+          // console.log(dataList[picNum].skuCode,', 图片imgUrl为null');
+          addPicNum();
+        } else {
+          // 该商品图片不为空
+          if (dataList[picNum].imgUrl.includes('//recipt-picture.oss-cn-hongkong.aliyuncs.com/sku-img/')) {
+            // 图片地址/文件夹吻合
+            // 处理地址
+            let url = `//${dataList[picNum].imgUrl.split('//')[1]}`;
+            // 处理图片类型
+            let typeList = dataList[picNum].imgUrl.split('.'),
+              type = typeList[(typeList.length - 1)];
+
+            // 使用fetch方法下载图片, 转存为 blob
+            fetch(url).then(r => r.blob()).then(r => {
+              // 获取图片文件成功
+              imageFolder.file(`JD${dataList[picNum].skuCode}.${type}`, r);
+              imageSuccessList.push(dataList[picNum]);
+              // console.log(dataList[picNum].skuCode,', 图片下载成功');
+              //
+              // 这里需要额外说明, 当商品图片为空或不符合格式而跳过时, 由本地判断的速度会非常快
+              // 从而导致浏览器在短时间内超量调用渲染render方法, 导致卡顿, 甚至内存溢出过载
+              // 所以仅在调取接口下载图片时, 重新渲染render
+              // this.forceUpdate()也可以达成这个效果,
+              // 但是出于安全考虑, 建议使用this.setState({})
+              this.setState({});
+              //
+              addPicNum();
+            }).catch(()=>{
+              // 代码出现解析问题, 或文件类型有误
+              imageFailList.push({skuCode:dataList[picNum].skuCode,errorReason:'获取图片失败'});
+              // console.log(dataList[picNum].skuCode,', 图片下载失败');
+              addPicNum();
+            })
+          } else {
+            // 图片地址/文件夹不吻合
+            imageFailList.push({skuCode:dataList[picNum].skuCode,errorReason:'商品图片地址有误'});
+            // console.log(dataList[picNum].skuCode,', 图片地址有误');
+            addPicNum();
+          }
+        }
+      }
+    };
+    downloadPic();
   }
 
   // 打开弹窗
@@ -150,18 +243,17 @@ class commoditiesDataBase extends React.Component {
     fetch(`${window.fandianUrl}/sku/getSku`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({choice: record, pageNum: pageNum, pageSize: pageSize, searchParm: searchValue.trim()}),
+      body: JSON.stringify({
+        choice: record,
+        pageNum: pageNum,
+        pageSize: pageSize,
+        searchParm: searchValue.trim()
+      }),
     }).then(r => r.json()).then(r => {
       this.setState({tableIsLoading: false, dataList: []});
       if (r.status) {
         if (r.status === 10000) {
-          let skuCodeList=[];
-          for (let i = 0; i < r.data.list.length; i++) {
-            skuCodeList.push(r.data.list[i].skuCode);
-          }
-
           this.setState({
-            skuCodeList:skuCodeList,
             dataList: r.data.list,
             pageNum: r.data.pageNum,
             pageSize: r.data.pageSize,
@@ -364,86 +456,9 @@ class commoditiesDataBase extends React.Component {
     this.props.history.push(`/commodities-manage/commodities-database/create-and-edit?type=${type}&skuId=${skuId}&record=${record}`);
   }
 
-  //下载图片
-  downLoadPic() {
-    var that = this;
-    this.setState({loadingTxt: '图片下载中...',count: 0,dowmloadFailPic:[]});
-    fetch(`${window.fandianUrl}/sku/selectNoRecord`, {
-      method: 'post',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(this.state.skuCodeList)
-    }).then(r => r.json()).then((res) => {
-      if (res.status === 10000) {
-        this.setState({picList:res.data});
-        this.main(res.data[this.state.count].imgUrl);
-
-      }
-      if (res.status !== 10000) {
-        message.error(`${res.status}:${res.msg}`);
-      }
-    })
-  }
-
-  getBase64Image(img) {
-    var canvas = document.createElement("canvas");
-    canvas.width = img.width;
-    canvas.height = img.height;
-    var ctx = canvas.getContext("2d");
-    ctx.drawImage(img, 0, 0, img.width, img.height);
-    var dataURL = canvas.toDataURL("image/jpeg");  // 可选其他值 image/jpeg
-    return dataURL;
-  }
-
-  main(src) {
-    image.onload = function () {
-      var base64 = window.commoditiesDataBase.getBase64Image(image);
-      //that.dataURLtoFile(base64);
-      //console.error(base64.split(',')[1]) ;
-      var data = base64.split(',')[1];
-      //zip.file(`123.png`, "213", {base64: true});
-      zip.file(`JD${window.commoditiesDataBase.state.picList[window.commoditiesDataBase.state.count].skuCode}.jpg`, data, {base64: true});
-      if(window.commoditiesDataBase.state.count == window.commoditiesDataBase.state.picList.length-1){
-        window.commoditiesDataBase.setState({downloadVisible: true})
-
-        var file_name = `未备案商品图片(${moment(new Date()).format('YYYY-MM-DD_HH.mm.ss')}).zip`;
-        zip.generateAsync({type: "blob"}).then(function (content) {
-          // see FileSaver.js
-          //console.error(content);
-          window.commoditiesDataBase.setState({loadingTxt: ''});
-          saveAs(content, file_name);
-        });
-      }else{
-        window.commoditiesDataBase.setState({count:window.commoditiesDataBase.state.count+1},function () {
-          window.commoditiesDataBase.main(window.commoditiesDataBase.state.picList[window.commoditiesDataBase.state.count].imgUrl);
-        })
-      }
-    }
-    image.onerror = () => {
-      window.commoditiesDataBase.state.dowmloadFailPic.push(window.commoditiesDataBase.state.picList[window.commoditiesDataBase.state.count].skuCode);
-      if(window.commoditiesDataBase.state.count == window.commoditiesDataBase.state.picList.length-1){
-        this.setState({downloadVisible: true})
-        var file_name = `未备案商品图片(${moment(new Date()).format('YYYY-MM-DD_HH.mm.ss')}).zip`;
-        zip.generateAsync({type: "blob"}).then(function (content) {
-          // see FileSaver.js
-          //console.error(content);
-          window.commoditiesDataBase.setState({loadingTxt: ''});
-          window.saveAs(content, file_name);
-        });
-      }else{
-        window.commoditiesDataBase.setState({count:window.commoditiesDataBase.state.count+1},function () {
-          window.commoditiesDataBase.main(window.commoditiesDataBase.state.picList[window.commoditiesDataBase.state.count].imgUrl);
-        })
-      }
-
-    }
-    image.src = src + '?v=' + Math.random(); // 处理缓存
-  }
-  downloadPicModal (){
-    this.setState({downloadVisible: false})
-  }
   render() {
     const RadioButton = Radio.Button, RadioGroup = Radio.Group;
-    const {dataList, searchValue, pageNum, pageSize, pageTotal, pageSizeOptions, record, loadingTxt, importModalVisible, dowmloadFailPic,downloadVisible,input, errorList, isSubmit, failList, failListNum, excelDataList, successList, tableIsLoading, exportModalVisible, isExport,} = this.state;
+    const { dataList, searchValue, pageNum, pageSize, pageTotal, pageSizeOptions, record, importModalVisible, input, errorList, isSubmit, failList, failListNum, excelDataList, successList, tableIsLoading, exportModalVisible, isExport, downloadImageVisible, imageLoading, imageFailList, imageSuccessList, imageIsDownload, } = this.state;
     const Search = Input.Search;
     // 表单头
     const columns = [
@@ -483,8 +498,8 @@ class commoditiesDataBase extends React.Component {
       },
       {
         title: '操作', dataIndex: '操作', key: '操作',
-        // width: 100,
-        // fixed: 'right',
+        width: 100,
+        fixed: 'right',
         render: (text, record) => (
           <div>
             <Button type="primary"
@@ -539,8 +554,6 @@ class commoditiesDataBase extends React.Component {
     ];
     return (
       <div className="dataBase">
-        {/*加载*/}
-        {loadingTxt && <PageLoading loadingTxt={loadingTxt} percentage={`${this.state.count}/${this.state.picList.length}`}/>}
 
         {/*导出弹窗*/}
         <Modal title="导出"
@@ -604,22 +617,42 @@ class commoditiesDataBase extends React.Component {
             ))}
           </div>
         </Modal>
+
         {/*下载图片弹窗*/}
         <Modal title="下载图片"
-               className="exportModal"
-               visible={downloadVisible}
-               onOk={this.downloadPicModal.bind(this)}
-               onCancel={this.downloadPicModal.bind(this)}
+               wrapClassName="downloadAndZipFilesModal"
+               visible={downloadImageVisible}
+               confirmLoading={imageLoading}
+               onOk={()=>{imageIsDownload ? message.error('图片已下载完成, 如需重新下载需关闭窗口重新打开')
+                 : this.downloadImages()
+               }}
+               width={600}
+               onCancel={()=>{
+                 if (imageLoading) {
+                   message.error('正在下载中,请勿关闭')
+                 } else {
+                   this.setState({
+                     downloadImageVisible: false,
+                     imageIsDownload: false,
+                     imageFailList: [],
+                     imageSuccessList: []
+                   });
+                   this.getSku()
+                 }
+               }}
         >
-          {this.state.dowmloadFailPic.length===0 ? <p>下载成功</p> : <p>下载失败的商品条码为:</p>}
-          {
-            dowmloadFailPic.map((item,index)=>{
-              return (
-                <p key={index} style={{color: `red`, opacity: .8}} >{item}</p>
-                )
-            })
+          {imageLoading &&
+            <p style={{fontSize:'24px',color:'rgba(255,0,0,.7)'}}>
+              <Icon type="loading" /> 正在下载图片, 请稍后...
+            </p>
           }
+          <p>当前处理完成图片: {imageFailList.length + imageSuccessList.length}/{dataList.length}</p>
+          <p>当前错误图片:</p>
+          {imageFailList.map((item,i) => (
+            <p style={{color:'rgba(255,0,0,.7)'}} key={i}>{i}. 商品码:{item.skuCode}, 下载失败原因:{item.errorReason}</p>
+          ))}
         </Modal>
+
         {/*查询条件单选行*/}
         <RadioGroup value={record}
                     buttonStyle="solid"
@@ -639,18 +672,18 @@ class commoditiesDataBase extends React.Component {
                   className="createNew"
                   onClick={this.toCE.bind(this, 'create', null)}
           >新增商品</Button>
-
-
           {record === 1 && <Button type="primary"
                                    className="exportExcelBtn"
                                    onClick={this.exportExcel_record_1.bind(this)}
           >导出已备案资料</Button>}
-
           {record === 2 && <Button type="primary"
                                    className="exportExcelBtn"
                                    onClick={() => this.setState({exportModalVisible: true})}
           >excel导出</Button>}
-          {record === 2 && <Button type="primary" className="importExcelBtn" onClick={this.downLoadPic.bind(this)}>下载图片</Button>}
+          {record === 2 && <Button type="primary"
+                                   className="importExcelBtn"
+                                   onClick={()=>this.setState({downloadImageVisible: true})}
+          >下载图片</Button>}
           {record === 3 &&
           <Button type="primary"
                   onClick={this.clickIT.bind(this)}
@@ -659,19 +692,18 @@ class commoditiesDataBase extends React.Component {
           <Search className="searchInput"
                   placeholder="请输入关键字进行搜索"
                   value={searchValue}
-            // 根据条件搜索
+                  // 根据条件搜索
                   onSearch={(e) => this.getSku(e)}
-            // 保存搜索框值
+                  // 保存搜索框值
                   onChange={(e) => this.setState({searchValue: e.target.value})}
           />
-
         </div>
 
         {/*表单主体*/}
         <Table className="tableList"
                ref={'commoditiesTable'}
                dataSource={dataList}
-          // columns={record === 2 ? columnsForExport : columns}
+               // columns={record === 2 ? columnsForExport : columns}
                columns={columns}
                pagination={false}
                bordered

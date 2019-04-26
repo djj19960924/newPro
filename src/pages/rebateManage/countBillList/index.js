@@ -15,8 +15,6 @@ class countBillList extends React.Component {
       passportFolder: null,
       // 小票文件夹
       ticketFolder: null,
-      // 自增整数
-      Num: 0,
       // 下载图片弹窗
       downloadModalVisible: false,
       // 小票下载成功列表
@@ -213,7 +211,7 @@ class countBillList extends React.Component {
         this.setState({isOkLoading: false, closeIsAllowed: true});
       })
     } else {
-
+      message.error('小票下载成功列表为空')
     }
   }
 
@@ -231,71 +229,77 @@ class countBillList extends React.Component {
 
   // 下载并压缩图片文件
   downloadAndZipFiles() {
-    const { selectedList, Num, ticketFolder, passportFolder, zip, passportSuccessList, ticketSuccessList, ticketSuccessIdList, ticketErrorList, passportErrorList, } = this.state;
-    if (Num < selectedList.length) {
-      // 获取地址
-      let dataObj = selectedList[Num];
+    const { selectedList, ticketFolder, passportFolder, zip, passportSuccessList, ticketSuccessList, ticketSuccessIdList, ticketErrorList, passportErrorList, } = this.state;
+    let Num = 0;
+    let addNum = () => {
+      Num += 1;
+      downloadPic();
+      this.setState({});
+    };
+    let downloadPic = () => {
+      if (Num < selectedList.length) {
+        // 获取地址
+        let dataObj = selectedList[Num];
 
-      // 处理护照链接以及护照图片类型
-      let passport = `//${dataObj.passport.split('//')[1]}`,
-        passportTypeList = dataObj.passport.split('.'),
-        passportType = passportTypeList[(passportTypeList.length - 1)];
+        // 处理护照链接以及护照图片类型
+        let passport = `//${dataObj.passport.split('//')[1]}`,
+          passportTypeList = dataObj.passport.split('.'),
+          passportType = passportTypeList[(passportTypeList.length - 1)];
 
-      // 处理小票链接以及小票图片类型
-      let pictureUrl = `//${dataObj.pictureUrl.split('//')[1]}`,
-        pictureTypeList = dataObj.pictureUrl.split('.'),
-        pictureType = pictureTypeList[(pictureTypeList.length - 1)];
+        // 处理小票链接以及小票图片类型
+        let pictureUrl = `//${dataObj.pictureUrl.split('//')[1]}`,
+          pictureTypeList = dataObj.pictureUrl.split('.'),
+          pictureType = pictureTypeList[(pictureTypeList.length - 1)];
 
-      // 自增Num, 并重新调用本体方法
-      let addNum = () => this.setState({Num:(Num+1)},()=>{this.downloadAndZipFiles()});
-
-      // 处理护照下载压缩, 逻辑判断是否进行
-      let downloadPassport = () => {
-        if (passportSuccessList.includes(passport)) {
-          addNum()
-        } else {
-          fetch(passport).then(r => r.blob()).then(r => {
-            // 成功调取接口, 创建小票文件
-            passportFolder.file(`护照号_${dataObj.passportNum}.${passportType}`, r);
-            passportSuccessList.push(passport);
+        // 处理护照下载压缩, 逻辑判断是否进行
+        let downloadPassport = () => {
+          if (passportSuccessList.includes(passport)) {
             addNum();
-          }).catch(() => {
-            // 前端报错
-            message.error(`前端错误: 获取护照图片失败`);
-            passportErrorList.push(dataObj.passportNum);
-            addNum();
-          });
-        }
-      };
+          } else {
+            fetch(passport).then(r => r.blob()).then(r => {
+              // 成功调取接口, 创建小票文件
+              passportFolder.file(`护照号_${dataObj.passportNum}.${passportType}`, r);
+              passportSuccessList.push(passport);
+              addNum();
+            }).catch(() => {
+              // 前端报错
+              message.error(`前端错误: 获取护照图片失败`);
+              passportErrorList.push(dataObj.passportNum);
+              addNum();
+            });
+          }
+        };
 
-      // 处理小票下载压缩
-      fetch(pictureUrl).then(r => r.blob()).then(r => {
-        // 成功调取接口, 创建小票文件
-        ticketFolder.file(`护照号_${dataObj.passportNum} - 小票id_${dataObj.reciptId}.${pictureType}`, r);
-        ticketSuccessList.push(dataObj);
-        ticketSuccessIdList.push(dataObj.reciptId);
-        downloadPassport();
-      }).catch(()=>{
-        // 前端报错
-        message.error(`前端错误: 获取id为${dataObj.reciptId}小票图片失败`);
-        ticketErrorList.push(dataObj);
-        downloadPassport();
-      });
-
-    } else {
-      // 下载所有图片完成, 导出zip文件
-      let fileName = `对账管理${moment(new Date()).format('YYYY-MM-DD_HH.mm.ss')}.zip`;
-      zip.generateAsync({type: "blob"}).then((file) => {
-        window.saveAs(file, fileName);
-        this.setState({textType: 1},()=>{
-          this.sendReciptInSelected();
+        // 处理小票下载压缩
+        fetch(pictureUrl).then(r => r.blob()).then(r => {
+          // 成功调取接口, 创建小票文件
+          ticketFolder.file(`护照号_${dataObj.passportNum} - 小票id_${dataObj.reciptId}.${pictureType}`, r);
+          ticketSuccessList.push(dataObj);
+          ticketSuccessIdList.push(dataObj.reciptId);
+          downloadPassport();
+        }).catch(()=>{
+          // 前端报错
+          message.error(`前端错误: 获取id为${dataObj.reciptId}小票图片失败`);
+          ticketErrorList.push(dataObj);
+          downloadPassport();
         });
-      }).catch(r=>{
-        console.error(r);
-        message.error(`前端错误: 下载/压缩失败`);
-        this.setState({isOkLoading: false,textType: 0});
-      });
-    }
+
+      } else {
+        // 下载所有图片完成, 导出zip文件
+        let fileName = `对账管理${moment(new Date()).format('YYYY-MM-DD_HH.mm.ss')}.zip`;
+        zip.generateAsync({type: "blob"}).then((file) => {
+          window.saveAs(file, fileName);
+          this.setState({textType: 1},()=>{
+            this.sendReciptInSelected();
+          });
+        }).catch(r=>{
+          console.error(r);
+          message.error(`前端错误: 下载/压缩失败`);
+          this.setState({isOkLoading: false,textType: 0});
+        });
+      }
+    };
+    downloadPic();
   }
 
   render() {
@@ -402,7 +406,7 @@ class countBillList extends React.Component {
                    this.setState({selectedList: selectedRows, selectedIds: selectedRowKeys});
                  },
                } : null}
-               scroll={{y: 600, x: 800}}
+               scroll={{y: 500, x: 800}}
                rowKey={(record, index) => `${record.reciptId}`}
         />
 

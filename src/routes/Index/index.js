@@ -32,8 +32,8 @@ class Index extends React.Component {
             // 默认转换收缩按钮
             trigger={null}
             // 定义侧边栏宽度
-            width={180}
-            style={{position: 'fixed', left: 0, top: 64, bottom: 0, width: 180, }}>
+            width={200}
+            style={{position: 'fixed', left: 0, top: 64, bottom: 0}}>
             <SiderNav />
           </Sider>
           <Layout>
@@ -41,7 +41,7 @@ class Index extends React.Component {
             >
               <HeaderBar />
             </Header>
-            <Content style={{position: 'fixed', left: 180, top: 64, bottom: 0, right: 0, width:'calc(100% - 180px)'}}>
+            <Content style={{position: 'fixed', left: 200, top: 64, bottom: 0, right: 0, width:'calc(100% - 200px)'}}>
               <ContentMain />
             </Content>
             <Footer></Footer>
