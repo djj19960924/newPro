@@ -21,7 +21,7 @@ class Home extends React.Component{
           <div className="updateInfo">
             <div className="infoTitle" >2019-4-29 更新</div>
             <div className="dividingLine shot" />
-            <p>添加全球返点 - 收货到仓功能页面</p>
+            <p>添加全球转运 - 收货到仓功能页面</p>
           </div>
 
           <div className="updateInfo">
