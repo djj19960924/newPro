@@ -34,6 +34,12 @@ import importExcel from '@pages/developerPages/importExcel/';
     // 未推送
     import orderNotPushed from '@pages/logisticsManage/postal/notPushed/';
 
+  // 全球运转
+    // 已收货
+    import globalTranshipmentArrived from '@pages/logisticsManage/globalTranshipment/arrived/';
+    // 未收货
+    import globalTranshipmentNotArrived from '@pages/logisticsManage/globalTranshipment/notArrived/';
+
 // 预约
   // 预约接送机
   import airportTransfer from '@pages/reservationService/airportTransfer/';
@@ -91,6 +97,9 @@ class ContentMain extends React.Component{
             {/*邮政*/}
             <Route exact path="/logistics-manage/postal/pushed/" component={orderPushed} />
             <Route exact path="/logistics-manage/postal/not-pushed/" component={orderNotPushed} />
+            {/*全球运转*/}
+            <Route exact path="/logistics-manage/globalTranshipment/arrived" component={globalTranshipmentArrived} />
+            <Route exact path="/logistics-manage/globalTranshipment/not-arrived" component={globalTranshipmentNotArrived} />
 
           {/*返点管理*/}
           <Route exact path="/rebate-manage/awaiting-examine" component={awaitingExamine} />
