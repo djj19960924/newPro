@@ -64,6 +64,23 @@ const menus = [
             key: '/logistics-manage/postal/pushed'
           },
         ]
+      },
+      {
+        title: '全球运转',
+        icon: 'global',
+        key: '/logistics-manage/globalTranshipment',
+        subs: [
+          {
+            title: '未到货',
+            icon: 'file-unknown',
+            key: '/logistics-manage/globalTranshipment/not-arrived'
+          },
+          {
+            title: '已到货',
+            icon: 'file-done',
+            key: '/logistics-manage/globalTranshipment/arrived'
+          },
+        ]
       }
     ]
   },
