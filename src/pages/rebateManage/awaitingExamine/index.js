@@ -635,6 +635,7 @@ class awaitingExamine extends React.Component {
             <Radio value={1}>凭证号不正确</Radio>
             <Radio value={2}>小票重复</Radio>
             <Radio value={3}>其他</Radio>
+            <Radio value={4}>小票不完整</Radio>
           </RadioGroup>
           <Button type="primary" onClick={this.openNotification.bind(this)}>确定</Button>
         </div>
