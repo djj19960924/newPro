@@ -160,6 +160,20 @@ const menus = [
       },
     ]
   },
+  // 本地专用
+  {
+    title: '开发人员专用',
+    icon: 'like',
+    key: '/developer-pages',
+    testType: 'localTest',
+    subs: [
+      {
+        title: '导入excel',
+        icon: 'file-excel',
+        key: '/developer-pages/import-excel'
+      }
+    ]
+  }
 ];
 
 export default menus;

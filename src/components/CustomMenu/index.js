@@ -70,7 +70,13 @@ class CustomMenu extends React.Component {
     }
   }
 
-  renderMenuItem = ({key, icon, title,}) => {
+  renderMenuItem = ({key, icon, title, testType}) => {
+    // 如果菜单内存在testType(不存在则始终显示,包括正式版)
+    if (testType)
+      // 如果全局testType不为本地测试时(如果为本地测试则始终显示所有侧边栏)
+      if (window.testType !== 'localTest')
+        // 如果菜单内testType与全局testType不相同时, 则隐藏该菜单栏(当为在线测试版时,隐藏本地测试内容)
+        if (testType !== window.testType) return false;
     return (
       <Menu.Item key={key}>
         <Link to={key}>
@@ -80,7 +86,10 @@ class CustomMenu extends React.Component {
       </Menu.Item>
     )
   }
-  renderSubMenu = ({key, icon, title, subs}) => {
+  renderSubMenu = ({key, icon, title, subs, testType}) => {
+    if (testType)
+      if (window.testType !== 'localTest')
+        if (testType !== window.testType) return false;
     return (
       <Menu.SubMenu key={key} title={<span>{icon && <Icon type={icon}/>}<span>{title}</span></span>}>
         {

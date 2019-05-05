@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 // 离线缓存
 import * as serviceWorker from './serviceWorker';
 // Hash路由
-import {BrowserRouter} from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 // 预加载antd组件
 import { LocaleProvider } from 'antd';
 // antd中文组件
@@ -21,12 +21,10 @@ import 'antd/dist/antd.less';
 
 import App from './App';
 
-const testapi = 'http://testapi.maishoumiji.com';
-//const testapi = 'http://fandian.maishoulm.com';
-//const testapi = 'http://192.168.3.32:8000';
-window.apiUrl = window.fandianUrl = window.testUrl = testapi;
-window.isLocalTest = true;
-document.getElementsByTagName("title")[0].innerText = `后台管理系统 - 本地版`;
+// 线上测试:
+window.testType = 'serverTest'; // 服务端测试版开口
+window.apiUrl = window.fandianUrl = 'http://testapi.maishoumiji.com';
+document.getElementsByTagName("title")[0].innerText = `后台管理系统 - 测试版`;
 
 ReactDOM.render(
   <BrowserRouter>

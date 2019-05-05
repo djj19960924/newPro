@@ -76,6 +76,10 @@ class ContentMain extends React.Component{
     super(props);
     this.state = {};
   }
+  judgeIsTest(testType) {
+    if (window.testType === 'localTest') return true;
+    return window.testType === testType;
+  }
   render() {
     return(
       <div style={{backgroundColor: '#eee', width: '100%', height: '100%', padding: '10px'}}>
@@ -124,7 +128,7 @@ class ContentMain extends React.Component{
                  component={commoditiesImgList} />
 
           {/*开发人员专用管理路由*/}
-          {window.isLocalTest && <Route exact path="/developer-pages/import-excel" component={importExcel} />}
+          {this.judgeIsTest('localTest') && <Route exact path="/developer-pages/import-excel" component={importExcel} />}
 
           {/*这里可以配置404 not found 页面*/}
           <Route component={page404} />
