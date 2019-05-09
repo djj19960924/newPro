@@ -18,6 +18,12 @@ class Home extends React.Component{
 
         <div className="main">
           <div className="updateInfo">
+            <div className="infoTitle" >2019-5-9 更新</div>
+            <div className="dividingLine shot" />
+            <p>设置返点 - 添加删除品牌功能</p>
+          </div>
+
+          <div className="updateInfo">
             <div className="infoTitle" >2019-5-7 更新</div>
             <div className="dividingLine shot" />
             <p>已返款增加提现到余额的记录</p>
