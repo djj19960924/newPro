@@ -242,6 +242,28 @@ class setRebate extends React.Component{
       }
     })
   }
+  // 删除
+  delete(record) {
+    // console.log(record.rebateId);
+    fetch(`${window.fandianUrl}/rebate/deleteBrandByRebateId`,{
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({rebateId: record.rebateId}),
+    }).then(r=>r.json()).then(r=>{
+      if (!r.data && !r.msg) {
+        message.error('后端数据错误')
+      } else {
+        if (r.status === 10000) {
+          message.success(`${r.msg}`)
+        } else {
+          message.error(`${r.msg}, 错误码: ${r.status}`)
+        }
+      }
+    }).catch(r=>{
+      console.error(r);
+      console.log('前端接口调取错误')
+    })
+  }
   render() {
     // 表单标题
     const columns=[
@@ -256,13 +278,17 @@ class setRebate extends React.Component{
       )
       },
       {title: '返点率', dataIndex: 'rebateRate', key: 'rebateRate', width: 100},
-      {title: '操作', dataIndex: '操作', key: '操作', width: 100, fixed: 'right',
+      {title: '操作', dataIndex: '操作', key: '操作', width: 160, fixed: 'right',
         render: (text, record) => (
           <div>
             <Button type="primary"
                     style={{'margin':0}}
                     onClick={this.openEdit.bind(this,record)}
             >编辑</Button>
+            <Button type="danger"
+                    style={{'marginLeft':8}}
+                    onClick={this.delete.bind(this,record)}
+            >删除</Button>
           </div>
         ),
       }
