@@ -6,6 +6,7 @@ import './index.less';
 import countryList from '@js/country';
 const FormItem = Form.Item;
 const Option = Select.Option;
+const confirm = Modal.confirm;
 
 // 正则小计(中文+韩文+英文+数字+()（）_/):
 //
@@ -44,6 +45,10 @@ class setRebate extends React.Component{
       modalType: 'create',
       // 编辑所需额外字段
       modalEditData: {},
+      // 当前所选删除品牌
+      currentRecord: {},
+      // 删除弹框
+      deleteModalVisible: false,
     };
   }
   componentDidMount() {
@@ -243,18 +248,21 @@ class setRebate extends React.Component{
     })
   }
   // 删除
-  delete(record) {
+  delete() {
     // console.log(record.rebateId);
+    const { currentRecord } = this.state;
     fetch(`${window.fandianUrl}/rebate/deleteBrandByRebateId`,{
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({rebateId: record.rebateId}),
+      body: JSON.stringify({rebateId: currentRecord.rebateId}),
     }).then(r=>r.json()).then(r=>{
       if (!r.data && !r.msg) {
         message.error('后端数据错误')
       } else {
         if (r.status === 10000) {
-          message.success(`${r.msg}`)
+          message.success(`${r.msg}`);
+          this.selectAllRebateByMallName();
+          this.setState({deleteModalVisible:false,currentRecord:{}})
         } else {
           message.error(`${r.msg}, 错误码: ${r.status}`)
         }
@@ -287,13 +295,13 @@ class setRebate extends React.Component{
             >编辑</Button>
             <Button type="danger"
                     style={{'marginLeft':8}}
-                    onClick={this.delete.bind(this,record)}
+                    onClick={()=>{this.setState({deleteModalVisible: true,currentRecord: record})}}
             >删除</Button>
           </div>
         ),
       }
     ];
-    const {shopList, currentShop, country,tableDataList, pageTotal, pageSize, pageNum, modalTitle, modalVisible, modalType,  } = this.state;
+    const {shopList, currentShop, country,tableDataList, pageTotal, pageSize, pageNum, deleteModalVisible, currentRecord, modalVisible, modalType,  } = this.state;
     const {getFieldDecorator} = this.props.form;
     return (
       <div className="setRebate">
@@ -351,6 +359,18 @@ class setRebate extends React.Component{
                     pageSizeOptions={['10','20','30','40']}
                     onShowSizeChange={this.changePageSize.bind(this)}
         />
+
+        {/*删除弹窗*/}
+        <Modal title="删除品牌"
+               visible={deleteModalVisible}
+               onCancel={()=>{this.setState({deleteModalVisible:false,currentRecord:{}})}}
+               onOk={this.delete.bind(this)}
+               okText="删除"
+               okType="danger"
+               cancelText="取消"
+        >
+          <p>是否删除{currentRecord.brandName}</p>
+        </Modal>
 
         {/*弹窗*/}
         <Modal width={320}
