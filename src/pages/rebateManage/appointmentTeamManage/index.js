@@ -307,6 +307,12 @@ class appointmentTeamManage extends React.Component {
     const {dataList, pageTotal, pageSize, pageNum, pageSizeOptions, appointmentStatus, previewVisible, previewImage, showEdit, selectedIds, isLoading, inputValue, selectedList, tableIsLoading, } = this.state;
     // 表单头
     const columnsNoMassNo = [
+      {title: '提交时间', dataIndex: 'createTime', key: 'createTime', width: 180,
+        render: (text,record)=>(
+          <p>{moment(text).format('YYYY-MM-DD HH:mm:ss')}</p>
+          )
+      },
+
       {title: '姓名', dataIndex: 'passportName', key: 'passportName', width: 180},
       {title: '出生年月日', dataIndex: 'birthday', key: 'birthday', width: 200,},
       {title: '国籍', dataIndex: 'nationality', key: 'nationality', width: 100},
