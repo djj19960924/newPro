@@ -112,7 +112,12 @@ class BCUploadOrder extends React.Component {
 
   // 改变页码
   changePage(pageNum,pageSize) {
-    console.log(pageNum,pageSize);
+    this.setState({
+      pageNum: pageNum,
+      pageSize: pageSize,
+    },()=>{
+      this.queryParcelInfoToBc();
+    })
   }
 
   render() {
