@@ -1,20 +1,35 @@
-import React, {Component} from 'react';
-import PrivateRoute from './components/PrivateRoute';
-import {Route,Switch} from 'react-router-dom';
+import React, { Component } from 'react';
+import { Route, Switch, Redirect } from 'react-router-dom';
 import Login from './routes/Login/index';
 import ForgotPassWord from './routes/ForgotPasswd/index';
-// import Login from './routes/Login2/index';
 import Index from './routes/Index/index';
+import Ajax from '@components/getApi/';
 import './App.less';
 
-
+// import { observer, inject, } from 'mobx-react';
+// @inject('appStore') @observer
 class App extends Component {
+  constructor(props) {
+    super(props);
+    // 这里注入原生 ajax 方法至 React.Component
+    Component.prototype.ajax = new Ajax();
+  }
   render() {
     return (
       <Switch>
         <Route exact path="/login" component={Login}/>
-        <Route exact path="/forgotpassword" component={ForgotPassWord} />
-        <PrivateRoute path="/" component={Index}/>
+        <Route exact path="/forgot-password" component={ForgotPassWord} />
+        {/*<PrivateRoute path="/" component={Index}/>*/}
+        <Route path="/" render={(props) => (
+          window.getCookie('isLogin') === 'true'
+            // this.props.appStore.isLogin
+            ? <Index/>
+            : <Redirect to={{
+              pathname: `/login`,
+              search: `?historyPath=${props.location.pathname}${encodeURIComponent(props.location.search)}`,
+              state: {from: props.location}
+            }}/>
+        )}/>
       </Switch>
     )
   }

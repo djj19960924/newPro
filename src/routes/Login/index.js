@@ -12,7 +12,6 @@ class Login extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
-    // window.Login = this;
     // 可以将该组件挂载至window下, 则全局都可获取到当前组件
     // 某些失去当前对象的情况下, 可以使用该方法
     // window.Login = this;
@@ -35,7 +34,7 @@ class Login extends React.Component {
         // 判断是否需要前端方法保存当前登录账号, 如需要, 则将账号信息保存进cookie
         if (this.props.form.getFieldValue('remember')) {
           // 设置默认账号名保存7天
-          window.setCookie('saveUserName',this.props.form.getFieldValue('userName'), 3600 * 24 * 7)
+          window.setCookie('saveUserName', this.props.form.getFieldValue('userName'), 3600 * 24 * 7)
         } else {
           window.delCookie('saveUserName')
         }
@@ -63,7 +62,12 @@ class Login extends React.Component {
               this.addCookie();
               // 登陆以后进入的页面
               // this.props.history.push('/');
-              this.props.history.push('/');
+              let historyPath = window.getQueryString('historyPath');
+              if (historyPath) {
+                this.props.history.push(historyPath)
+              } else {
+                this.props.history.push('/');
+              }
             } else {
               message.error(r.message);
             }
@@ -112,7 +116,7 @@ class Login extends React.Component {
                 <Checkbox className="remember">保存当前用户名</Checkbox>
               )}
               <Link className="loginFormForgot"
-                    to="/forgotpassword"
+                    to="/forgot-password"
               >忘记密码？请点击</Link>
               <Button type="primary" htmlType="submit" className="loginFormButton" style={{width: '100%', marginTop: '10px'}}>
                 登录

@@ -5,6 +5,24 @@ const menus = [
     key: '/'
   },
   {
+    title: '权限管理',
+    icon: 'usergroup-add',
+    key: '/permission',
+    testType: 'localTest',
+    subs: [
+      {
+        title: '角色管理',
+        icon: 'solution',
+        key: '/permission/roles'
+      },
+      {
+        title: '用户管理',
+        icon: 'team',
+        key: '/permission/users'
+      },
+    ]
+  },
+  {
     title: '物流管理',
     icon: 'rocket',
     key: '/logistics-manage',

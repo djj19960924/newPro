@@ -23,6 +23,11 @@ class importExcel extends React.Component{
       repeatListNum: [],
       Num: 0,
       isStart: false,
+      inputUrl: '',
+      token: '',
+      // url: 'http://47.98.221.129:8088/quanhai',
+      // url: 'http://127.0.0.1:8088/quanhai',
+      url: 'http://192.168.31.60:8088',
     };
     window.importExcel = this;
     window.XLSX = XLSX;
@@ -44,6 +49,41 @@ class importExcel extends React.Component{
         categoryList: r.data
       })
     });
+
+    // 测试接口
+    this.testFetch()
+  }
+  testFetch() {
+    let data = {userName: 'vogue1314', password: '123456'};
+    // let data = {userName: 'admin', password: '13141314'};
+    this.ajax.post('/login/auth', data).then(r => {
+      console.log(r);
+      if (r.data.status === 10000) message.success(`${r.data.msg}`);
+      // 使用 showError 方法, 进行统一报错
+      r.showError(message);
+    }).catch(r => {
+      // console.log(r);
+    })
+  }
+  testFetch2() {
+    let data = {pageNum: 1,pageSize: 3};
+    this.ajax.post('/role/getRoleList', data).then(r => {
+      console.log(r);
+      // 使用 showError 方法, 进行统一报错
+      r.showError(message);
+    }).catch(r => {
+      // console.log(r);
+    })
+  }
+  testFetch3() {
+    let data = {roleName: '销售', menuIdList: [ 2, 3, 4 ]};
+    this.ajax.post('/role/addRole', data).then(r => {
+      console.log(r);
+      // 使用 showError 方法, 进行统一报错
+      r.showError(message);
+    }).catch(r => {
+      // console.log(r);
+    })
   }
 
   // 导出excel方法
@@ -238,6 +278,18 @@ class importExcel extends React.Component{
               <p key={i}>{`出错数据行数: ${item.Num+2}, 出错数据原因: ${item.msg}, 出错数据错误码: ${item.status}`}</p>
             ))}
           </div>
+        </div>
+        <div className="btnLine">
+          <Button type="primary"
+                  onClick={this.testFetch2.bind(this)}
+                  style={{marginLeft: 10}}
+          >测试调取接口2</Button>
+        </div>
+        <div className="btnLine">
+          <Button type="primary"
+                  onClick={this.testFetch3.bind(this)}
+                  style={{marginLeft: 10}}
+          >测试调取接口3</Button>
         </div>
       </div>
     )

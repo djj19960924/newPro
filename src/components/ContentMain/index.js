@@ -11,7 +11,13 @@ import page404 from '@pages/system/page404/'
 // 开发人员专用调试
 import importExcel from '@pages/developerPages/importExcel/';
 
-//物流管理
+// 权限管理
+  // 角色管理
+  import roles from '@pages/permission/roles/';
+  // 用户管理
+  import users from '@pages/permission/users/';
+
+// 物流管理
   // bc清关
     // bc商品打包
     import commoditiesPackaging from "@pages/logisticsManage/BC_customsClearance/commoditiesPackaging/";
@@ -70,6 +76,7 @@ import importExcel from '@pages/developerPages/importExcel/';
   import commoditiesCreateAndEdit from '@pages/commoditiesManage/commoditiesDatabase/commoditiesCreateAndEdit/';
   import commoditiesImgList from '@pages/commoditiesManage/commoditiesDatabase/commoditiesImgList/';
 
+
 @withRouter
 class ContentMain extends React.Component{
   constructor(props) {
@@ -86,6 +93,10 @@ class ContentMain extends React.Component{
         <Switch>
           {/*首页*/}
           <Route exact path="/" component={Home} />
+
+          {/*权限管理*/}
+          {this.judgeIsTest('localTest') && <Route exact path="/permission/roles" component={roles} />}
+          {this.judgeIsTest('localTest') && <Route exact path="/permission/users" component={users} />}
 
           {/*物流管理*/}
             {/*bc清关*/}

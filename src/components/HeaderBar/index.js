@@ -20,9 +20,10 @@ class HeaderBar extends React.Component{
   //   })
   // }
   loginOut() {
+    const { history, location, } = this.props;
     // 清除cookie中所保存的登录信息, 这里只清除模拟数据isLogin
     window.delCookie('isLogin');
-    this.props.history.push('/login');
+    history.push(`/login?historyPath=${location.pathname}${encodeURIComponent(location.search)}`);
   }
   render() {
     return(

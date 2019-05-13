@@ -157,7 +157,7 @@ module.exports = {
       '@src':path.resolve("src"),
       '@img':path.resolve("src/resource/img"),
       '@js':path.resolve("src/resource/js"),
-      '@components':path.resolve("src/resource/components"),
+      '@components':path.resolve("src/components"),
       '@pages':path.resolve("src/pages"),
     },
     plugins: [
