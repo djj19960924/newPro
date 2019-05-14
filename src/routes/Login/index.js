@@ -1,5 +1,4 @@
 import React from 'react';
-import md5 from '@js/md5';
 import { Link } from 'react-router-dom';
 import { inject, observer } from 'mobx-react/index'
 import { Form, Icon, Input, Button, Checkbox, message, } from 'antd';
@@ -18,71 +17,34 @@ class Login extends React.Component {
   };
   // 提交表单
   handleSubmit = (e) => {
+    const { push } = this.props.history;
     // 当运行当前事件时, 去除其他相关操作绑定s
     e.preventDefault();
     // 这里进行表单验证
     this.props.form.validateFields((err, values) => {
-      // 这里使用getFieldsValue()获取form表单内所有数据
-      // 或者使用getFieldValue('参数值')
-      // console.log(
-      //   this.props.form.getFieldsValue()
-      // );
       if (!err) {
-        // 密码需要传输md5加密后的数据
-        // console.log(md5(this.props.form.getFieldValue('password')));
-        // this.addCookie();
         // 判断是否需要前端方法保存当前登录账号, 如需要, 则将账号信息保存进cookie
-        if (this.props.form.getFieldValue('remember')) {
-          // 设置默认账号名保存7天
-          window.setCookie('saveUserName', this.props.form.getFieldValue('userName'), 3600 * 24 * 7)
-        } else {
-          window.delCookie('saveUserName')
-        }
-        // 这里直接将form表单提交, 正式环境请将所需字段单独提取后再传输
-        // let DataList = this.props.form.getFieldsValue();
-        let DataList = 'account=' + this.props.form.getFieldValue('userName')
-          + '&password=' + this.props.form.getFieldValue('password');
-        // 暂时收起md5加密功能, 待后台完全发布
-        // DataList.password = md5(this.props.form.getFieldValue('password'));
-        fetch(
-          `${window.apiUrl}/loginVerify`,
-          {
-            method: 'POST',
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            body: DataList,
-            // 默认为omit,忽略的意思，也就是不带cookie; 还有两个参数:
-            // same-origin，意思就是同源请求带cookie；
-            // include,表示无论跨域还是同源请求都会带cookie
-            // credentials: 'include',
-          }).then(r => r.json()).then(r => {
-            // console.log(r)
-            if (r.success === true) {
-              message.success(r.message);
-              // 这里需要将收到的数据, 主要是session字段等保存至cookie, 用于验证是否可以进入根目录
-              this.addCookie();
-              // 登陆以后进入的页面
-              // this.props.history.push('/');
-              let historyPath = window.getQueryString('historyPath');
-              if (historyPath) {
-                this.props.history.push(historyPath)
-              } else {
-                this.props.history.push('/');
-              }
-            } else {
-              message.error(r.message);
-            }
-          }).catch(r => {
-            // console.log('error')
-            // 接口调取失败时提示
-            message.error('请求失败!');
-          })
+        if (values.remember) window.setCookie('saveUserName', values.userName, 3600 * 24 * 7);
+        else window.delCookie('saveUserName');
+
+        // 登陆
+        this.ajax.post('/login/auth', {
+          userName: values.userName,
+          password: values.password
+        }).then(r => {
+          if (r.data.status === 10000) {
+            message.success(r.data.msg);
+            // 置登陆状态
+            window.setCookie('isLogin','true',3600 * 10);
+            let historyPath = window.getQueryString('historyPath');
+            push(historyPath ? historyPath : '/');
+          }
+          r.showError(message);
+        }).catch(r => {
+          r.showError(message);
+        });
       }
     });
-  };
-  addCookie() {
-    // 这里模拟登陆成功, 将身份信息注册至cookie中, 时限8小时
-    window.setCookie('isLogin','true',3600 * 8);
-    // console.log('isLogin: ' + window.getCookie('isLogin'));
   };
   render() {
     // 将表单数据保存至this.props.form, 由form组件托管当前数据
@@ -131,8 +93,5 @@ class Login extends React.Component {
     )
   }
 }
-
-// 这里注入表单验证, 如无需表单验证或自定义验证内容和时机还有规则, 则不需要添加Form.create(), 具体详见antd文档
-// Login = Form.create()(Login);
 
 export default Login;
