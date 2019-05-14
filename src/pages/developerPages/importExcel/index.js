@@ -50,40 +50,27 @@ class importExcel extends React.Component{
         categoryList: r.data
       })
     });
-
-    // 测试接口
-    this.testFetch()
   }
-  testFetch() {
-    let data = {userName: 'vogue1314', password: '123456'};
-    // let data = {userName: 'admin', password: '13141314'};
-    this.ajax.post('/login/auth', data).then(r => {
-      console.log(r);
-      if (r.data.status === 10000) message.success(`${r.data.msg}`);
-      // 使用 showError 方法, 进行统一报错
-      r.showError(message);
-    }).catch(r => {
-      // console.log(r);
-    })
-  }
-  testFetch2() {
+  test2() {
     let data = {pageNum: 1,pageSize: 3};
     this.ajax.post('/role/getRoleList', data).then(r => {
       console.log(r);
       // 使用 showError 方法, 进行统一报错
       r.showError(message);
     }).catch(r => {
-      // console.log(r);
+      console.error(r);
+      message.error('前端接口调取/数据处理出现错误, 请联系管理员');
     })
   }
-  testFetch3() {
+  test3() {
     let data = {roleName: '销售', menuIdList: [ 2, 3, 4 ]};
     this.ajax.post('/role/addRole', data).then(r => {
       console.log(r);
       // 使用 showError 方法, 进行统一报错
       r.showError(message);
     }).catch(r => {
-      // console.log(r);
+      console.error(r);
+      message.error('前端接口调取/数据处理出现错误, 请联系管理员');
     })
   }
 
@@ -283,13 +270,13 @@ class importExcel extends React.Component{
         </div>
         <div className="btnLine">
           <Button type="primary"
-                  onClick={this.testFetch2.bind(this)}
+                  onClick={this.test2.bind(this)}
                   style={{marginLeft: 10}}
           >测试调取接口2</Button>
         </div>
         <div className="btnLine">
           <Button type="primary"
-                  onClick={this.testFetch3.bind(this)}
+                  onClick={this.test3.bind(this)}
                   style={{marginLeft: 10}}
           >测试调取接口3</Button>
         </div>
