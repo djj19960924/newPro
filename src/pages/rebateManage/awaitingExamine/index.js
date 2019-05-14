@@ -109,6 +109,7 @@ class awaitingExamine extends React.Component {
   getCountryLeftTicket() {
     fetch(`${window.fandianUrl}/recipt/countReciptByNationName`,{
       method: 'POST',
+      credentials: 'include',
     }).then(r => r.json()).then(r => {
       if (r.status === 10000) {
         if (r.msg) {
@@ -151,7 +152,8 @@ class awaitingExamine extends React.Component {
     fetch(window.fandianUrl + '/mall/getMallList', {
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: 'nationName=' + e.target.value
+      body: 'nationName=' + e.target.value,
+      credentials: 'include',
     }).then(r => r.json()).then(r => {
       if (r.retcode.status === '10000') {
         // message.success(r.retcode.msg)
@@ -184,6 +186,7 @@ class awaitingExamine extends React.Component {
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       // 这里给出搜索的页码与当前页数
       body: 'mallName=' + val,
+      credentials: 'include',
     }).then(r => r.json()).then(r => {
       if (r.retcode.status === '10000') {
         this.setState({
@@ -210,6 +213,7 @@ class awaitingExamine extends React.Component {
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       // 这里给出搜索的页码与当前页数
       body: 'mallName=' + val + '&pageNum=1&pageSize=20',
+      credentials: 'include',
     }).then(r => r.json()).then(r => {
       if (r.retcode.status === '10000') {
         // 初始化数据
@@ -341,6 +345,7 @@ class awaitingExamine extends React.Component {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(data),
+            credentials: 'include',
           }).then(r => r.json()).then(r => {
             if(r.retcode.status==='10000'){
               message.success(`执行通过审核成功`);
@@ -412,6 +417,7 @@ class awaitingExamine extends React.Component {
         method: 'post',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(reject),
+        credentials: 'include',
       }).then(res => res.json()).then(r => {
         if (r.retcode.status === `10000`) {
           message.success(`执行驳回成功`);

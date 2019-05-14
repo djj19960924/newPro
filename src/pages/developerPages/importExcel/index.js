@@ -42,7 +42,8 @@ class importExcel extends React.Component{
 
     // 用于接取品类关联数据校验行邮税号
     fetch(`${window.fandianUrl}/sku/getAllProductCategory`, {
-      method: 'POST'
+      method: 'POST',
+      credentials: 'include',
     }).then(r => r.json()).then(r => {
       // console.log(r)
       this.setState({
@@ -183,6 +184,7 @@ class importExcel extends React.Component{
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(processedDataList[Num]),
+        credentials: 'include',
       }).then(r => r.json()).then(r => {
         if (!r.status) {
           message.error(`后端数据错误`)

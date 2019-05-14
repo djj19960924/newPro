@@ -249,6 +249,7 @@ class commoditiesDataBase extends React.Component {
         pageSize: pageSize,
         searchParm: searchValue.trim()
       }),
+      credentials: 'include',
     }).then(r => r.json()).then(r => {
       this.setState({tableIsLoading: false, dataList: []});
       if (r.status) {
@@ -304,6 +305,7 @@ class commoditiesDataBase extends React.Component {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(dataArrayAll),
+      credentials: 'include',
     }).then(r => r.json()).then(r => {
       if (r.status) {
         if (r.status === 10000) {
@@ -313,6 +315,7 @@ class commoditiesDataBase extends React.Component {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(dataArray),
+            credentials: 'include',
           }).then(r => r.json()).then(r => {
             if (r.status) {
               if (r.status === 10000) {
@@ -395,6 +398,7 @@ class commoditiesDataBase extends React.Component {
           grossWeight: excelDataList[Num].grossWeight,
           purchaseArea: excelDataList[Num].purchaseArea,
         }),
+        credentials: 'include',
       }).then(r => r.json()).then(r => {
         if (r.status) {
           if (r.status === 10000) {

@@ -41,7 +41,8 @@ class globalTranshipmentNotArrived extends React.Component {
     fetch(`${window.fandianUrl}/parcelMessage/isWareHouseParcelMessage`,{
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body:`pageNum=${pageNum}&pageSize=${pageSize}&isWareHouse=0&logistics=${logistics.trim()}`
+      body:`pageNum=${pageNum}&pageSize=${pageSize}&isWareHouse=0&logistics=${logistics.trim()}`,
+      credentials: 'include',
     }).then(r => r.json()).then(r => {
       // console.log(r);
       if (!r.msg && !r.data) {
@@ -76,6 +77,7 @@ class globalTranshipmentNotArrived extends React.Component {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body:JSON.stringify(selectedIds),
+      credentials: 'include',
     }).then(r => r.json()).then(r => {
       if (!r.msg && !r.data) {
         message.error(`后端数据错误`);

@@ -49,7 +49,8 @@ class rejectExamine extends React.Component{
     fetch(window.fandianUrl + '/mall/getMallList', {
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body:'nationName='+val
+      body:'nationName='+val,
+      credentials: 'include',
     }).then(r => r.json()).then(r => {
       if (r.retcode.status === '10000') {
         // message.success(r.retcode.msg)
@@ -81,6 +82,7 @@ class rejectExamine extends React.Component{
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       // 这里给出搜索的页码与当前页数
       body: 'mallName=' + val+'&pageNum='+pageNum+'&pageSize='+pageSize,
+      credentials: 'include',
     }).then(r => r.json()).then(r => {
       if (r.retcode.status === '10000') {
         this.setState({dataSource: r.data.list,  pageTotal: r.data.total,mallName:val});

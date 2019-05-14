@@ -20,6 +20,7 @@ class orderUnmatched extends React.Component{
     fetch(window.apiUrl+"/box/getBoxOrderList2",{
       method:"GET",
       headers:{'Content-Type': 'application/x-www-form-urlencoded'},
+      credentials: 'include',
     }).then(response=>response.json()).then((res)=>{
       this.setState({dataSource:res.boxOrderList})
     })
@@ -28,6 +29,7 @@ class orderUnmatched extends React.Component{
     fetch(window.apiUrl+"/box/getBoxOrderList",{
       method:"GET",
       headers:{'Content-Type': 'application/x-www-form-urlencoded'},
+      credentials: 'include',
     }).then(response=>response.json()).then((res)=>{
       this.setState({dataSource:res.boxOrderList})
     })
@@ -36,7 +38,8 @@ class orderUnmatched extends React.Component{
 
     fetch(window.apiUrl+"/box/uploadBoxOrder",{
       method:"GET",
-      headers:{'Content-Type': 'application/x-www-form-urlencoded'}
+      headers:{'Content-Type': 'application/x-www-form-urlencoded'},
+      credentials: 'include',
     }).then(response=>response.json()).then((res)=>{
       alert(res.Message);
     })
@@ -54,7 +57,8 @@ class orderUnmatched extends React.Component{
     fetch(window.apiUrl+"/box/getUploadBoxOrderByBoxCode",{
       method:"post",
       headers:{'Content-Type': 'application/json'},
-      body:JSON.stringify(boxlist)
+      body:JSON.stringify(boxlist),
+      credentials: 'include',
     }).then(response=>response.json()).then((res)=>{
       alert(res.Message);
       this.tableList2();

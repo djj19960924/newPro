@@ -60,6 +60,7 @@ class orderPushed extends React.Component{
           boxCode: fileDate[Num].箱号,
           waybillNo: fileDate[Num].运单号,
         }),
+        credentials: 'include',
       }).then(r => r.json()).then(r => {
         console.log(r);
         if (!r.msg && !r.data) {
@@ -123,6 +124,7 @@ class orderPushed extends React.Component{
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body:JSON.stringify({pageNum:pageNum,pageSize:pageSize}),
+      credentials: 'include',
     }).then(r => r.json()).then(r => {
       // console.log(r);
       if (!r.msg && !r.data) {

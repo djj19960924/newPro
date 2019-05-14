@@ -43,6 +43,7 @@ class appointmentTeamManage extends React.Component {
     if (status === 4) {
       fetch(`${window.fandianUrl}/AppointmentMangement/getMassNoByMallName`,{
         method: `POST`,
+        credentials: 'include',
       }).then(r => r.json()).then(r => {
         if (!r.msg && !r.data) {
           message.error(`后端数据错误`)
@@ -72,6 +73,7 @@ class appointmentTeamManage extends React.Component {
         method: `POST`,
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: `status=${status}&pageNum=${pageNum}&pageSize=${pageSize}`,
+        credentials: 'include',
       }).then(r => r.json()).then(r => {
         if (!r.msg && !r.data) {
           message.error(`后端数据错误`)
@@ -150,6 +152,7 @@ class appointmentTeamManage extends React.Component {
           method: `POST`,
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(dataObj),
+          credentials: 'include',
         }).then(r => r.json()).then(r => {
           // console.log(r);
           if (!r.msg && !r.data) {
@@ -175,6 +178,7 @@ class appointmentTeamManage extends React.Component {
           method: `POST`,
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({id:v,massNo:inputValue[`input_${i}`]}),
+          credentials: 'include',
         }).then(r => r.json()).then(r => {
           if (!r.msg && !r.data) {
             message.error(`后端数据错误`)
@@ -242,6 +246,7 @@ class appointmentTeamManage extends React.Component {
       method: `POST`,
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({id: id}),
+      credentials: 'include',
     }).then(r => r.json()).then(r => {
       if (!r.msg && !r.data) {
         message.error(`后端数据错误`)
@@ -281,6 +286,7 @@ class appointmentTeamManage extends React.Component {
         method: `POST`,
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({appointmentList:dataList,appointmentIdList: idList}),
+        credentials: 'include',
       }).then(r => r.json()).then(r => {
         // console.log(r)
         if (r.status === 10000) {

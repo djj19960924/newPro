@@ -43,6 +43,7 @@ class airportTransfer extends React.Component {
         startTime: startTime ? `${moment(startTime).format('YYYY-MM-DD')} 00:00:00` : null,
         endTime: endTime ? `${moment(endTime).format('YYYY-MM-DD')} 23:59:59` : null,
       }),
+      credentials: 'include',
     }).then(r => r.json()).then(r => {
       // 这里成功调取后端服务器
       if (r.status) {

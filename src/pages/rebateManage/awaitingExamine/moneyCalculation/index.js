@@ -89,6 +89,7 @@ class MoneyCalculation extends React.Component {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(data),
+      credentials: 'include',
     }).then(r => r.json()).then(r => {
       // console.log(this.state.mainDataList);
       if (r.retcode.status === `10000`) {

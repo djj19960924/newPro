@@ -49,7 +49,8 @@ class adoptExaminePaid extends React.Component {
     fetch(window.fandianUrl + '/programUser/getAllReciptAccount', {
       method: "post",
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(dataObj)
+      body: JSON.stringify(dataObj),
+      credentials: 'include',
     }).then(r => r.json()).then(r => {
       if (r.status) {
         if (r.status === 10000) {
