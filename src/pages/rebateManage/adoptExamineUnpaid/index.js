@@ -34,8 +34,7 @@ class adoptExamineUnpaid extends React.Component{
     fetch(window.fandianUrl + '/programUser/getProgramUserNotPayList',{
       method:"post",
       headers:{'Content-Type': 'application/x-www-form-urlencoded'},
-      body:`payment=${payment}&pageNum=${pageNum}&pageSize=${pageSize}`,
-      credentials: 'include',
+      body:`payment=${payment}&pageNum=${pageNum}&pageSize=${pageSize}`
     }).then(response=>response.json()).then((res)=>{
       this.setState({
         dataSource: res.data.list,
@@ -54,8 +53,7 @@ class adoptExamineUnpaid extends React.Component{
     fetch(window.fandianUrl + '/programUser/getProgramUserNoPayment',{
       method:"post",
       headers:{'Content-Type': 'application/x-www-form-urlencoded'},
-      body:`payment=&pageNum=${pageNum}&pageSize=${pageSize}`,
-      credentials: 'include',
+      body:`payment=&pageNum=${pageNum}&pageSize=${pageSize}`
     }).then(response=>response.json()).then((res)=>{
       this.setState({
         dataSource:res.data.list,
@@ -88,8 +86,7 @@ class adoptExamineUnpaid extends React.Component{
     fetch(window.fandianUrl + '/programUser/getProgramUserByUnionId',{
       method:'post',
       headers:{'Content-Type': 'application/x-www-form-urlencoded'},
-      body:'unionId='+unionId,
-      credentials: 'include',
+      body:'unionId='+unionId
     }).then(res=>res.json()).then((res)=>{
       if(res.status===10000){
         this.setState({
@@ -115,8 +112,7 @@ class adoptExamineUnpaid extends React.Component{
     fetch(window.fandianUrl+'/programUser/updatePayAndReciptByUnionId',{
       method:'post',
       headers:{'Content-Type': 'application/json'},
-      body:JSON.stringify(data),
-      credentials: 'include',
+      body:JSON.stringify(data)
     }).then(res=>res.json()).then((res)=>{
       // console.log(res);
       if(res.status===10000){

@@ -65,8 +65,7 @@ class commoditiesImgList extends React.Component {
         fetch(`${window.fandianUrl}/sku/selectEditSkuBySkuId`, {
           method: 'POST',
           headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-          body:`skuId=${skuId}`,
-          credentials: 'include',
+          body:`skuId=${skuId}`
         }).then(r => r.json()).then(r => {
           if (r.status === 10000) {
             // 成功
@@ -367,8 +366,7 @@ class commoditiesImgList extends React.Component {
       // 上传接口
       fetch(`${window.fandianUrl}/skuUpimg/headImgUpload`,{
         method: 'POST',
-        body: formData,
-        credentials: 'include',
+        body: formData
       }).then(r=>r.json()).then(r=>{
         // 关闭loading
         this.setState({
@@ -414,8 +412,7 @@ class commoditiesImgList extends React.Component {
       body: JSON.stringify({
         skuId: skuId,
         newImgList: r.imgList
-      }),
-      credentials: 'include',
+      })
     }).then(r=>r.json()).then(r=>{
       if (r.status === 10000) {
         // 修改成功

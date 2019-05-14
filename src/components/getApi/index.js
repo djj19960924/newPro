@@ -38,7 +38,7 @@ class Ajax {
             resolve(new resolveResponse(request.response));
           } else {
             // 进入 catch 方法, 并将 reject 发送至 catch
-            reject(new rejectResponse(request));
+            reject(request);
             // 默认进行报错提示
             console.error('接口调取失败');
             console.error(request);
@@ -76,7 +76,7 @@ class Ajax {
             resolve(new resolveResponse(request.response));
           } else {
             // 进入 catch 方法, 并将 reject 发送至 catch
-            reject(new rejectResponse(request));
+            reject(request);
             // 默认进行报错提示
             console.error('接口调取失败');
             console.error(request);
@@ -116,22 +116,6 @@ class resolveResponse {
         message.warn(`${this.data.msg}, 状态码:${this.data.status}`)
       }
     }
-  }
-}
-
-// 处理 reject 事件
-class rejectResponse {
-  constructor(r) {
-    this.request = r;
-  }
-  request = {};
-  // 处理错误
-  showError(message) {
-    if (!message) {
-      console.error('请将antd的message植入该方法');
-      return false;
-    }
-    message.error('接口调取错误, 请联系管理员');
   }
 }
 

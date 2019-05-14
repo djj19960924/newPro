@@ -88,8 +88,7 @@ class MoneyCalculation extends React.Component {
     fetch(window.fandianUrl + '/rebate/getRebateByDate', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(data),
-      credentials: 'include',
+      body: JSON.stringify(data)
     }).then(r => r.json()).then(r => {
       // console.log(this.state.mainDataList);
       if (r.retcode.status === `10000`) {

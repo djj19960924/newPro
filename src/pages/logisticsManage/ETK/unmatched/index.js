@@ -19,8 +19,7 @@ class orderUnmatched extends React.Component{
   tableList2 (){
     fetch(window.apiUrl+"/box/getBoxOrderList2",{
       method:"GET",
-      headers:{'Content-Type': 'application/x-www-form-urlencoded'},
-      credentials: 'include',
+      headers:{'Content-Type': 'application/x-www-form-urlencoded'}
     }).then(response=>response.json()).then((res)=>{
       this.setState({dataSource:res.boxOrderList})
     })
@@ -28,8 +27,7 @@ class orderUnmatched extends React.Component{
   tableList (){
     fetch(window.apiUrl+"/box/getBoxOrderList",{
       method:"GET",
-      headers:{'Content-Type': 'application/x-www-form-urlencoded'},
-      credentials: 'include',
+      headers:{'Content-Type': 'application/x-www-form-urlencoded'}
     }).then(response=>response.json()).then((res)=>{
       this.setState({dataSource:res.boxOrderList})
     })
@@ -38,8 +36,7 @@ class orderUnmatched extends React.Component{
 
     fetch(window.apiUrl+"/box/uploadBoxOrder",{
       method:"GET",
-      headers:{'Content-Type': 'application/x-www-form-urlencoded'},
-      credentials: 'include',
+      headers:{'Content-Type': 'application/x-www-form-urlencoded'}
     }).then(response=>response.json()).then((res)=>{
       alert(res.Message);
     })
@@ -57,8 +54,7 @@ class orderUnmatched extends React.Component{
     fetch(window.apiUrl+"/box/getUploadBoxOrderByBoxCode",{
       method:"post",
       headers:{'Content-Type': 'application/json'},
-      body:JSON.stringify(boxlist),
-      credentials: 'include',
+      body:JSON.stringify(boxlist)
     }).then(response=>response.json()).then((res)=>{
       alert(res.Message);
       this.tableList2();

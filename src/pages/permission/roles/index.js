@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button, Table, message, Pagination, Modal, } from 'antd';
 import moment from 'moment';
+import md5 from '@js/md5';
 import './index.less';
 
 class roles extends React.Component {
@@ -17,15 +18,16 @@ class roles extends React.Component {
       pageSize: 100,
       pageSizeOptions: [`50`,`100`,`200`,`300`]
     };
+    window.md5 = md5;
   }
 
   componentWillMount() {
-    // 模拟登陆
-    let data = {userName: 'vogue1314', password: '123456'};
-    this.ajax.post('/login/auth', data).then(r => {
-      r.showError(message);
-      if (r.data.status === 10000) message.success(r.data.msg)
-    });
+    // 登陆
+    // let data = {userName: 'vogue1314', password: '123456'};
+    // this.ajax.post('/login/auth', data).then(r => {
+    //   r.showError(message);
+    //   if (r.data.status === 10000) message.success(r.data.msg)
+    // });
   }
 
   componentDidMount() {

@@ -40,8 +40,7 @@ class orderNotPushed extends React.Component{
     fetch(`${window.fandianUrl}/postalManagement/sendToPostal`,{
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body:JSON.stringify({pageNum:pageNum,pageSize:pageSize}),
-      credentials: 'include',
+      body:JSON.stringify({pageNum:pageNum,pageSize:pageSize})
     }).then(r => r.json()).then(r => {
       // console.log(r);
       if (!r.msg && !r.data) {
@@ -90,8 +89,7 @@ class orderNotPushed extends React.Component{
       fetch(`${window.fandianUrl}/postalManagement/updateStatusByBoxCode`,{
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(dataList),
-        credentials: 'include',
+        body: JSON.stringify(dataList)
       }).then(r => r.json()).then(r => {
         if (!r.msg && !r.data) {
           message.error(`后端数据错误`);

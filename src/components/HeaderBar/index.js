@@ -1,6 +1,7 @@
 import React from 'react';
 import { inject, observer } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
+import { message } from 'antd';
 
 import './index.less';
 
@@ -10,20 +11,22 @@ class HeaderBar extends React.Component{
     super(props);
     this.state = {
       // 这里保存当前用户名
-      userName: 'admin',
+      userName: this.props.appStore.userData.userName,
       // message: 3,
     };
   }
-  // clearMessage() {
-  //   this.setState({
-  //     message: 0,
-  //   })
-  // }
   loginOut() {
     const { history, location, } = this.props;
-    // 清除cookie中所保存的登录信息, 这里只清除模拟数据isLogin
-    window.delCookie('isLogin');
-    history.push(`/login?historyPath=${location.pathname}${encodeURIComponent(location.search)}`);
+    this.ajax.post('/login/logout').then(r => {
+      if (r.data.status === 10000) message.success(r.data.msg);
+      r.showError(message);
+      // 清除cookie中所保存的登录信息, 这里只清除模拟数据isLogin
+      window.delCookie('isLogin');
+      history.push(`/login?historyPath=${location.pathname}${encodeURIComponent(location.search)}`);
+    }).catch(r => {
+      console.error(r);
+      message.error('前端接口调取/数据处理出现错误, 请联系管理员');
+    });
   }
   render() {
     return(

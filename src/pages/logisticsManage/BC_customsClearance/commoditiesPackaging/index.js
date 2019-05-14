@@ -72,8 +72,7 @@ class commoditiesPackaging extends React.Component{
       fetch(`${window.fandianUrl}/parcelManagement/getParcelProductListByUnionId`,{
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({unionId:unionId}),
-        credentials: 'include',
+        body: JSON.stringify({unionId:unionId})
       }).then(r => r.json()).then(r => {
         // console.log(r);
         if (!r.data && !r.msg) {
@@ -126,8 +125,7 @@ class commoditiesPackaging extends React.Component{
           parcelNo: parcelNo,
           unionId: unionId,
           wechatName: nickname,
-        }),
-        credentials: 'include',
+        })
       }).then(r => r.json()).then(r => {
         // console.log(r);
         if (!r.data && !r.msg) {
@@ -169,8 +167,7 @@ class commoditiesPackaging extends React.Component{
         body: JSON.stringify({
           parcelNo: parcelNo,
           productCode: productCode,
-        }),
-        credentials: 'include',
+        })
       }).then(r => r.json()).then(r => {
         // console.log(r);
         if (!r.data && !r.msg) {
@@ -216,8 +213,7 @@ class commoditiesPackaging extends React.Component{
           productCode: productCode,
           unionId: unionId,
           wechatName: nickname,
-        }),
-        credentials: 'include',
+        })
       }).then(r => r.json()).then(r => {
         // console.log(r);
         if (!r.data && !r.msg) {
@@ -378,8 +374,7 @@ class commoditiesPackaging extends React.Component{
           body: JSON.stringify({
             parcelWeight: boxesList[Num].parcelWeight,
             parcelNo: parcelNo,
-          }),
-          credentials: 'include',
+          })
         }).then(r => r.json()).then(r => {
           if (!r.data && !r.msg) {
             message.error(`后端返回数据错误`);
@@ -487,8 +482,7 @@ class commoditiesPackaging extends React.Component{
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
         parcelNo: parcelNo,
-      }),
-      credentials: 'include',
+      })
     }).then(r => r.json()).then(r => {
       if (!r.data && !r.msg) {
         message.error(`后端返回数据错误`);
@@ -531,8 +525,7 @@ class commoditiesPackaging extends React.Component{
           parcelNum: boxesList.length,
           productNum: productNum,
           logisticsChoice: 2,
-        }),
-        credentials: 'include',
+        })
       }).then(r => r.json()).then(r => {
         if (!r.data && !r.msg) {
           message.error(`后端返回数据错误`);

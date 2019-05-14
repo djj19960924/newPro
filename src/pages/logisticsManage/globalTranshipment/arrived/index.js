@@ -35,8 +35,7 @@ class globalTranshipmentArrived extends React.Component {
     fetch(`${window.fandianUrl}/parcelMessage/isWareHouseParcelMessage`,{
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body:`pageNum=${pageNum}&pageSize=${pageSize}&isWareHouse=1&logistics=${logistics.trim()}`,
-      credentials: 'include',
+      body:`pageNum=${pageNum}&pageSize=${pageSize}&isWareHouse=1&logistics=${logistics.trim()}`
     }).then(r => r.json()).then(r => {
       // console.log(r);
       if (!r.msg && !r.data) {

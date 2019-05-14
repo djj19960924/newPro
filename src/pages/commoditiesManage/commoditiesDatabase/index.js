@@ -248,8 +248,7 @@ class commoditiesDataBase extends React.Component {
         pageNum: pageNum,
         pageSize: pageSize,
         searchParm: searchValue.trim()
-      }),
-      credentials: 'include',
+      })
     }).then(r => r.json()).then(r => {
       this.setState({tableIsLoading: false, dataList: []});
       if (r.status) {
@@ -304,8 +303,7 @@ class commoditiesDataBase extends React.Component {
     fetch(`${window.fandianUrl}/sku/sendExcel`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(dataArrayAll),
-      credentials: 'include',
+      body: JSON.stringify(dataArrayAll)
     }).then(r => r.json()).then(r => {
       if (r.status) {
         if (r.status === 10000) {
@@ -314,8 +312,7 @@ class commoditiesDataBase extends React.Component {
           fetch(`${window.fandianUrl}/sku/updateProductRecordState`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(dataArray),
-            credentials: 'include',
+            body: JSON.stringify(dataArray)
           }).then(r => r.json()).then(r => {
             if (r.status) {
               if (r.status === 10000) {
@@ -397,8 +394,7 @@ class commoditiesDataBase extends React.Component {
           netWeight: excelDataList[Num].netWeight,
           grossWeight: excelDataList[Num].grossWeight,
           purchaseArea: excelDataList[Num].purchaseArea,
-        }),
-        credentials: 'include',
+        })
       }).then(r => r.json()).then(r => {
         if (r.status) {
           if (r.status === 10000) {

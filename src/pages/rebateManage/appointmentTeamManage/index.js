@@ -42,8 +42,7 @@ class appointmentTeamManage extends React.Component {
     this.setState({tableIsLoading: true});
     if (status === 4) {
       fetch(`${window.fandianUrl}/AppointmentMangement/getMassNoByMallName`,{
-        method: `POST`,
-        credentials: 'include',
+        method: `POST`
       }).then(r => r.json()).then(r => {
         if (!r.msg && !r.data) {
           message.error(`后端数据错误`)
@@ -72,8 +71,7 @@ class appointmentTeamManage extends React.Component {
       fetch(`${window.fandianUrl}/AppointmentMangement/getAppointmentByStatus`,{
         method: `POST`,
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: `status=${status}&pageNum=${pageNum}&pageSize=${pageSize}`,
-        credentials: 'include',
+        body: `status=${status}&pageNum=${pageNum}&pageSize=${pageSize}`
       }).then(r => r.json()).then(r => {
         if (!r.msg && !r.data) {
           message.error(`后端数据错误`)
@@ -151,8 +149,7 @@ class appointmentTeamManage extends React.Component {
         fetch(`${window.fandianUrl}/AppointmentMangement/editMassNoByMallName`, {
           method: `POST`,
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(dataObj),
-          credentials: 'include',
+          body: JSON.stringify(dataObj)
         }).then(r => r.json()).then(r => {
           // console.log(r);
           if (!r.msg && !r.data) {
@@ -177,8 +174,7 @@ class appointmentTeamManage extends React.Component {
         fetch(`${window.fandianUrl}/AppointmentMangement/editMassNoById`, {
           method: `POST`,
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({id:v,massNo:inputValue[`input_${i}`]}),
-          credentials: 'include',
+          body: JSON.stringify({id:v,massNo:inputValue[`input_${i}`]})
         }).then(r => r.json()).then(r => {
           if (!r.msg && !r.data) {
             message.error(`后端数据错误`)
@@ -245,8 +241,7 @@ class appointmentTeamManage extends React.Component {
     fetch(`${window.fandianUrl}/AppointmentMangement/apointmentToRejected`, {
       method: `POST`,
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({id: id}),
-      credentials: 'include',
+      body: JSON.stringify({id: id})
     }).then(r => r.json()).then(r => {
       if (!r.msg && !r.data) {
         message.error(`后端数据错误`)
@@ -285,8 +280,7 @@ class appointmentTeamManage extends React.Component {
       fetch(`${window.fandianUrl}/AppointmentMangement/sendAppointmentInselected`, {
         method: `POST`,
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({appointmentList:dataList,appointmentIdList: idList}),
-        credentials: 'include',
+        body: JSON.stringify({appointmentList:dataList,appointmentIdList: idList})
       }).then(r => r.json()).then(r => {
         // console.log(r)
         if (r.status === 10000) {

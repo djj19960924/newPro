@@ -42,8 +42,7 @@ class YTO extends React.Component {
     fetch(window.apiUrl + "/Yto/backendIsYto", {
       method: "post",
       headers: {"Content-Type": "application/x-www-form-urlencoded"},
-      body: "isYto=" + status+"&pageNum="+pageNum+"&pageSize="+pageSize,
-      credentials: 'include',
+      body: "isYto=" + status+"&pageNum="+pageNum+"&pageSize="+pageSize
     }).then(r => r.json()).then((res) => {
       if (!res.msg && !res.data) {
         message.error(`后端数据错误`)
@@ -101,8 +100,7 @@ class YTO extends React.Component {
     fetch(window.apiUrl+"/Yto/uploadSelectToYto",{
       method:"post",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(selectNo),
-      credentials: 'include',
+      body:JSON.stringify(selectNo)
     }).then(r=>r.json()).then((res)=>{
       if(res.status===10000){
         this.getOrderInfo(0);

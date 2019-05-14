@@ -17,8 +17,7 @@ class appointmentInfo extends React.Component{
   allInformation() {
     fetch(window.apiUrl+"/appointment/getAppointmentList",{
       method:"GET",
-      headers:{'Content-Type': 'application/x-www-form-urlencoded'},
-      credentials: 'include',
+      headers:{'Content-Type': 'application/x-www-form-urlencoded'}
     }).then(r => r.json()).then(r=>{
       this.setState({
         dataSource: r,

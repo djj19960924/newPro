@@ -60,8 +60,7 @@ class commoditiesCreateAndEdit extends React.Component {
     // },3000);
     // 获取所有品类列表,以及数量单位
     fetch(`${window.fandianUrl}/sku/getAllProductCategory`, {
-      method: 'POST',
-      credentials: 'include',
+      method: 'POST'
     }).then(r => r.json()).then(r => {
       if (r.status === 10000) {
         let dataList = [];
@@ -108,8 +107,7 @@ class commoditiesCreateAndEdit extends React.Component {
       fetch(`${window.fandianUrl}/sku/selectEditSkuBySkuId`, {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body:`skuId=${skuId}`,
-        credentials: 'include',
+        body:`skuId=${skuId}`
       }).then(r => r.json()).then(r => {
         // 关闭loading
         this.setState({
@@ -272,8 +270,7 @@ class commoditiesCreateAndEdit extends React.Component {
         fetch(`${window.fandianUrl}${skuUrl}`, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(data),
-          credentials: 'include',
+          body: JSON.stringify(data)
         }).then(r => r.json()).then(r => {
           if (r.status === 10000) {
             message.success(`${r.msg}`);

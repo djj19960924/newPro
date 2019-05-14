@@ -93,7 +93,6 @@ class countBillList extends React.Component {
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       body: `verifyStatus=${n}&pageNum=${pageNum}&pageSize=${pageSize}`,
-      credentials: 'include',
     }).then(r => r.json()).then(r => {
       if (r.status === 10000) {
         if (r.data) {
@@ -194,7 +193,6 @@ class countBillList extends React.Component {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(data),
-        credentials: 'include',
       }).then(r => r.json()).then(r => {
         if (!r.data && !r.message) {
           message.error(`后端数据错误`);

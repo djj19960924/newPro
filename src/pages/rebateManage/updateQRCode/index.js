@@ -26,8 +26,7 @@ class updateQRCode extends React.Component {
     fetch(`${window.fandianUrl}/rebate/selectMaxRebateByRebateDate`,{
       method: `POST`,
       headers:{'Content-Type': 'application/x-www-form-urlencoded'},
-      body: `nationName=${encodeURIComponent(`中国`)}`,
-      credentials: 'include',
+      body: `nationName=${encodeURIComponent(`中国`)}`
     }).then(r => r.json()).then(r => {
       if (r.data) {
         if (!!r.data[0]) this.setState({imgUrl: r.data[0].mallImgUrl})
@@ -49,8 +48,7 @@ class updateQRCode extends React.Component {
       // 上传接口
       fetch(`${window.fandianUrl}/upimg/mallImgUpload`,{
         method: 'POST',
-        body: formData,
-        credentials: 'include',
+        body: formData
       }).then(r=>r.json()).then(r=>{
         if (r.status) {
           if (r.status === 10000) {

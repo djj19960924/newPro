@@ -11,10 +11,9 @@ class Login extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
-    // 可以将该组件挂载至window下, 则全局都可获取到当前组件
-    // 某些失去当前对象的情况下, 可以使用该方法
-    // window.Login = this;
   };
+  // appStore 内部方法
+  saveUserData = this.props.appStore.saveUserData.bind(this);
   // 提交表单
   handleSubmit = (e) => {
     const { push } = this.props.history;
@@ -36,12 +35,14 @@ class Login extends React.Component {
             message.success(r.data.msg);
             // 置登陆状态
             window.setCookie('isLogin','true',3600 * 10);
+            this.saveUserData({userName: values.userName});
             let historyPath = window.getQueryString('historyPath');
             push(historyPath ? historyPath : '/');
           }
           r.showError(message);
         }).catch(r => {
-          r.showError(message);
+          console.error(r);
+          message.error('前端接口调取/数据处理出现错误, 请联系管理员');
         });
       }
     });

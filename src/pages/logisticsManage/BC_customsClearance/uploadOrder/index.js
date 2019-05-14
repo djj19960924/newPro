@@ -51,8 +51,7 @@ class BCUploadOrder extends React.Component {
         body: JSON.stringify({
           productCode: tableDataList[fetchNum].productCode,
           parcelNo: tableDataList[fetchNum].parcelNo,
-        }),
-        credentials: 'include',
+        })
       }).then(r => r.json()).then(r => {
         if (!r.msg && !r.data) {
           message.error(`后端数据错误`)
@@ -87,8 +86,7 @@ class BCUploadOrder extends React.Component {
       body: JSON.stringify({
         pageNum: pageNum,
         pageSize: pageSize,
-      }),
-      credentials: 'include',
+      })
     }).then(r => r.json()).then(r => {
       if (!r.msg && !r.data) {
         message.error(`后端数据错误`)
