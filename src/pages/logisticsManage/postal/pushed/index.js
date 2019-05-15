@@ -172,6 +172,10 @@ class orderPushed extends React.Component{
           <Button type="primary"
                   onClick={()=>{input.click()}}
           >导入excel</Button>
+          <Button type="primary"
+                  style={{marginLeft: 10}}
+                  href="//resource.maishoumiji.com/downloads/Import_Templates.xlsx"
+          >下载excel模板</Button>
         </div>
 
         <Modal title="导入订单信息"
