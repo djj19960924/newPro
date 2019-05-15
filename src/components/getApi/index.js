@@ -11,7 +11,8 @@ class Ajax {
   info = '这是基于原生ajax功能所扩展的ajax工具, 可以更加快捷方便的调用ajax, 并且可以根据环境灵活改变内部配置.';
   headers = {};
   // origin = window.fandianUrl;
-  origin = '//192.168.31.60:8088';
+  // origin = '//192.168.31.60:8088';
+  origin = '//47.98.221.129:8088/quanhai';
 
   post(path,data,headers) {
     let request = new XMLHttpRequest();
