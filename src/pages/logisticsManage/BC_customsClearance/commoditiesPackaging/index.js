@@ -268,6 +268,7 @@ class commoditiesPackaging extends React.Component{
       }
     };
     window.onkeyup = (e) => {
+      // console.log(e);
       // 清除方法
       let clearData = () => {
         inputValue = ``;
@@ -277,15 +278,15 @@ class commoditiesPackaging extends React.Component{
       // 判断
       if (allowedKeys.includes(e.key)) {
         // console.warn(`按键值:"${e.key}", 起键时间:${new Date().getTime()}`);
-        if ((new Date().getTime() - onKeyDownTime) <= 3) {
+        if ((new Date().getTime() - onKeyDownTime) <= 12) {
           // 按键: onkeydown, 起键: onkeyup
           // 这里做双重保障: 1.判断按键与起键时间差, 只有扫码才能在3ms内进行按键操作
           // 2.判断按键与起键的值, 在人手动使用键盘乱按的时候, 是有可能造成输入延迟, 导致某次起键动作被延迟
           // 从而导致按键与起键时间高度重合, 所有根据按键与起键的值(e.key)再做进一步的校验
           if (lastInputTime === null || (new Date().getTime() - lastInputTime) <= 50)
-            if (onKeyDownKey === e.key) {
+            if (onKeyDownKey === e.key.toUpperCase()) {
               this.setState({loadingShow:true});
-              inputValue += e.key;
+              inputValue += e.key.toUpperCase();
               lastInputTime = new Date().getTime();
             } else {
               // 输入间隔过大时, 删除判断时间以作保险
@@ -294,7 +295,7 @@ class commoditiesPackaging extends React.Component{
             }
         }
       } else if (e.key === `Enter`) {
-        if ((new Date().getTime() - onKeyDownTime) <= 3) {
+        if ((new Date().getTime() - onKeyDownTime) <= 12) {
           if (onKeyDownKey === e.key && (new Date().getTime() - lastInputTime) <= 50) {
             // 在这里识别所获取的value值, 当判断为箱号或商品条形码时, 进行接口调取动作
             // let ruleNumber = /^[0-9]+$/;
