@@ -16,7 +16,7 @@ const menus = [
         key: '/permission/roles'
       },
       {
-        title: '用户管理',
+        title: '账户管理',
         icon: 'team',
         key: '/permission/users'
       },
