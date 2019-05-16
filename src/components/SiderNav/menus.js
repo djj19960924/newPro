@@ -164,6 +164,12 @@ const menus = [
         icon: 'solution',
         key: '/reservation-service/appointment-info',
       },
+      {
+        title: '全球跑腿预订',
+        icon: 'solution',
+        key: '/reservation-service/global-errands',
+        testType: 'localTest'
+      }
     ]
   },
   {
