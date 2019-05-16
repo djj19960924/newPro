@@ -544,7 +544,11 @@ class commoditiesCreateAndEdit extends React.Component {
                       labelCol={{span: 4}}
                       wrapperCol={{span: 15}}
             >
-              {getFieldDecorator('recordPrice')(
+              {getFieldDecorator('recordPrice',{
+                rules: [
+                  {required: true},
+                ],
+              })(
                 <InputNumber style={{width: 180}}
                              placeholder="请输入备案价"
                              min={0}
