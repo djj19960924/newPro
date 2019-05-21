@@ -11,6 +11,11 @@ const menus = [
     testType: 'localTest',
     subs: [
       {
+        title: '权限管理',
+        icon: 'lock',
+        key: '/users/permissions'
+      },
+      {
         title: '角色管理',
         icon: 'solution',
         key: '/users/roles'
@@ -19,11 +24,6 @@ const menus = [
         title: '账户管理',
         icon: 'team',
         key: '/users/accounts'
-      },
-      {
-        title: '权限管理',
-        icon: 'lock',
-        key: '/users/permissions'
       },
     ]
   },
