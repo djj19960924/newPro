@@ -176,12 +176,12 @@ class accounts extends React.Component {
       {title: '邮箱', dataIndex: 'email', key: 'email', width: 200},
       {title: '角色名称', dataIndex: 'roleName', key: 'roleName'},
       {title: '角色id', dataIndex: 'roleId', key: 'roleId', width: 80},
-      {title: '操作', dataIndex: '操作', key: '操作', width: 270, fixed: 'right',
+      {title: '操作', dataIndex: '操作', key: '操作', width: 250, fixed: 'right',
         render: (text, record) =>
           <div>
             <Button type="primary"
                     onClick={this.showDetails.bind(this,'detail',record)}
-            >查看详情</Button>
+            >查看</Button>
             <Button type="primary"
                     style={{marginLeft: 10}}
                     onClick={this.showDetails.bind(this,'edit',record)}

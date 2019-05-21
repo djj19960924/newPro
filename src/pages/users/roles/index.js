@@ -300,7 +300,7 @@ class roles extends React.Component {
       {title: '权限', dataIndex: 'permissions', key: 'permissions',
         render: (text, record) => this.renderPermissions(text, record)
       },
-      {title: '操作', dataIndex: '操作', key: '操作', width: 270, fixed: 'right',
+      {title: '操作', dataIndex: '操作', key: '操作', width: 250, fixed: 'right',
         render: (text, record) => {
           if (record.roleId === 1) {
             return <div style={{color:'rgba(255,0,0,.6)'}}>超级管理员不可进行操作</div>
@@ -308,7 +308,7 @@ class roles extends React.Component {
             return <div>
               <Button type="primary"
                       onClick={this.showDetailsModal.bind(this, record)}
-              >查看详情</Button>
+              >查看</Button>
               <Button type="primary"
                       style={{marginLeft: 10}}
                       onClick={this.showDetailsModalForEdit.bind(this, record)}
