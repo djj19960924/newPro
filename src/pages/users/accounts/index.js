@@ -105,36 +105,30 @@ class accounts extends React.Component {
 
   // 删除用户
   deleteUser(userId) {
-    this.ajax.post('/user/deleteUser',{userId: userId}).then(r => {
-      if (r.data.status === 10000) {
-        message.success(r.data.msg);
-        this.getUserList();
+    Modal.confirm({
+      title: '删除账户',
+      content: '确认删除该账户',
+      okText: '删除',
+      okType: 'danger',
+      maskClosable: true,
+      onOk: () => {
+        this.ajax.post('/user/deleteUser',{userId: userId}).then(r => {
+          if (r.data.status === 10000) {
+            message.success(r.data.msg);
+            this.getUserList();
+          }
+          r.showError(message);
+        }).catch(r => {
+          console.error(r);
+          this.ajax.isReturnLogin(r,this);
+        })
       }
-      r.showError(message);
-    }).catch(r => {
-      console.error(r);
-      this.ajax.isReturnLogin(r,this);
-    })
-  }
-
-  // 新增用户
-  addUser(dataObj) {
-    this.ajax.post('/user/addUser',dataObj).then(r => {
-      if (r.data.status === 10000) {
-        message.success(r.data.msg);
-        this.setState({showDetails: false});
-        this.getUserList();
-      }
-      r.showError(message);
-    }).catch(r => {
-      console.error(r);
-      this.ajax.isReturnLogin(r,this);
-    })
+    });
   }
 
   // 修改用户
-  updateUser(dataObj) {
-    this.ajax.post('/user/updateUser',dataObj).then(r => {
+  changeUser(dataObj,type) {
+    this.ajax.post(`/user/${type}`,dataObj).then(r => {
       if (r.data.status === 10000) {
         message.success(r.data.msg);
         this.setState({showDetails: false});
@@ -162,10 +156,10 @@ class accounts extends React.Component {
           company: val.company ? val.company.trim() : '',
         };
         if (detailState === 'add') {
-          this.addUser(dataObj);
+          this.changeUser(dataObj,'addUser');
         } else if (detailState === 'edit') {
           dataObj.userId = currentInfo.userId;
-          this.updateUser(dataObj);
+          this.changeUser(dataObj,'updateUser');
         }
       }
     })
@@ -241,12 +235,9 @@ class accounts extends React.Component {
               }
             </FormItem>
             <FormItem label="密码" colon style={detailState === 'detail' ? {display: 'none'} : {}}>
-              {detailState !== 'detail' ?
-                getFieldDecorator('password', {
-                  rules: [{required: (detailState === 'add'), message: '请输入密码!'}]
-                })( <Input placeholder={`${detailState === 'add' ? '请输入密码' : '如需修改, 请输入新密码'}`} /> )
-                : null
-              }
+              {getFieldDecorator('password', {
+                rules: [{required: (detailState === 'add'), message: '请输入密码!'}]
+              })( <Input placeholder={`${detailState === 'add' ? '请输入密码' : '如需修改, 请输入新密码'}`} /> )}
             </FormItem>
             <FormItem label="邮箱" colon >
               {detailState !== 'detail' ?

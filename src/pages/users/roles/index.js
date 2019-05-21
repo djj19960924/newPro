@@ -240,6 +240,7 @@ class roles extends React.Component {
           this.setState({showDetails: false});
           this.getRoleList();
         }
+        r.showError(message);
       }).catch(r => {
         console.error(r);
         this.ajax.isReturnLogin(r,this);
@@ -261,6 +262,7 @@ class roles extends React.Component {
         this.setState({showDetails: false, newRoleName: ''});
         this.getRoleList();
       }
+      r.showError(message);
     }).catch(r => {
       console.error(r);
       this.ajax.isReturnLogin(r,this);
@@ -269,14 +271,24 @@ class roles extends React.Component {
 
   // 删除角色
   deleteRole(roleId) {
-    this.ajax.post('/role/deleteRole',{roleId: roleId}).then(r => {
-      if (r.data.status === 10000) {
-        message.success(`${r.data.msg}`);
-        this.getRoleList();
+    Modal.confirm({
+      title: '删除角色',
+      content: '确认删除该角色',
+      okText: '删除',
+      okType: 'danger',
+      maskClosable: true,
+      onOk: () => {
+        this.ajax.post('/role/deleteRole', {roleId: roleId}).then(r => {
+          if (r.data.status === 10000) {
+            message.success(`${r.data.msg}`);
+            this.getRoleList();
+          }
+          r.showError(message);
+        }).catch(r => {
+          console.error(r);
+          this.ajax.isReturnLogin(r, this);
+        })
       }
-    }).catch(r => {
-      console.error(r);
-      this.ajax.isReturnLogin(r,this);
     })
   }
 
