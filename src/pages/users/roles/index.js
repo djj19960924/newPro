@@ -1,6 +1,5 @@
 import React from 'react';
 import { Button, Table, message, Pagination, Modal, Input, } from 'antd';
-import moment from 'moment';
 import './index.less';
 
 class roles extends React.Component {
@@ -32,7 +31,6 @@ class roles extends React.Component {
       // 新增角色名称
       newRoleName: ''
     };
-    window.roles = this;
   }
 
   componentDidMount() {
@@ -61,11 +59,10 @@ class roles extends React.Component {
     this.setState({tableIsLoading: true});
     let dataObj = {pageNum:pageNum,pageSize:pageSize};
     this.ajax.post('/role/getRoleList', dataObj).then(r => {
-      const { data } = r;
-      if (data.status === 10000) {
+      if (r.data.status === 10000) {
         this.setState({
-          tableDataList: data.data.list,
-          pageTotal: data.data.total
+          tableDataList: r.data.data.list,
+          pageTotal: r.data.data.total
         });
       }
       r.showError(message);
@@ -77,7 +74,7 @@ class roles extends React.Component {
     })
   }
 
-  // 获取角色列表
+  // 换页刷新
   changePage(pageNum, pageSize) {
     this.setState({
       pageNum: pageNum,
@@ -166,7 +163,6 @@ class roles extends React.Component {
     //   {menuName: '菜单测试5:菜单测试202:菜单测试20202', perms: '操作测试1', menuId: 19},
     //   {menuName: '菜单测试5:菜单测试202:菜单测试20202', perms: '操作测试2', menuId: 60},
     // ];
-
     this.rebuildData(record.permissions);
     this.setState({detailState: 'detail', currentRecord: record});
   }
@@ -324,7 +320,7 @@ class roles extends React.Component {
         </div>
         <Modal className="details"
                wrapClassName="rolesDetailsModal"
-               title="权限详情"
+               title={detailState === 'edit' ? '修改角色' : (detailState === 'add' ? '新增角色' : '角色详情')}
                visible={showDetails}
                bodyStyle={{padding: 18,maxHeight: '600px',overflow: 'auto'}}
                width={680}

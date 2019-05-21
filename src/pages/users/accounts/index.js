@@ -1,16 +1,300 @@
 import React from 'react';
+import { Button, Table, message, Pagination, Modal, Input, Form, Select, } from 'antd';
+import { observer } from 'mobx-react/index';
 import './index.less';
 
+@observer @Form.create()
 class accounts extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      // 表单数据
+      tableDataList: [],
+      // 表单加载状态
+      tableIsLoading: false,
+      // 分页相关
+      pageTotal: 0,
+      pageNum: 1,
+      pageSize: 100,
+      pageSizeOptions: [`50`,`100`,`200`,`300`],
+      // 显示弹窗
+      showDetails: false,
+      detailState: 'detail',
+      // 角色选择项
+      rolesOptions: [],
+      // 当前账户信息
+      currentInfo: {},
+    };
+  }
+
+  componentDidMount() {
+    this.getRoleList();
+  }
+
+  // 查询用户列表
+  getUserList() {
+    const { pageNum, pageSize } = this.state;
+    this.setState({tableIsLoading: true});
+    let dataObj = {pageNum: pageNum, pageSize: pageSize};
+    this.ajax.post('/user/getUserList',dataObj).then(r => {
+      if (r.data.status === 10000) {
+        this.setState({
+          tableDataList: r.data.data.list,
+          pageTotal: r.data.data.total
+        });
+      }
+      r.showError(message);
+      this.setState({tableIsLoading: false});
+    }).catch(r => {
+      console.error(r);
+      this.setState({tableIsLoading: false});
+      this.ajax.isReturnLogin(r,this);
+    })
+  }
+
+  // 获取角色列表
+  getRoleList() {
+    const Option = Select.Option;
+    const { pageNum, pageSize, } = this.state;
+    this.setState({tableIsLoading: true});
+    let dataObj = {pageNum:pageNum,pageSize:pageSize};
+    this.ajax.post('/role/getRoleList', dataObj).then(r => {
+      if (r.data.status === 10000) {
+        this.getUserList();
+        let dataList = [];
+        for (let obj of r.data.data.list) dataList.push(<Option key={obj.roleId} value={obj.roleId}>{obj.roleName}</Option>)
+        this.setState({rolesOptions: dataList})
+      }
+      r.showError(message);
+      this.setState({tableIsLoading: false});
+    }).catch(r => {
+      console.error(r);
+      this.setState({tableIsLoading: false});
+      this.ajax.isReturnLogin(r,this);
+    })
+  }
+
+  // 换页刷新
+  changePage(pageNum, pageSize) {
+    this.setState({
+      pageNum: pageNum,
+      pageSize: pageSize,
+    },()=>{
+      this.getUserList();
+    })
+  }
+
+  // 打开弹窗
+  showDetails(state,record) {
+    const { setFieldsValue, resetFields } = this.props.form;
+    resetFields();
+    this.setState({
+      detailState: state,
+      showDetails: true,
+      currentInfo: record ? record : {}
+    }, () => {
+      if (state !== 'detail') setFieldsValue({
+        company: record.company,
+        email: record.email,
+        roleId: record.roleId,
+        userName: record.userName,
+        userPhone: record.userPhone,
+      })
+    });
+  }
+
+  // 删除用户
+  deleteUser(userId) {
+    this.ajax.post('/user/deleteUser',{userId: userId}).then(r => {
+      if (r.data.status === 10000) {
+        message.success(r.data.msg);
+        this.getUserList();
+      }
+      r.showError(message);
+    }).catch(r => {
+      console.error(r);
+      this.ajax.isReturnLogin(r,this);
+    })
+  }
+
+  // 新增用户
+  addUser(dataObj) {
+    this.ajax.post('/user/addUser',dataObj).then(r => {
+      if (r.data.status === 10000) {
+        message.success(r.data.msg);
+        this.setState({showDetails: false});
+        this.getUserList();
+      }
+      r.showError(message);
+    }).catch(r => {
+      console.error(r);
+      this.ajax.isReturnLogin(r,this);
+    })
+  }
+
+  // 修改用户
+  updateUser(dataObj) {
+    this.ajax.post('/user/updateUser',dataObj).then(r => {
+      if (r.data.status === 10000) {
+        message.success(r.data.msg);
+        this.setState({showDetails: false});
+        this.getUserList();
+      }
+      r.showError(message);
+    }).catch(r => {
+      console.error(r);
+      this.ajax.isReturnLogin(r,this);
+    })
+  }
+
+  // 提交表单
+  submitForm() {
+    const { validateFields } = this.props.form;
+    const { detailState, currentInfo } = this.state;
+    validateFields((err, val) => {
+      if (!err) {
+        const dataObj = {
+          userName: val.userName,
+          roleId: val.roleId,
+          password: val.password ? val.password : '',
+          email: val.email ? val.email.trim() : '',
+          userPhone: val.userPhone ? val.userPhone.trim() : '',
+          company: val.company ? val.company.trim() : '',
+        };
+        if (detailState === 'add') {
+          this.addUser(dataObj);
+        } else if (detailState === 'edit') {
+          dataObj.userId = currentInfo.userId;
+          this.updateUser(dataObj);
+        }
+      }
+    })
   }
 
   render() {
+    const { tableDataList, tableIsLoading, pageTotal, pageSize, pageNum, pageSizeOptions, detailState, showDetails, rolesOptions, currentInfo, } = this.state;
+    const FormItem = Form.Item;
+    const { getFieldDecorator } = this.props.form;
+    const columns = [
+      {title: '账户id', dataIndex: 'userId', key: 'userId', width: 80},
+      {title: '账户名称', dataIndex: 'userName', key: 'userName', width: 140},
+      {title: '联系电话（通行证）', dataIndex: 'userPhone', key: 'userPhone', width: 140},
+      {title: '邮箱', dataIndex: 'email', key: 'email', width: 200},
+      {title: '角色名称', dataIndex: 'roleName', key: 'roleName'},
+      {title: '角色id', dataIndex: 'roleId', key: 'roleId', width: 80},
+      {title: '操作', dataIndex: '操作', key: '操作', width: 270, fixed: 'right',
+        render: (text, record) =>
+          <div>
+            <Button type="primary"
+                    onClick={this.showDetails.bind(this,'detail',record)}
+            >查看详情</Button>
+            <Button type="primary"
+                    style={{marginLeft: 10}}
+                    onClick={this.showDetails.bind(this,'edit',record)}
+            >修改</Button>
+            <Button type="danger"
+                    style={{marginLeft: 10}}
+                    onClick={this.deleteUser.bind(this,record.userId)}
+            >删除</Button>
+          </div>
+      },
+    ];
     return (
       <div className="accounts">
-        用户管理
+        <div className="title">账户管理</div>
+        <div className="btnLine">
+          <Button type="primary"
+                  onClick={this.showDetails.bind(this,'add')}
+          >新增账户</Button>
+        </div>
+        <Modal className="details"
+               wrapClassName="accountsDetailsModal"
+               title={detailState === 'edit' ? '修改账户' : (detailState === 'add' ? '新增账户' : '账户详情')}
+               visible={showDetails}
+               bodyStyle={{padding: 18,maxHeight: '600px',overflow: 'auto'}}
+               width={500}
+               onCancel={() => this.setState({showDetails: false})}
+               onOk={this.submitForm.bind(this)}
+               okText={detailState === 'edit' ? '修改' : (detailState === 'add' ? '新增' : '')}
+               footer={detailState === 'detail' ? null : undefined}
+               forceRender={true}
+        >
+          {/* 用户名称/邮箱/电话/公司/角色 */}
+          <Form className=""
+                labelCol={{span: 8}}
+                wrapperCol={{span: 16}}
+          >
+            <FormItem label="账户名称" colon >
+              {detailState !== 'detail' ?
+                getFieldDecorator('userName', {
+                  rules: [{required: true, message: '请输入账户名称!'}],
+                })( <Input placeholder="请输入账户名称" /> )
+                : <div>{currentInfo.userName}</div>
+              }
+            </FormItem>
+            <FormItem label="角色名称" colon >
+              {detailState !== 'detail' ?
+                getFieldDecorator('roleId', {
+                  rules: [{required: true, message: '请选择角色!'}]
+                })( <Select placeholder="请选择角色" >{rolesOptions}</Select> )
+                : <div>{currentInfo.roleName}</div>
+              }
+            </FormItem>
+            <FormItem label="密码" colon style={detailState === 'detail' ? {display: 'none'} : {}}>
+              {detailState !== 'detail' ?
+                getFieldDecorator('password', {
+                  rules: [{required: (detailState === 'add'), message: '请输入密码!'}]
+                })( <Input placeholder={`${detailState === 'add' ? '请输入密码' : '如需修改, 请输入新密码'}`} /> )
+                : null
+              }
+            </FormItem>
+            <FormItem label="邮箱" colon >
+              {detailState !== 'detail' ?
+                getFieldDecorator('email')( <Input placeholder="请输入邮箱" /> )
+                : <div>{currentInfo.email}</div>
+              }
+            </FormItem>
+            <FormItem label="电话" colon >
+              {detailState !== 'detail' ?
+                getFieldDecorator('userPhone')( <Input placeholder="请输入电话" /> )
+                : <div>{currentInfo.userPhone}</div>
+              }
+            </FormItem>
+            <FormItem label="公司" colon >
+              {detailState !== 'detail' ?
+                getFieldDecorator('company')( <Input placeholder="请输入公司名称" /> )
+                : <div>{currentInfo.company}</div>
+              }
+            </FormItem>
+          </Form>
+        </Modal>
+        <div className="TableMain">
+          {/*表单主体*/}
+          <Table className="tableList"
+                 id="tableList"
+                 dataSource={tableDataList}
+                 columns={columns}
+                 pagination={false}
+                 loading={tableIsLoading}
+                 bordered
+                 scroll={{ y: 500, x: 1050 }}
+                 rowKey={(record, index) => `id_${index}`}
+          />
+          {/*分页*/}
+          <Pagination className="tablePagination"
+                      total={pageTotal}
+                      pageSize={pageSize}
+                      current={pageNum}
+                      showTotal={(total, range) =>
+                        `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`
+                      }
+                      style={{float:'right',marginRight:20,marginTop:10,marginBottom: 20}}
+                      onChange={this.changePage.bind(this)}
+                      showSizeChanger
+                      pageSizeOptions={pageSizeOptions}
+                      onShowSizeChange={this.changePage.bind(this)}
+          />
+        </div>
       </div>
     )
   }
