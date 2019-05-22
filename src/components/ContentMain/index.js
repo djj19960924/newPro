@@ -13,9 +13,12 @@ import importExcel from '@pages/developerPages/importExcel/';
 
 // 权限管理
 // 角色管理
-import roles from '@pages/permission/roles/';
+import roles from '@pages/users/roles/';
 // 用户管理
-import users from '@pages/permission/users/';
+import accounts from '@pages/users/accounts/';
+// 权限列表
+import permissions from '@pages/users/permissions/';
+
 
 // 物流管理
 // bc清关
@@ -102,8 +105,9 @@ class ContentMain extends React.Component {
           <Route exact path="/" component={Home}/>
 
           {/*权限管理*/}
-          {this.judgeIsTest('localTest') && <Route exact path="/permission/roles" component={roles}/>}
-          {this.judgeIsTest('localTest') && <Route exact path="/permission/users" component={users}/>}
+          {this.judgeIsTest('localTest') && <Route exact path="/users/roles" component={roles}/>}
+          {this.judgeIsTest('localTest') && <Route exact path="/users/accounts" component={accounts}/>}
+          {this.judgeIsTest('localTest') && <Route exact path="/users/permissions" component={permissions}/>}
 
           {/*物流管理*/}
           {/*bc清关*/}
@@ -147,7 +151,7 @@ class ContentMain extends React.Component {
           <Route exact path="/commodities-manage/commodities-database/commodities-img-list"
                  component={commoditiesImgList}/>
 
-          {/*开发人员专用管理路由*/}
+          {/*开发人员专用测试路由*/}
           {this.judgeIsTest('localTest') && <Route exact path="/developer-pages/import-excel" component={importExcel}/>}
 
           {/*这里可以配置404 not found 页面*/}

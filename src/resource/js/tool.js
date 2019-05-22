@@ -77,3 +77,8 @@ window.delAllCookie = () => {
   }
   return `删除所有 cookie 成功`
 };
+
+// 获取数据方法类型
+window.getDataType = (data) => {
+  return Object.prototype.toString.call(data)
+};

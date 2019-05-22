@@ -1,0 +1,134 @@
+.roles {
+  background-color: #fff;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+
+  .title {
+    font-size: 24px;
+    line-height: 40px;
+    height: 40px;
+    padding-left: 10px;
+  }
+
+  .btnLine {
+    padding-top: 10px;
+    padding-left: 10px;
+  }
+
+  .TableMain {
+    max-width: 1100px;
+
+    .tableList {
+      // 权限栏位内部样式
+      .tabsList {
+        overflow: hidden;
+        text-align: center;
+        box-sizing: border-box;
+        .tabs {
+          //float: left;
+          display: inline-block;
+          border: 1px solid rgba(64,158,255,.2);
+          border-radius: 5px;
+          padding: 4px 8px;
+          margin: 2.5px 5px;
+          color: #409eff;
+          background-color: rgba(64,158,255,.1);
+        }
+        .tabs.allPer {
+          background-color: rgba(103,194,58,.2);
+          color: #67c23a;
+        }
+      }
+    }
+
+    .tableList {
+      //max-width: 1400px;
+      min-height: 300px;
+      //max-height: 600px;
+      margin: 10px;
+
+      .ellipsis {
+        word-break: keep-all;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      th {
+        padding: 10px;
+        line-height: 1.1;
+        text-align: center;
+        vertical-align: middle;
+      }
+
+      td {
+        padding: 5px 10px;
+        text-align: center;
+        vertical-align: middle;
+      }
+    }
+  }
+}
+
+.rolesDetailsModal {
+  .addRole {
+    overflow: hidden;
+    line-height: 32px;
+    padding: 8px 0;
+    .addRoleTitle {
+      float: left;
+      font-size: 16px;
+    }
+    .addRoleInput {
+      margin-left: 10px;
+      float: left;
+      width: 150px;
+    }
+  }
+  .detailsMain{
+    border: 1px solid #ddd;
+    overflow: hidden;
+    .menu_body {
+      overflow: hidden;
+      border-left: 1px #ddd solid;
+    }
+    .menu_name,.menu_perms {
+      float: left;
+      overflow: hidden;
+    }
+    .menu_name {
+      line-height: 44px;
+      padding: 0 8px;
+      //color: #409eff;
+      //background-color: rgba(64, 158, 255, 0.1);
+    }
+    .menu_perms {
+      display: inline-block;
+      border-radius: 5px;
+      padding: 4px 8px;
+      margin: 5px 0 5px 8px;
+    }
+    .menu_perms.can_edit {
+      cursor: pointer;
+    }
+    .menu_perms.can_edit:hover {
+      color: rgba(64, 158, 255, 0.5);
+      border: 1px solid rgba(64, 158, 255, 0.2);
+    }
+    .menu_perms.own_perms {
+      color: #409eff;
+      background-color: rgba(64, 158, 255, 0.1);
+      border: 1px solid rgba(64, 158, 255, 0.2);
+    }
+    .menu_perms.not_own {
+      color: #999;
+      background-color: rgba(180, 180, 180, 0.1);
+      border: 1px solid rgba(180, 180, 180, 0.2);
+    }
+    .menu_1 {
+      color: #666;
+      font-size: 16px;
+    }
+  }
+}

@@ -5,20 +5,25 @@ const menus = [
     key: '/'
   },
   {
-    title: '权限管理',
+    title: '用户管理',
     icon: 'usergroup-add',
-    key: '/permission',
+    key: '/users',
     testType: 'localTest',
     subs: [
       {
+        title: '权限管理',
+        icon: 'lock',
+        key: '/users/permissions'
+      },
+      {
         title: '角色管理',
         icon: 'solution',
-        key: '/permission/roles'
+        key: '/users/roles'
       },
       {
         title: '账户管理',
         icon: 'team',
-        key: '/permission/users'
+        key: '/users/accounts'
       },
     ]
   },

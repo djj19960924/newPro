@@ -1,7 +1,7 @@
 import React from 'react';
 import './index.less';
 
-class users extends React.Component {
+class permissions extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
@@ -9,11 +9,11 @@ class users extends React.Component {
 
   render() {
     return (
-      <div className="users">
-        用户管理
+      <div className="permissions">
+        菜单管理
       </div>
     )
   }
 }
 
-export default users;
+export default permissions;
