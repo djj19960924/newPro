@@ -1,6 +1,5 @@
 import React from 'react';
 import {withRouter, Switch, Route,} from 'react-router-dom';
-
 // 这里引用各个组件内容, 内容为方便管理, 统一写入pages页面
 // 主页
 import Home from '@pages/Home/';
@@ -14,7 +13,7 @@ import importExcel from '@pages/developerPages/importExcel/';
 // 权限管理
 // 角色管理
 import roles from '@pages/users/roles/';
-// 用户管理
+// 账户管理
 import accounts from '@pages/users/accounts/';
 // 权限列表
 import permissions from '@pages/users/permissions/';
@@ -84,25 +83,36 @@ import commoditiesImgList from '@pages/commoditiesManage/commoditiesDatabase/com
 class ContentMain extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      componentsList: null,
+    };
   }
 
-  judgeIsTest(testType) {
+  componentWillMount() {
+    const dataList = [];
+    this.setState({componentsList: dataList})
+  }
+
+  judgeIsShow(testType) {
     if (window.testType === 'localTest') return true;
     return window.testType === testType;
   }
 
   render() {
+    const { componentsList } = this.state;
     return (
       <div style={{backgroundColor: '#eee', width: '100%', height: '100%', padding: '10px'}}>
         <Switch>
+          {/*放置循环路由*/}
+          {componentsList}
+
           {/*首页*/}
           <Route exact path="/" component={Home}/>
 
           {/*权限管理*/}
-          {this.judgeIsTest('localTest') && <Route exact path="/users/roles" component={roles}/>}
-          {this.judgeIsTest('localTest') && <Route exact path="/users/accounts" component={accounts}/>}
-          {this.judgeIsTest('localTest') && <Route exact path="/users/permissions" component={permissions}/>}
+          {this.judgeIsShow('localTest') && <Route exact path="/users/roles" component={roles}/>}
+          {this.judgeIsShow('localTest') && <Route exact path="/users/accounts" component={accounts}/>}
+          {this.judgeIsShow('localTest') && <Route exact path="/users/permissions" component={permissions}/>}
 
           {/*物流管理*/}
           {/*bc清关*/}
@@ -136,7 +146,7 @@ class ContentMain extends React.Component {
           {/*服务预定管理*/}
           <Route exact path="/reservation-service/airport-transfer" component={airportTransfer}/>
           <Route exact path="/reservation-service/appointment-info" component={appointmentInfo}/>
-          {this.judgeIsTest('localTest') && <Route exact path="/reservation-service/global-errands" component={GlobalErrands}/>}
+          {this.judgeIsShow('localTest') && <Route exact path="/reservation-service/global-errands" component={GlobalErrands}/>}
           {/*商品管理*/}
           <Route exact path="/commodities-manage/commodities-database"
                  component={commoditiesDataBase}/>
@@ -146,7 +156,7 @@ class ContentMain extends React.Component {
                  component={commoditiesImgList}/>
 
           {/*开发人员专用测试路由*/}
-          {this.judgeIsTest('localTest') && <Route exact path="/developer-pages/import-excel" component={importExcel}/>}
+          {this.judgeIsShow('localTest') && <Route exact path="/developer-pages/import-excel" component={importExcel}/>}
 
           {/*这里可以配置404 not found 页面*/}
           <Route component={page404}/>
