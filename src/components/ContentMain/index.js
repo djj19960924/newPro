@@ -53,7 +53,11 @@ import globalTranshipmentNotArrived from '@pages/logisticsManage/globalTranshipm
 import airportTransfer from '@pages/reservationService/airportTransfer/';
 // 预约打包
 import appointmentInfo from '@pages/reservationService/appointmentInfo/';
+//全球跑腿
+//展示信息
 import GlobalErrands from '@pages/reservationService/globalErrands/';
+//编辑进度
+import EditProgress from '@pages/reservationService/globalErrands/editProgress/';
 // 返点
 // 已支付
 import adoptExaminePaid from '@pages/rebateManage/adoptExaminePaid/';
@@ -77,6 +81,7 @@ import appointmentTeamManage from '@pages/rebateManage/appointmentTeamManage/';
 import commoditiesDataBase from '@pages/commoditiesManage/commoditiesDatabase/';
 import commoditiesCreateAndEdit from '@pages/commoditiesManage/commoditiesDatabase/commoditiesCreateAndEdit/';
 import commoditiesImgList from '@pages/commoditiesManage/commoditiesDatabase/commoditiesImgList/';
+
 
 
 @withRouter
@@ -146,7 +151,8 @@ class ContentMain extends React.Component {
           {/*服务预定管理*/}
           <Route exact path="/reservation-service/airport-transfer" component={airportTransfer}/>
           <Route exact path="/reservation-service/appointment-info" component={appointmentInfo}/>
-          {this.judgeIsShow('localTest') && <Route exact path="/reservation-service/global-errands" component={GlobalErrands}/>}
+          {this.judgeIsTest('localTest') && <Route exact path="/reservation-service/global-errands" component={GlobalErrands}/>}
+          <Route exact path="/reservation-service/global-errands/edit-progress" component={EditProgress}/>
           {/*商品管理*/}
           <Route exact path="/commodities-manage/commodities-database"
                  component={commoditiesDataBase}/>
