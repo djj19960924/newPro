@@ -91,7 +91,10 @@ class commoditiesCreateAndEdit extends React.Component {
           imgList: JSON.parse(localStorage.newImgList).imgList
         },()=>{this.showImg()})
       }
-      if (!!localStorage.skuInfo && !!!!localStorage.skuInfoState) {
+      this.props.form.setFieldsValue({
+        sugPostway: 2
+      });
+      if (!!localStorage.skuInfo && !!localStorage.skuInfoState) {
         this.props.form.setFieldsValue(JSON.parse(localStorage.skuInfo));
         this.setState(JSON.parse(localStorage.skuInfoState));
       }
