@@ -264,6 +264,10 @@ class commoditiesImgList extends React.Component {
       video: {width: 480, height: 480},
       audio: true
     };
+    if (navigator.mediaDevices === undefined) {
+      message.warn('暂时无法使用摄像头');
+      return false;
+    }
     // 获取摄像头内容,显示在video中
     let promise = navigator.mediaDevices.getUserMedia(constraints);
     promise.then(function(MediaStream) {
@@ -483,7 +487,7 @@ class commoditiesImgList extends React.Component {
           {fileList.length >= 3 ? null : uploadButton}
         </Upload>
           <Button type="primary"
-                  disabled={fileList.length >= 3}
+                  disabled={fileList.length >= 3 || !navigator.mediaDevices}
                   onClick={this.openCamera.bind(this)}
                   style={{marginTop: 35}}
           >拍照上传</Button>
