@@ -4,7 +4,9 @@ const menus = [
     id: 24,
     icon: 'home',
     key: '/',
-    components: ['Home']
+    components: [
+      {name: 'Home', path: '/'}
+    ]
   },
   {
     title: '用户管理',
@@ -18,21 +20,27 @@ const menus = [
         id: 15,
         icon: 'lock',
         key: '/users/permissions',
-        components: ['permissions']
+        components: [
+          {name: 'permissions', path: '/users/permissions'}
+        ]
       },
       {
         title: '角色管理',
         id: 10,
         icon: 'solution',
         key: '/users/roles',
-        components: ['roles']
+        components: [
+          {name: 'roles', path: '/users/roles'}
+        ]
       },
       {
         title: '账户管理',
         id: 2,
         icon: 'team',
         key: '/users/accounts',
-        components: ['accounts']
+        components: [
+          {name: 'accounts', path: '/users/accounts'}
+        ]
       },
     ]
   },
@@ -53,21 +61,28 @@ const menus = [
             id: 31,
             icon: 'gift',
             key: '/logistics-manage/BC-customsClearance/commodities-packaging',
-            components: ['commoditiesPackaging','customerLogin']
+            components: [
+              {name: 'commoditiesPackaging', path: '/logistics-manage/BC-customsClearance/commodities-packaging'},
+              {name: 'customerLogin', path: '/logistics-manage/BC-customsClearance/commodities-packaging/customer-login'}
+            ]
           },
           {
             title: '圆通物流',
             id: 32,
             icon: 'sync',
             key: '/logistics-manage/BC-customsClearance/YTO',
-            components: ['YTO']
+            components: [
+              {name: 'YTO', path: '/logistics-manage/BC-customsClearance/YTO'}
+            ]
           },
           {
             title: 'BC推单',
             id: 33,
             icon: 'file-excel',
             key: '/logistics-manage/BC-customsClearance/upload-order',
-            components: ['BCUploadOrder']
+            components: [
+              {name: 'BCUploadOrder', path: '/logistics-manage/BC-customsClearance/upload-order'}
+            ]
           },
         ]
       },
@@ -82,14 +97,18 @@ const menus = [
             id: 34,
             icon: 'file-unknown',
             key: '/logistics-manage/ETK/unmatched',
-            components: ['orderUnmatched']
+            components: [
+              {name: 'orderUnmatched', path: '/logistics-manage/ETK/unmatched'}
+            ]
           },
           {
             title: '已匹配订单',
             id: 35,
             icon: 'file-done',
             key: '/logistics-manage/ETK/matched',
-            components: ['orderMatched']
+            components: [
+              {name: 'orderMatched', path: '/logistics-manage/ETK/matched'}
+            ]
           }
         ]
       },
@@ -104,14 +123,18 @@ const menus = [
             id: 36,
             icon: 'file-unknown',
             key: '/logistics-manage/postal/not-pushed',
-            components: ['orderNotPushed']
+            components: [
+              {name: 'orderNotPushed', path: '/logistics-manage/postal/not-pushed'}
+            ]
           },
           {
             title: '已推送订单',
             id: 37,
             icon: 'file-done',
             key: '/logistics-manage/postal/pushed',
-            components: ['orderPushed']
+            components: [
+              {name: 'orderPushed', path: '/logistics-manage/postal/pushed'}
+            ]
           },
         ]
       },
@@ -126,14 +149,18 @@ const menus = [
             id: 38,
             icon: 'file-unknown',
             key: '/logistics-manage/globalTranshipment/not-arrived',
-            components: ['globalTranshipmentNotArrived']
+            components: [
+              {name: 'globalTranshipmentNotArrived', path: '/logistics-manage/globalTranshipment/not-arrived'}
+            ]
           },
           {
             title: '已到货',
             id: 39,
             icon: 'file-done',
             key: '/logistics-manage/globalTranshipment/arrived',
-            components: ['globalTranshipmentArrived']
+            components: [
+              {name: 'globalTranshipmentArrived', path: '/logistics-manage/globalTranshipment/arrived'}
+            ]
           },
         ]
       }
@@ -150,56 +177,72 @@ const menus = [
         id: 45,
         icon: 'snippets',
         key: '/rebate-manage/appointment-team-manage',
-        components: ['appointmentTeamManage']
+        components: [
+          {name: 'appointmentTeamManage', path: '/rebate-manage/appointment-team-manage'}
+        ]
       },
       {
         title: '设置返点',
         id: 46,
         icon:'edit',
         key: '/rebate-manage/set-rebate',
-        components: ['setRebate']
+        components: [
+          {name: 'setRebate', path: '/rebate-manage/set-rebate'}
+        ]
       },
       {
         title: '对账管理',
         id: 47,
         icon: 'diff',
         key: '/rebate-manage/count-bill-list',
-        components: ['countBillList']
+        components: [
+          {name: 'countBillList', path: '/rebate-manage/count-bill-list'}
+        ]
       },
       {
         title: '待审核',
         id: 48,
         icon: 'file-unknown',
         key: '/rebate-manage/awaiting-examine',
-        components: ['awaitingExamine']
+        components: [
+          {name: 'awaitingExamine', path: '/rebate-manage/awaiting-examine'}
+        ]
       },
       {
         title: '待返款',
         id: 49,
         icon: 'meh',
         key: '/rebate-manage/adopt-examine-unpaid',
-        components: ['adoptExamineUnpaid']
+        components: [
+          {name: 'adoptExamineUnpaid', path: '/rebate-manage/adopt-examine-unpaid'}
+        ]
       },
       {
         title: '已返款',
         id: 50,
         icon: 'smile',
         key: '/rebate-manage/adopt-examine-paid',
-        components: ['adoptExaminePaid']
+        components: [
+          {name: 'adoptExaminePaid', path: '/rebate-manage/adopt-examine-paid'}
+        ]
       },
       {
         title: '驳回',
         id: 51,
         icon: 'frown',
         key: '/rebate-manage/reject-examine',
-        components: ['rejectExamine']
+        components: [
+          {name: 'rejectExamine', path: '/rebate-manage/reject-examine'}
+        ]
       },
       {
         title: '上传日上二维码',
         id: 52,
         icon: 'qrcode',
         key: '/rebate-manage/update-QR-code',
-        components: ['updateQRCode']
+        components: [
+          {name: 'updateQRCode', path: '/rebate-manage/update-QR-code'}
+        ]
       },
     ]
   },
@@ -214,14 +257,18 @@ const menus = [
         id: 53,
         icon: 'exclamation-circle',
         key: '/reservation-service/airport-transfer',
-        components: ['airportTransfer']
+        components: [
+          {name: 'airportTransfer', path: '/reservation-service/airport-transfer'}
+        ]
       },
       {
         title: '预约上门打包',
         id: 54,
         icon: 'solution',
         key: '/reservation-service/appointment-info',
-        components: ['appointmentInfo']
+        components: [
+          {name: 'appointmentInfo', path: '/reservation-service/appointment-info'}
+        ]['appointmentInfo']
       },
       {
         title: '全球跑腿预订',
@@ -229,7 +276,10 @@ const menus = [
         icon: 'solution',
         testType: 'localTest',
         key: '/reservation-service/global-errands',
-        components: ['GlobalErrands','EditProgress']
+        components: [
+          {name: 'GlobalErrands', path: '/reservation-service/global-errands'},
+          {name: 'EditProgress', path: '/reservation-service/global-errands/edit-progress'}
+        ]
       }
     ]
   },
@@ -244,8 +294,12 @@ const menus = [
         id: 43,
         icon: 'database',
         key: '/commodities-manage/commodities-database',
-        components: ['commoditiesDataBase','commoditiesCreateAndEdit','commoditiesImgList']
-      },
+        components: [
+          {name: 'commoditiesDataBase', path: '/commodities-manage/commodities-database'},
+          {name: 'commoditiesCreateAndEdit', path: '/commodities-manage/commodities-database/create-and-edit'},
+          {name: 'commoditiesImgList', path: '/commodities-manage/commodities-database/commodities-img-list'}
+        ]
+      }
     ]
   },
   // 本地专用
@@ -261,7 +315,9 @@ const menus = [
         id: 44,
         icon: 'file-excel',
         key: '/developer-pages/import-excel',
-        components: ['importExcel']
+        components: [
+          {name: 'importExcel', path: '/developer-pages/import-excel'}
+        ]
       }
     ]
   }
