@@ -223,7 +223,7 @@ class EditProgress extends React.Component {
         <Modal centered
                closable={false}
                visible={addVisible}
-               wrapClassName="globalErrands"
+               wrapClassName="globalErrandsModal"
                destroyOnClose
                footer={[
                  <Button key="ok" type="primary" onClick={this.sureInfo.bind(this)} loading={btnLoading}>确定</Button>,
