@@ -22,6 +22,8 @@ class accounts extends React.Component {
       detailState: 'detail',
       // 角色选择项
       rolesOptions: [],
+      // 角色对应表
+      rolesObject: {},
       // 当前账户信息
       currentInfo: {},
     };
@@ -61,9 +63,12 @@ class accounts extends React.Component {
     this.ajax.post('/role/getRoleList', dataObj).then(r => {
       if (r.data.status === 10000) {
         this.getUserList();
-        let dataList = [];
-        for (let obj of r.data.data.list) dataList.push(<Option key={obj.roleId} value={obj.roleId}>{obj.roleName}</Option>)
-        this.setState({rolesOptions: dataList})
+        let dataList = [], dataObj = {};
+        for (let obj of r.data.data.list) {
+          dataList.push(<Option key={obj.roleId} value={obj.roleId}>{obj.roleName}</Option>);
+          dataObj[`${obj.roleId}`] = obj.roleName;
+        }
+        this.setState({rolesOptions: dataList,rolesObject:dataObj})
       }
       r.showError(message);
       this.setState({tableIsLoading: false});
@@ -134,7 +139,7 @@ class accounts extends React.Component {
         this.setState({showDetails: false});
         this.getUserList();
       }
-      r.showError(message);
+      r.showError();
     }).catch(r => {
       console.error(r);
       this.ajax.isReturnLogin(r,this);
@@ -150,7 +155,7 @@ class accounts extends React.Component {
         const dataObj = {
           userName: val.userName,
           roleId: val.roleId,
-          password: val.password ? val.password : '',
+          password: val.password ? val.password : null,
           email: val.email ? val.email.trim() : '',
           userPhone: val.userPhone ? val.userPhone.trim() : '',
           company: val.company ? val.company.trim() : '',
@@ -166,7 +171,7 @@ class accounts extends React.Component {
   }
 
   render() {
-    const { tableDataList, tableIsLoading, pageTotal, pageSize, pageNum, pageSizeOptions, detailState, showDetails, rolesOptions, currentInfo, } = this.state;
+    const { tableDataList, tableIsLoading, pageTotal, pageSize, pageNum, pageSizeOptions, detailState, showDetails, rolesOptions, currentInfo, rolesObject, } = this.state;
     const FormItem = Form.Item;
     const { getFieldDecorator } = this.props.form;
     const columns = [
@@ -174,7 +179,9 @@ class accounts extends React.Component {
       {title: '账户名称', dataIndex: 'userName', key: 'userName', width: 140},
       {title: '联系电话（通行证）', dataIndex: 'userPhone', key: 'userPhone', width: 140},
       {title: '邮箱', dataIndex: 'email', key: 'email', width: 200},
-      {title: '角色名称', dataIndex: 'roleName', key: 'roleName'},
+      {title: '角色名称', dataIndex: 'roleId', key: 'roleIdForName',
+        render: (text, record) => <div>{rolesObject[`${record.roleId}`]}</div>
+      },
       {title: '角色id', dataIndex: 'roleId', key: 'roleId', width: 80},
       {title: '操作', dataIndex: '操作', key: '操作', width: 250, fixed: 'right',
         render: (text, record) =>
