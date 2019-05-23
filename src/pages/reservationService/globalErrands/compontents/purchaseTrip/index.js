@@ -253,6 +253,7 @@ class PurchaseTrip extends React.Component {
         <Modal title="编辑该行程"
                visible={editVisible}
                closable={false}
+               wrapClassName="globalErrands"
                centered
                destroyOnClose
                okText={"保存"}
@@ -274,6 +275,7 @@ class PurchaseTrip extends React.Component {
         <Modal title="删除该行程"
                visible={deleteVisible}
                closable={false}
+               wrapClassName="globalErrands"
                centered
                destroyOnClose
                okText={"狠心删除"}

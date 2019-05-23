@@ -144,7 +144,7 @@ class EditProgress extends React.Component {
     fetch(window.apiUrl + "/legworkBackend/delLegworkSchedule", {
       method: "post",
       headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({id: this.state.deleteId})
+      body: JSON.stringify({id: this.state.deleteId,legworkId:window.getQueryString("id")})
     }).then(r => r.json()).then(res => {
       if (res.status === 10000) {
         message.success(res.msg)
@@ -223,6 +223,7 @@ class EditProgress extends React.Component {
         <Modal centered
                closable={false}
                visible={addVisible}
+               wrapClassName="globalErrands"
                destroyOnClose
                footer={[
                  <Button key="ok" type="primary" onClick={this.sureInfo.bind(this)} loading={btnLoading}>确定</Button>,
@@ -253,6 +254,7 @@ class EditProgress extends React.Component {
                closable={false}
                visible={deleteVisible}
                destroyOnClose
+               wrapClassName="globalErrands"
                onOk={this.deleteOk.bind(this)}
                onCancel={() => {
                  this.setState({deleteVisible: false, deleteId: null})

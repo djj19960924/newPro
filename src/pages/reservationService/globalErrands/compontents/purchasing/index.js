@@ -186,6 +186,7 @@ class WaitPurchasing extends React.Component {
         <Modal title="请确认"
                centered
                destroyOnClose
+               wrapClassName="globalErrands"
                visible={endVisible}
                closable={false}
                footer={[
