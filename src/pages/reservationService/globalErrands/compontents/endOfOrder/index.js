@@ -9,8 +9,8 @@ class EndOfOrder extends React.Component {
 
     this.state = {
       pageNum: 1,
-      pageSize: 2,
-      pageSizeOptions: ["2","3", "4", "5"],
+      pageSize: 50,
+      pageSizeOptions:["50","100","500","1000"],
       dataSource: [],
       tableLoading: false
     };

@@ -11,8 +11,8 @@ class WaitPurchasing extends React.Component {
       //订单总量
       orderTotal: 0,
       pageNum: 1,
-      pageSize: 1,
-      pageSizeOptions:["1","2","3","4"],
+      pageSize: 50,
+      pageSizeOptions:["50","100","500","1000"],
       //表格数据
       dataSource: [],
       //表格加载loading
