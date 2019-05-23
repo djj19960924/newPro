@@ -20,6 +20,7 @@ const menus = [
         id: 15,
         icon: 'lock',
         key: '/users/permissions',
+        testType: 'localTest',
         components: [
           {name: 'permissions', path: '/users/permissions'}
         ]
@@ -29,6 +30,7 @@ const menus = [
         id: 10,
         icon: 'solution',
         key: '/users/roles',
+        testType: 'localTest',
         components: [
           {name: 'roles', path: '/users/roles'}
         ]
@@ -38,6 +40,7 @@ const menus = [
         id: 2,
         icon: 'team',
         key: '/users/accounts',
+        testType: 'localTest',
         components: [
           {name: 'accounts', path: '/users/accounts'}
         ]
@@ -268,14 +271,14 @@ const menus = [
         key: '/reservation-service/appointment-info',
         components: [
           {name: 'appointmentInfo', path: '/reservation-service/appointment-info'}
-        ]['appointmentInfo']
+        ]
       },
       {
         title: '全球跑腿预订',
         id: 55,
         icon: 'solution',
-        testType: 'localTest',
         key: '/reservation-service/global-errands',
+        testType: 'localTest',
         components: [
           {name: 'GlobalErrands', path: '/reservation-service/global-errands'},
           {name: 'EditProgress', path: '/reservation-service/global-errands/edit-progress'}
@@ -307,14 +310,15 @@ const menus = [
     title: '开发人员专用',
     id: 42,
     icon: 'like',
-    testType: 'localTest',
     key: '/developer-pages',
+    testType: 'localTest',
     subs: [
       {
         title: '导入excel',
         id: 44,
         icon: 'file-excel',
         key: '/developer-pages/import-excel',
+        testType: 'localTest',
         components: [
           {name: 'importExcel', path: '/developer-pages/import-excel'}
         ]
