@@ -233,7 +233,7 @@ class PurchaseTrip extends React.Component {
           <div>
             <Button type="primary"
                     onClick={this.editTrip.bind(this, record.id, record.purchaseAddress, record.startingTime, record.endTime)}>编辑</Button>
-            <Button type="danger"
+            <Button type="danger" disabled={!record.purchaseAddress}
                     onClick={this.deleteTrip.bind(this, record.id, record.purchaseAddress, record.startingTime, record.endTime)}
                     style={{"marginLeft": 10}}>删除</Button>
           </div>
@@ -253,7 +253,7 @@ class PurchaseTrip extends React.Component {
         <Modal title="编辑该行程"
                visible={editVisible}
                closable={false}
-               wrapClassName="globalErrandsModal"
+               wrapClassName="globalErrandsModal-trip"
                centered
                destroyOnClose
                okText={"保存"}
@@ -275,7 +275,7 @@ class PurchaseTrip extends React.Component {
         <Modal title="删除该行程"
                visible={deleteVisible}
                closable={false}
-               wrapClassName="globalErrandsModal"
+               wrapClassName="globalErrandsModal-trip"
                centered
                destroyOnClose
                okText={"狠心删除"}

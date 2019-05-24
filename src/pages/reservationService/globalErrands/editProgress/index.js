@@ -223,7 +223,7 @@ class EditProgress extends React.Component {
         <Modal centered
                closable={false}
                visible={addVisible}
-               wrapClassName="globalErrandsModal"
+               wrapClassName="globalErrandsModal-edit"
                destroyOnClose
                footer={[
                  <Button key="ok" type="primary" onClick={this.sureInfo.bind(this)} loading={btnLoading}>确定</Button>,
@@ -254,7 +254,7 @@ class EditProgress extends React.Component {
                closable={false}
                visible={deleteVisible}
                destroyOnClose
-               wrapClassName="globalErrands"
+               wrapClassName="globalErrandsModal-edit"
                onOk={this.deleteOk.bind(this)}
                onCancel={() => {
                  this.setState({deleteVisible: false, deleteId: null})
