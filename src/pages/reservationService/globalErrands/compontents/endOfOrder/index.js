@@ -46,9 +46,10 @@ class EndOfOrder extends React.Component {
           }
         } else if (res.status === 10004) {
           message.warn(res.msg);
-          this.setState({dataSource: res.data.list,orderTotal:0});
+          this.setState({dataSource: [],orderTotal:0});
         } else {
           message.error(res.msg);
+          this.setState({dataSource: [],orderTotal:0});
         }
       }
     ).catch(r => {
