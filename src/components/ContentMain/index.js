@@ -151,7 +151,7 @@ class ContentMain extends React.Component {
           {/*服务预定管理*/}
           <Route exact path="/reservation-service/airport-transfer" component={airportTransfer}/>
           <Route exact path="/reservation-service/appointment-info" component={appointmentInfo}/>
-          {this.judgeIsShow('localTest') && <Route exact path="/reservation-service/global-errands" component={GlobalErrands}/>}
+          <Route exact path="/reservation-service/global-errands" component={GlobalErrands}/>}
           <Route exact path="/reservation-service/global-errands/edit-progress" component={EditProgress}/>
           {/*商品管理*/}
           <Route exact path="/commodities-manage/commodities-database"
