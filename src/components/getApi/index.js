@@ -9,11 +9,11 @@ import { message } from 'antd';
 
 class Ajax {
   name = 'Ajax';
-  version = 'V0.1 - test';
+  version = 'V1.0';
   info = '这是基于原生ajax功能所扩展的ajax工具, 可以更加快捷方便的调用ajax, 并且可以根据环境灵活改变内部配置.';
   headers = {};
   // origin = window.fandianUrl;
-  // origin = '//192.168.31.60:8088';
+  // origin = '//192.168.31.60:8000';
   origin = '//47.98.221.129:8088/quanhai';
 
   // 注入公共配置
