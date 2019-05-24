@@ -9,9 +9,11 @@ import { message } from 'antd';
 
 class Ajax {
   name = 'Ajax';
-  version = 'V1.0';
+  version = 'V1.1';
   info = '这是基于原生ajax功能所扩展的ajax工具, 可以更加快捷方便的调用ajax, 并且可以根据环境灵活改变内部配置.';
-  headers = {};
+  headers = {
+    'Content-Type': 'application/json'
+  };
   // origin = window.fandianUrl;
   // origin = '//192.168.31.60:8000';
   origin = '//47.98.221.129:8088/quanhai';
@@ -28,7 +30,7 @@ class Ajax {
   }
 
   // promise方法
-  promise(request,data) {
+  promise(request,data,originType) {
     return new Promise((resolve, reject) => {
       // 当接口调取状态变更时触发
       request.onreadystatechange = () => {
@@ -49,20 +51,24 @@ class Ajax {
         console.log(request)
       };
       // 开始发送请求
-      request.send(JSON.stringify(data));
+      if (data) {
+        if (originType) {
+          request.send(data)
+        } else {
+          request.send(JSON.stringify(data))
+        }
+      }
     })
   }
 
   // post方法
-  post(path,data,headers) {
+  post(path,data,headers,originType) {
     let request = new XMLHttpRequest();
     // 开启 request 对象, 指定 post 方法, 输入 url
     request.open('POST', `${this.origin}${path}`, true);
     // 注入公共配置
     this.injectMethod(request,headers);
-    // 强制设置 Content-Type, 无视 headers 内部
-    request.setRequestHeader('Content-Type','application/json');
-    return this.promise(request,data);
+    return this.promise(request,data,originType);
   }
 
   // get方法
@@ -71,7 +77,7 @@ class Ajax {
     // 开启 request 对象, 指定 get 方法, 输入 url
     request.open('GET', `${this.origin}${path}?${string}`, true);
     // 注入公共配置
-    this.injectMethod(request,headers);
+    this.injectMethod(request,headers,'get');
     return this.promise(request);
   }
 
