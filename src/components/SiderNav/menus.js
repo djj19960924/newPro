@@ -278,7 +278,6 @@ const menus = [
         id: 55,
         icon: 'solution',
         key: '/reservation-service/global-errands',
-        testType: 'localTest',
         components: [
           {name: 'GlobalErrands', path: '/reservation-service/global-errands'},
           {name: 'EditProgress', path: '/reservation-service/global-errands/edit-progress'}
