@@ -187,13 +187,14 @@ class commoditiesDataBase extends React.Component {
             price = excelDataListOrigin[i].成本价,
             name = excelDataListOrigin[i].商品名称,
             brand = excelDataListOrigin[i].品牌,
+            specificationType = excelDataListOrigin[i].商品规格,
             netWeight = excelDataListOrigin[i].净重,
             grossWeight = excelDataListOrigin[i].毛重,
             purchaseArea = Country[excelDataListOrigin[i].原产国];
           if (!code || !price) {
             errorList.push({
               Num: parseInt(i),
-              errValue: `${!code ? `商品货号 ` : ``}${!code ? '商品名称 ' : ''}${!code ? '品牌 ' : ''}${!code ? '净重 ' : ''}${!code ? '毛重 ' : ''}${!code ? '原产国 ' : ''}${!price ? `成本价` : ``}`,
+              errValue: `${!code ? `商品货号 ` : ``}${!name ? '商品名称 ' : ''}${!brand ? '品牌 ' : ''}${!netWeight ? '净重 ' : ''}${!grossWeight ? '毛重 ' : ''}${!purchaseArea ? '原产国 ' : ''}${!price ? `成本价` : ``}${!specificationType ? '商品规格' : ''}`,
             })
           } else {
             excelDataList.push({
@@ -205,6 +206,7 @@ class commoditiesDataBase extends React.Component {
               netWeight: netWeight,
               grossWeight: grossWeight,
               purchaseArea: purchaseArea,
+              specificationType: specificationType
             });
           }
         }
@@ -394,6 +396,7 @@ class commoditiesDataBase extends React.Component {
           netWeight: excelDataList[Num].netWeight,
           grossWeight: excelDataList[Num].grossWeight,
           purchaseArea: excelDataList[Num].purchaseArea,
+          specificationType: excelDataList[Num].specificationType
         })
       }).then(r => r.json()).then(r => {
         if (r.status) {
