@@ -1,6 +1,7 @@
 import React from "react";
 import {Table, Button, message, Modal,Pagination,Input} from "antd";
 import moment from "moment";
+import XLSX from 'xlsx';
 import "./index.less";
 
 class WaitPurchasing extends React.Component {
@@ -112,6 +113,12 @@ class WaitPurchasing extends React.Component {
       this.getOrderInfo(pageNum,pageSize);
     })
   }
+  //导出
+  exportInfo (){
+    let elt = document.getElementById('exportTable');
+    let wb = XLSX.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
+    XLSX.writeFile(wb, `采购信息 ${moment(new Date()).format('YYYY-MM-DD_HH.mm.ss')}.xlsx`);
+  }
   render() {
     const columns = [
       {
@@ -162,11 +169,44 @@ class WaitPurchasing extends React.Component {
         width: 150
       }
     ];
+    const exportColumns = [
+      {
+        title: "预订时间",
+        dataIndex: "createTime",
+        key: "createTime",
+        width: 150,
+        render: (text, record) => (
+          <div>{moment(record.createTime).format("YYYY-MM-DD HH:mm:ss")}</div>
+        )
+      },
+      {
+        title: "微信号",
+        dataIndex: "wechatNo",
+        key: "wechatNo",
+        width: 150
+      },
+      {
+        title: "商品内容",
+        dataIndex: "productName",
+        key: "productName",
+        width: 150
+      }
+    ];
     const {dataSource, tableLoading, endVisible,pageNum,pageSize,pageSizeOptions,orderTotal} = this.state;
     const Search=Input.Search;
     return (
       <div className="wait-purchasing">
+        <Button type={"primary"} disabled={dataSource.length===0} style={{"marginLeft":10}} onClick={this.exportInfo.bind(this)} >导出等待采购信息</Button>
         <Search  className="searchInput" placeholder="输入关键字搜索"  onSearch={value => {this.getOrderInfo(undefined,undefined,value);this.setState({searchParm:value})}} />
+        {/*导出*/}
+        <Table id="exportTable"
+               bordered
+               columns={exportColumns}
+               dataSource={dataSource}
+               pagination={false}
+               style={{display:`none`}}
+               rowKey={(record, index) => `${record.id}`}
+        />
         <Table bordered
                columns={columns}
                dataSource={dataSource}
