@@ -38,32 +38,40 @@ class appointmentTeamManage extends React.Component {
     this.getAppointmentByStatus()
   }
   // 搜索预约信息
-  getAppointmentByStatus() {
-    const { appointmentStatus, pageNum, pageSize } = this.state;
+  getAppointmentByStatus(status = this.state.appointmentStatus,pageNum = this.state.pageNum, pageSize = this.state.pageSize) {
     this.setState({tableIsLoading: true});
-    if (appointmentStatus === 4) {
-      this.ajax.post('/AppointmentMangement/getMassNoByMallName').then(r => {
-        if (r.data.status === 10000) {
-          const data = r.data.data;
-          let dataObj = {};
-          for (let n in data) dataObj[`input_${n}`] = data[n].massNo;
-          this.setState({
-            dataList: data,
-            inputValue: dataObj,
-          })
+    if (status === 4) {
+      fetch(`${window.fandianUrl}/AppointmentMangement/getMassNoByMallName`,{
+        method: `POST`
+      }).then(r => r.json()).then(r => {
+        if (!r.msg && !r.data) {
+          message.error(`后端数据错误`)
+        } else {
+          if (r.status === 10000) {
+            let dataObj = {};
+            for (let n in r.data) dataObj[`input_${n}`] = r.data[n].massNo;
+            this.setState({
+              dataList: r.data,
+              inputValue: dataObj,
+            })
+          } else {
+            if (r.status) {
+              message.error(`${r.msg} 错误码: ${r.status}`)
+            } else {
+              message.error(`后端数据错误`)
+            }
+          }
         }
         this.setState({tableIsLoading: false});
-        r.showError();
-      }).catch(r => {
-        console.error(r);
+      }).catch(()=>{
+        message.error(`前端接口调取出错`);
         this.setState({tableIsLoading: false});
-        this.ajax.isReturnLogin(r,this);
-      });
+      })
     } else {
       fetch(`${window.fandianUrl}/AppointmentMangement/getAppointmentByStatus`,{
         method: `POST`,
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: `status=${appointmentStatus}&pageNum=${pageNum}&pageSize=${pageSize}`
+        body: `status=${status}&pageNum=${pageNum}&pageSize=${pageSize}`
       }).then(r => r.json()).then(r => {
         if (!r.msg && !r.data) {
           message.error(`后端数据错误`)
@@ -94,26 +102,40 @@ class appointmentTeamManage extends React.Component {
       });
     }
   }
+  // 打开图片弹窗
+  openPreview(url) {
+    this.setState({
+      previewVisible: true,
+      previewImage: url,
+    })
+  }
   // 切换编辑
   toggleEdit(v,b) {
     const { showEdit, } = this.state;
     let dataObj = {};
-    for (let n in showEdit) dataObj[n] = false;
+    for (let n in showEdit) {
+      dataObj[n] = false;
+    }
     dataObj[`editRow_${v}`] = b;
     this.setState({showEdit: dataObj},()=>{
       // 当切换为 input 输入框时, 自动对焦, 使焦点锁定当前所打开的 input 框,
       // 从而使 input 失去焦点时, 可以恢复为其他显示方式
       let item = document.querySelector(`.input_${v}`);
-      if (!!item) item.focus();
+      if (!!item) {
+        // toggle 为双向绑定, 当关闭 input 时, 无需强制对焦
+        item.focus();
+      }
     })
   }
   // 失去焦点
   loseBlur(v,b) {
-    const { inputValue } = this.state;
+    const { inputValue, } = this.state;
     // 当输入框有值时, 默认无法直接在失去焦点时关闭输入框, 以防误操作
     // 阻止在失去焦点时, 强制刷新页面, 以防无法点击保存按钮
     // 这里逻辑无法将团号值置空
-    if (!inputValue[`input_${v}`]) this.toggleEdit(v,b);
+    if (!inputValue[`input_${v}`]) {
+      this.toggleEdit(v,b);
+    }
   }
   // 更改团号
   submitMassNo(i,v,momentDate,Date) {
@@ -122,35 +144,56 @@ class appointmentTeamManage extends React.Component {
       if (appointmentStatus === 4) {
         let dataObj = {mallName: v,};
         // 如果由日期选择插件调用, 则会带入Date参数, 以此为依据判断修改 massNo 还是 deadline
-        if (!!Date) {
-          dataObj.deadline = Date
-        } else {
-          dataObj.massNo = inputValue[`input_${i}`]
-        }
-        this.ajax.post('/AppointmentMangement/editMassNoByMallName',dataObj).then(r => {
-          if (r.data.status === 10000) {
-            message.success(r.data.data);
-            this.getAppointmentByStatus();
-            this.toggleEdit(i, false);
+        if (!!Date) { dataObj.deadline = Date
+        } else { dataObj.massNo = inputValue[`input_${i}`] }
+        fetch(`${window.fandianUrl}/AppointmentMangement/editMassNoByMallName`, {
+          method: `POST`,
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(dataObj)
+        }).then(r => r.json()).then(r => {
+          // console.log(r);
+          if (!r.msg && !r.data) {
+            message.error(`后端数据错误`)
+          } else {
+            if (r.status === 10000) {
+              message.success(r.data);
+              this.getAppointmentByStatus();
+              this.toggleEdit(i, false);
+            } else {
+              if (r.status) {
+                message.error(`${r.msg} 错误码: ${r.status}`)
+              } else {
+                message.error(`后端数据错误`)
+              }
+            }
           }
-          r.showError();
-        }).catch(r => {
-          console.error(r);
-          this.ajax.isReturnLogin(r,this);
-        });
+        }).catch(()=>{
+          message.error(`接口调取失败`)
+        })
       } else {
-        const dataObj = {id:v,massNo:inputValue[`input_${i}`]};
-        this.ajax.post('/AppointmentMangement/editMassNoById',dataObj).then(r => {
-          if (r.data.status === 10000) {
-            message.success(r.data.data);
-            this.getAppointmentByStatus();
-            this.toggleEdit(i, false);
+        fetch(`${window.fandianUrl}/AppointmentMangement/editMassNoById`, {
+          method: `POST`,
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({id:v,massNo:inputValue[`input_${i}`]})
+        }).then(r => r.json()).then(r => {
+          if (!r.msg && !r.data) {
+            message.error(`后端数据错误`)
+          } else {
+            if (r.status === 10000) {
+              message.success(r.data);
+              this.getAppointmentByStatus();
+              this.toggleEdit(i, false);
+            } else {
+              if (r.status) {
+                message.error(`${r.msg} 错误码: ${r.status}`)
+              } else {
+                message.error(`后端数据错误`)
+              }
+            }
           }
-          r.showError();
-        }).catch(r => {
-          console.error(r);
-          this.ajax.isReturnLogin(r,this);
-        });
+        }).catch(()=>{
+          message.error(`接口调取失败`)
+        })
       }
     } else {
       // 理论上说, 当对应的 inputValue 为空时, 无法点击进入该事件
@@ -182,7 +225,7 @@ class appointmentTeamManage extends React.Component {
       this.getAppointmentByStatus();
     })
   }
-  // 显示驳回modal
+  //显示驳回modal
   rejectRegiment (id){
     this.setState({rejectVisible:true,rejectId:id});
   }
@@ -195,16 +238,24 @@ class appointmentTeamManage extends React.Component {
   }
   // 驳回用户的预约挂团数据
   apointmentToRejected(id) {
-    this.ajax.post('/AppointmentMangement/apointmentToRejected',{id: id}).then(r => {
-      if (r.data.status === 10000) {
-        message.success(`${r.data.msg}`);
-        this.getAppointmentByStatus();
+    fetch(`${window.fandianUrl}/AppointmentMangement/apointmentToRejected`, {
+      method: `POST`,
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({id: id})
+    }).then(r => r.json()).then(r => {
+      if (!r.msg && !r.data) {
+        message.error(`后端数据错误`)
+      } else {
+        if (r.status === 10000) {
+          message.success(`${r.msg}`);
+          this.getAppointmentByStatus();
+        } else {
+          message.error(`${r.msg} 错误码: ${r.status}`)
+        }
       }
-      r.showError();
-    }).catch(r => {
-      console.error(r);
-      this.ajax.isReturnLogin(r,this);
-    });
+    }).catch(()=>{
+      message.error(`前端接口调取失败`)
+    })
   }
   // 发送申请
   submitAppointment() {
@@ -226,49 +277,29 @@ class appointmentTeamManage extends React.Component {
       let wb = XLSX.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
       XLSX.writeFile(wb, `预约挂团 ${moment(new Date()).format('YYYY-MM-DD_HH.mm.ss')}.xlsx`);
 
-      const data = {
-        appointmentList:dataList,
-        appointmentIdList: idList
-      };
-      this.ajax.post('/AppointmentMangement/sendAppointmentInselected',data).then(r => {
-        if (r.data.status === 10000) {
-          message.success(`${r.data.data}`);
+      fetch(`${window.fandianUrl}/AppointmentMangement/sendAppointmentInselected`, {
+        method: `POST`,
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({appointmentList:dataList,appointmentIdList: idList})
+      }).then(r => r.json()).then(r => {
+        // console.log(r)
+        if (r.status === 10000) {
+          message.success(`${r.data}`);
           this.getAppointmentByStatus();
+          this.setState({isLoading: false})
+        } else {
+          if (r.status) {
+            message.error(`${r.msg} 错误码: ${r.status}`)
+          } else {
+            message.error(`后端数据错误`)
+          }
         }
-        this.setState({isLoading: false});
-        r.showError();
-      }).catch(r => {
-        console.error(r);
-        this.setState({isLoading: false});
-        this.ajax.isReturnLogin(r,this);
-      });
+      }).catch(()=>{
+        message.error(`接口调取失败`)
+      })
     } else {
       message.error(`至少选择一列`)
     }
-  }
-  // 展示详细信息
-  showDetail(record) {
-    Modal.info({
-      title: '用户详情',
-      icon: 'user',
-      content: <div>
-        <div><div className="label">出生年月日: </div>{record.birthday}</div>
-        <div><div className="label">国籍: </div>{record.nationality}</div>
-        <div><div className="label">护照号码: </div>{record.passportNum}</div>
-        <div><div className="label">性别: </div>{record.sex === 0 ? "男" :(record.sex === 1 ? "女" : "")}</div>
-        <div><div className="label">护照到期日: </div>{record.maturityDate}</div>
-        <div><div className="label">入店日期: </div>{record.arrivalDate}</div>
-        <div><div className="label">出境日期: </div>{record.outboundDate}</div>
-        <div><div className="label">出境时间: </div>{record.outboundDatetime}</div>
-        <div><div className="label">航班号: </div>{record.flightNo}</div>
-        <div><div className="label">机场: </div>{record.airportTerminal}</div>
-      </div>,
-      maskClosable: true,
-      autoFocusButton: 'ok',
-      okText: '确定',
-      okType: 'default',
-      className: 'appointmentTeamManageUserDetail'
-    });
   }
 
   render() {
@@ -277,40 +308,39 @@ class appointmentTeamManage extends React.Component {
     // 表单头
     const columnsNoMassNo = [
       {title: '提交时间', dataIndex: 'createTime', key: 'createTime', width: 180,
-        render: (text)=>(
-          <div>{text ? moment(text).format('YYYY-MM-DD HH:mm:ss') : ''}</div>
+        render: (text,record)=>(
+          <p>{moment(text).format('YYYY-MM-DD HH:mm:ss')}</p>
           )
       },
+
       {title: '姓名', dataIndex: 'passportName', key: 'passportName', width: 180},
-      // {title: '出生年月日', dataIndex: 'birthday', key: 'birthday', width: 120,},
-      // {title: '国籍', dataIndex: 'nationality', key: 'nationality', width: 120},
-      // {title: '护照号码', dataIndex: 'passportNum', key: 'passportNum', width: 160},
-      {title: '信息详情', dataIndex: 'passportInfo', key: 'passportInfo', width: 120,
+      {title: '出生年月日', dataIndex: 'birthday', key: 'birthday', width: 200,},
+      {title: '国籍', dataIndex: 'nationality', key: 'nationality', width: 100},
+      {title: '护照号码', dataIndex: 'passportNum', key: 'passportNum', width: 140},
+      {title: '性别', dataIndex: 'sex', key: 'sex', width: 100,
         render: (text, record) => (
-          <div>
-            <Button type="default"
-                    onClick={this.showDetail.bind(this,record)}
-            >详情</Button>
-          </div>
-        )
+          <p>
+            {text==0 ? "男" :(text ==1 ? "女" : "")}
+          {/*<Button type="default"*/}
+                  {/*onClick={this.openPreview.bind(this,record.passport)}*/}
+          {/*>点击查看</Button>*/}
+          </p>
+        ),
       },
-      // {title: '性别', dataIndex: 'sex', key: 'sex', width: 80,
-      //   render: (text) => (
-      //     <div>{text === 0 ? "男" :(text === 1 ? "女" : "")}</div>
-      //   ),
-      // },
-      // {title: '护照到期日', dataIndex: 'maturityDate', key: 'maturityDate', width: 240},
-      {title: '入店日期', dataIndex: 'arrivalDate', key: 'arrivalDate', width: 120},
-      // {title: '出境日期', dataIndex: 'outboundDate', key: 'outboundDate', width: 240},
-      // {title: '出境时间', dataIndex: 'outboundDatetime', key: 'outboundDatetime', width: 180},
-      // {title: '航班号', dataIndex: 'flightNo', key: 'flightNo', width: 160,},
-      // {title: '机场', dataIndex: 'airportTerminal', key: 'airportTerminal', width: 160,},
-      {title: '商场', dataIndex: 'mallName', key: 'mallName'},
+      {title: '护照到期日', dataIndex: 'maturityDate', key: 'maturityDate', width: 240},
+      {title: '入店日期', dataIndex: 'arrivalDate', key: 'arrivalDate', width: 240},
+      {title: '出境日期', dataIndex: 'outboundDate', key: 'outboundDate', width: 240},
+      {title: '出境时间', dataIndex: 'outboundDatetime', key: 'outboundDatetime', width: 180},
+      {title: '航班号', dataIndex: 'flightNo', key: 'flightNo', width: 160,},
+      {title: '机场', dataIndex: 'airportTerminal', key: 'airportTerminal', width: 160,},
+      {title: '商场', dataIndex: 'mallName', key: 'mallName', width: 250},
     ];
     const columns = [];
-    for (let v of columnsNoMassNo) columns.push(v);
+    for (let v of columnsNoMassNo) {
+      columns.push(v)
+    }
     columns.push(
-      {title: '团号', dataIndex: 'massNo', key: 'massNo', width: 340,
+      {title: '团号', dataIndex: 'massNo', key: 'massNo',
         render: (text, record, index) => (
           <div>
             {showEdit[`editRow_${index}`] ? <div className="editMassNo">
@@ -368,7 +398,8 @@ class appointmentTeamManage extends React.Component {
           </div>
         )
       },
-      {title: '失效时间', dataIndex: 'date', key: 'date', width: 160,
+      {
+        title: '失效时间', dataIndex: 'date', key: 'date', width: 160,
         render: (text, record, index) => (
           <div>
             <DatePicker style={{width: 130}}
@@ -429,9 +460,8 @@ class appointmentTeamManage extends React.Component {
         {/*这里给出表单和分页最大宽度, 防止 table 过宽*/}
         <div className="main"
              style={{maxWidth: (appointmentStatus === 4 ? 660
-                 : (appointmentStatus === 1 ? 1250
-                  : (appointmentStatus === 2 ? 1250
-                     : 1150)))}}
+                 : (appointmentStatus === 1 ? 1350
+                   : 1250))}}
         >
           {/*导出用表单*/}
           <Table className="tableListForExport"
@@ -445,20 +475,17 @@ class appointmentTeamManage extends React.Component {
           {/*表单主体*/}
           <Table className="tableList"
                  dataSource={dataList}
-                 columns={(appointmentStatus === 0 ?
-                   columnsNoMassNo.concat(columnsAdd)
-                   : (appointmentStatus === 3 ?
-                     columnsNoMassNo
-                     : ( appointmentStatus === 4 ?
-                       columnsMallMassNo
-                       :  columns )))}
+                 columns={(appointmentStatus === 0 ? columnsNoMassNo.concat(columnsAdd) :(appointmentStatus === 3 ?
+                   columnsNoMassNo
+                   : ( appointmentStatus === 4 ?
+                     columnsMallMassNo
+                     :  columns )))}
                  pagination={false}
                  loading={tableIsLoading}
                  bordered
                  scroll={{ y: 540, x: (appointmentStatus === 4 ? 560
-                     : (appointmentStatus === 1 ? 1150
-                       : (appointmentStatus === 2 ? 1150
-                         : 950)))}}
+                     : (appointmentStatus === 1 ? 1300
+                       : 1150))}}
                  rowKey={(record, index) => `${record.id}`}
                  rowSelection={appointmentStatus === 0 ? {
                    selectedRowKeys: selectedIds,
