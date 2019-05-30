@@ -221,7 +221,8 @@ class awaitingExamine extends React.Component {
           currentTicketId: 0,
           ticketTotal: r.data.pageInfo.total,
           rejectVisible: false,
-          reasonId: null
+          reasonId: null,
+          rejectSpecificReason: null
         });
       } else {
         if (r.retcode) {
@@ -394,7 +395,8 @@ class awaitingExamine extends React.Component {
         currentTicketId: the.currentTicketId + 1,
         // 清空驳回列表
         rejectVisible: false,
-        reasonId: null
+        reasonId: null,
+        rejectSpecificReason: null
       });
     }
     // 将汇率修正为成功提交的数值
@@ -649,11 +651,14 @@ class awaitingExamine extends React.Component {
                  this.openNotification.bind(this)
                }
                onCancel={() => {
-                 this.setState({rejectVisible: false})
+                 this.setState({rejectVisible: false,rejectSpecificReason: null,reasonId: null});
                }}>
           <RadioGroup className='allReasons'
                       onChange={(e) => {
                         this.setState({reasonId: e.target.value});
+                        if(e.target.value!==3){
+                          this.setState({rejectSpecificReason: null})
+                        }
                       }}
                       value={reasonId}
           >
