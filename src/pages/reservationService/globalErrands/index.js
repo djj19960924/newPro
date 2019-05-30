@@ -15,12 +15,17 @@ class GlobalErrands extends React.Component {
 
   }
 
+  componentWillMount() {
+    if(window.getQueryString("contentType")!==null) {
+      this.setState({contentType: window.getQueryString("contentType")})
+    }
+  }
+
   render() {
     const {contentType}=this.state;
-    const Search=Input.Search;
     return (
       <div className="globalErrands">
-        <Radio.Group defaultValue="0"  buttonStyle="solid" onChange={(e)=>{this.setState({contentType:e.target.value})}} className="menu-selection">
+        <Radio.Group defaultValue={contentType}  buttonStyle="solid" onChange={(e)=>{this.props.history.push("/reservation-service/global-errands?contentType="+e.target.value);this.setState({contentType:e.target.value})}} className="menu-selection">
           <Radio.Button value="0" >等待采购</Radio.Button>
           <Radio.Button value="1" >订单完结</Radio.Button>
           <Radio.Button value="2" >采购行程</Radio.Button>
