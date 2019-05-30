@@ -1,15 +1,13 @@
 import React from 'react';
-import {withRouter, Switch, Route,} from 'react-router-dom';
+import {Route, Switch, withRouter} from 'react-router-dom';
+import {inject, observer} from 'mobx-react';
 // 这里引用各个组件内容, 内容为方便管理, 统一写入pages页面
 // 主页
 import Home from '@pages/Home/';
-
 // 404页面
 import page404 from '@pages/system/page404/'
-
 // 开发人员专用调试
 import importExcel from '@pages/developerPages/importExcel/';
-
 // 权限管理
 // 角色管理
 import roles from '@pages/users/roles/';
@@ -17,8 +15,6 @@ import roles from '@pages/users/roles/';
 import accounts from '@pages/users/accounts/';
 // 权限列表
 import permissions from '@pages/users/permissions/';
-
-
 // 物流管理
 // bc清关
 // bc商品打包
@@ -29,25 +25,21 @@ import customerLogin from "@pages/logisticsManage/BC_customsClearance/commoditie
 import YTO from "@pages/logisticsManage/BC_customsClearance/YTO/";
 // bc推单
 import BCUploadOrder from "@pages/logisticsManage/BC_customsClearance/uploadOrder/";
-
 // ETK订单
 // 已匹配
 import orderMatched from '@pages/logisticsManage/ETK/matched/';
 // 未匹配
 import orderUnmatched from '@pages/logisticsManage/ETK/unmatched/';
-
 // 邮政订单
 // 已推送
 import orderPushed from '@pages/logisticsManage/postal/pushed/';
 // 未推送
 import orderNotPushed from '@pages/logisticsManage/postal/notPushed/';
-
 // 全球运转
 // 已收货
 import globalTranshipmentArrived from '@pages/logisticsManage/globalTranshipment/arrived/';
 // 未收货
 import globalTranshipmentNotArrived from '@pages/logisticsManage/globalTranshipment/notArrived/';
-
 // 预约
 // 预约接送机
 import airportTransfer from '@pages/reservationService/airportTransfer/';
@@ -75,99 +67,87 @@ import setRebate from '@pages/rebateManage/setRebate/';
 import countBillList from '@pages/rebateManage/countBillList/';
 // 挂团
 import appointmentTeamManage from '@pages/rebateManage/appointmentTeamManage/';
-
 // 商品管理
 // 商品数据库
 import commoditiesDataBase from '@pages/commoditiesManage/commoditiesDatabase/';
 import commoditiesCreateAndEdit from '@pages/commoditiesManage/commoditiesDatabase/commoditiesCreateAndEdit/';
 import commoditiesImgList from '@pages/commoditiesManage/commoditiesDatabase/commoditiesImgList/';
 
+import menus from "../SiderNav/menus";
 
+const componentsList = { Home, importExcel, roles, accounts, permissions, commoditiesPackaging, customerLogin, YTO, BCUploadOrder, orderMatched, orderUnmatched, orderPushed, orderNotPushed, globalTranshipmentArrived, globalTranshipmentNotArrived, airportTransfer, appointmentInfo, GlobalErrands, EditProgress, adoptExaminePaid, adoptExamineUnpaid, rejectExamine, updateQRCode, awaitingExamine, setRebate, countBillList, appointmentTeamManage, commoditiesDataBase, commoditiesCreateAndEdit, commoditiesImgList, };
 
 @withRouter
+// @inject('appStore') @observer
 class ContentMain extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      componentsList: null,
+      menusList: [],
+      routesList: [],
+      allowSideList: this.props.allowSideList
     };
+    // 解析components
+    for (let obj of menus) {
+      if (obj.components) {
+        this.state.menusList.push({components: obj.components, id: obj.id, testType: obj.testType})
+      } else {
+        for (let obj1 of obj.subs) {
+          if (obj1.components) {
+            this.state.menusList.push({components: obj1.components, id: obj1.id, testType: obj1.testType})
+          } else {
+            for (let obj2 of obj1.subs) this.state.menusList.push({components: obj2.components, id: obj2.id, testType: obj2.testType})
+          }
+        }
+      }
+    }
   }
 
   componentWillMount() {
-    const dataList = [];
-    this.setState({componentsList: dataList})
+    // 用于更新已处于登陆状态的用户刷新页面以后的路由组件信息
+    this.getNewRoutesList(this.props.allowSideList)
+    // this.getNewRoutesList()
   }
 
-  judgeIsShow(testType) {
-    if (window.testType === 'localTest') return true;
-    return window.testType === testType;
+  componentWillUpdate(nextProps, nextState, nextContext) {
+    // 这里兼容未添加 allowSideList 传参的情况
+    if (this.props.allowSideList) if (this.props.allowSideList.length !== nextProps.allowSideList.length) {
+      // console.warn('渲染了路由');
+      this.getNewRoutesList(nextProps.allowSideList);
+    }
+  }
+
+  getNewRoutesList(allowSideList) {
+    const dataList = [];
+    this.setState({pageLoading: true});
+    const { menusList } = this.state;
+    for (let obj of menusList) {
+      // 添加测试判断
+      if (obj.testType) if (obj.testType !== window.testType || obj.testType !== 'localTest') continue;
+      // 添加权限判断
+      // 这里兼容未添加 allowSideList 传参的情况
+      if (allowSideList) if (!allowSideList.includes(obj.id)) continue;
+      for (let obj1 of obj.components) dataList.push(<Route exact path={obj1.path} component={componentsList[obj1.name]} key={obj1.path}/>);
+    }
+    // 渲染层对 routesList 做出了判断, 被迫进行了和 setState 相同的功能
+    // 不直接使用 setState, 是因为该方法会在组件卸载时重复渲染, 造成内存负载, 会导致 react 报错
+    // this.setState({routesList: dataList})
+    this.state.routesList = dataList;
   }
 
   render() {
-    const { componentsList } = this.state;
+    const { routesList } = this.state;
     return (
       <div style={{backgroundColor: '#eee', width: '100%', height: '100%', padding: '10px'}}>
-        <Switch>
-          {/*放置循环路由*/}
-          {componentsList}
-
-          {/*首页*/}
-          <Route exact path="/" component={Home}/>
-
-          {/*权限管理*/}
-          {this.judgeIsShow('localTest') && <Route exact path="/users/roles" component={roles}/>}
-          {this.judgeIsShow('localTest') && <Route exact path="/users/accounts" component={accounts}/>}
-          {this.judgeIsShow('localTest') && <Route exact path="/users/permissions" component={permissions}/>}
-
-          {/*物流管理*/}
-          {/*bc清关*/}
-          <Route exact path="/logistics-manage/BC-customsClearance/commodities-packaging"
-                 component={commoditiesPackaging}/>
-          <Route exact path="/logistics-manage/BC-customsClearance/commodities-packaging/customer-login"
-                 component={customerLogin}/>
-          <Route exact path="/logistics-manage/BC-customsClearance/YTO" component={YTO}/>
-          <Route exact path="/logistics-manage/BC-customsClearance/upload-order" component={BCUploadOrder}/>
-          {/*ETK*/}
-          <Route exact path="/logistics-manage/ETK/unmatched" component={orderUnmatched}/>
-          <Route exact path="/logistics-manage/ETK/matched" component={orderMatched}/>
-          {/*邮政*/}
-          <Route exact path="/logistics-manage/postal/pushed/" component={orderPushed}/>
-          <Route exact path="/logistics-manage/postal/not-pushed/" component={orderNotPushed}/>
-          {/*全球运转*/}
-          <Route exact path="/logistics-manage/globalTranshipment/arrived" component={globalTranshipmentArrived}/>
-          <Route exact path="/logistics-manage/globalTranshipment/not-arrived"
-                 component={globalTranshipmentNotArrived}/>
-
-          {/*返点管理*/}
-          <Route exact path="/rebate-manage/awaiting-examine" component={awaitingExamine}/>
-          <Route exact path="/rebate-manage/adopt-examine-unpaid" component={adoptExamineUnpaid}/>
-          <Route exact path="/rebate-manage/adopt-examine-paid" component={adoptExaminePaid}/>
-          <Route exact path="/rebate-manage/reject-examine" component={rejectExamine}/>
-          <Route exact path="/rebate-manage/set-rebate" component={setRebate}/>
-          <Route exact path="/rebate-manage/count-bill-list" component={countBillList}/>
-          <Route exact path="/rebate-manage/appointment-team-manage" component={appointmentTeamManage}/>
-          <Route exact path="/rebate-manage/update-QR-code" component={updateQRCode}/>
-
-          {/*服务预定管理*/}
-          <Route exact path="/reservation-service/airport-transfer" component={airportTransfer}/>
-          <Route exact path="/reservation-service/appointment-info" component={appointmentInfo}/>
-          <Route exact path="/reservation-service/global-errands" component={GlobalErrands}/>}
-          <Route exact path="/reservation-service/global-errands/edit-progress" component={EditProgress}/>
-          {/*商品管理*/}
-          <Route exact path="/commodities-manage/commodities-database"
-                 component={commoditiesDataBase}/>
-          <Route exact path="/commodities-manage/commodities-database/create-and-edit"
-                 component={commoditiesCreateAndEdit}/>
-          <Route exact path="/commodities-manage/commodities-database/commodities-img-list"
-                 component={commoditiesImgList}/>
-
-          {/*开发人员专用测试路由*/}
-          {this.judgeIsShow('localTest') && <Route exact path="/developer-pages/import-excel" component={importExcel}/>}
-
-          {/*这里可以配置404 not found 页面*/}
-          <Route component={page404}/>
-
-        </Switch>
+        {/*这里只在 routesList 内部有数据时才渲染 Switch 标签, 以防渲染过程中出现 404*/}
+        {!!routesList.length &&
+          <Switch>
+            {/*放置循环路由*/}
+            {routesList}
+            {/*404*/}
+            <Route component={page404}/>
+          </Switch>
+        }
       </div>
     )
   }
