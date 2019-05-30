@@ -74,8 +74,9 @@ class Ajax {
   // get方法
   get(path,string,headers) {
     let request = new XMLHttpRequest();
+    const queryString = string ? `?${string}` : '';
     // 开启 request 对象, 指定 get 方法, 输入 url
-    request.open('GET', `${this.origin}${path}?${string}`, true);
+    request.open('GET', `${this.origin}${path}${queryString}`, true);
     // 注入公共配置
     this.injectMethod(request,headers,'get');
     return this.promise(request);
