@@ -31,8 +31,14 @@ class appointmentTeamManage extends React.Component {
       // input输入框
       inputValue: {},
       tableIsLoading: false,
+      // 护照图片base64地址
+      passportUrl: '',
+      // 用户详情弹窗
+      userInfoModal: false,
+      // 当前用户信息
+      currentInfo: {},
     };
-    // window.appointmentTeamManage = this;
+    window.appointmentTeamManage = this;
   }
   componentDidMount() {
     this.getAppointmentByStatus()
@@ -299,32 +305,21 @@ class appointmentTeamManage extends React.Component {
   }
   // 展示详细信息
   showDetail(record) {
-    Modal.info({
-      title: '用户详情',
-      icon: 'user',
-      content: <div>
-        <div><div className="label">出生年月日: </div>{record.birthday}</div>
-        <div><div className="label">国籍: </div>{record.nationality}</div>
-        <div><div className="label">护照号码: </div>{record.passportNum}</div>
-        <div><div className="label">性别: </div>{record.sex === 0 ? "男" :(record.sex === 1 ? "女" : "")}</div>
-        <div><div className="label">护照到期日: </div>{record.maturityDate}</div>
-        <div><div className="label">入店日期: </div>{record.arrivalDate}</div>
-        <div><div className="label">出境日期: </div>{record.outboundDate}</div>
-        <div><div className="label">出境时间: </div>{record.outboundDatetime}</div>
-        <div><div className="label">航班号: </div>{record.flightNo}</div>
-        <div><div className="label">机场: </div>{record.airportTerminal}</div>
-      </div>,
-      maskClosable: true,
-      autoFocusButton: 'ok',
-      okText: '确定',
-      okType: 'default',
-      className: 'appointmentTeamManageUserDetail'
+    this.setState({currentInfo:record,userInfoModal:true});
+    fetch(record.passport).then(r => r.blob()).then(r => {
+      // console.log(r);
+      let fileReader = new FileReader();
+      fileReader.onload = (e) => {
+        // console.log(e.target.result);
+        this.setState({passportUrl: e.target.result});
+      };
+      fileReader.readAsDataURL(r);
     });
   }
 
   render() {
     const RadioButton = Radio.Button, RadioGroup = Radio.Group;
-    const {dataList, pageTotal, pageSize, pageNum, pageSizeOptions, appointmentStatus, previewVisible, previewImage, showEdit, selectedIds, isLoading, inputValue, selectedList, tableIsLoading, } = this.state;
+    const {dataList, pageTotal, pageSize, pageNum, pageSizeOptions, appointmentStatus, previewVisible, previewImage, showEdit, selectedIds, isLoading, inputValue, selectedList, tableIsLoading, rejectVisible, userInfoModal, currentInfo, passportUrl} = this.state;
     // 表单头
     const columnsNoMassNo = [
       {title: '提交时间', dataIndex: 'createTime', key: 'createTime', width: 180,
@@ -458,10 +453,48 @@ class appointmentTeamManage extends React.Component {
           <RadioButton value={3}>已驳回团号</RadioButton>
           <RadioButton value={4}>编辑商场团号</RadioButton>
         </RadioGroup>
+        {/*详情弹窗*/}
+        <Modal title="用户信息"
+               wrapClassName="appointmentTeamManageUserDetail"
+               visible={userInfoModal}
+               onCancel={() => {
+                 this.setState({userInfoModal:false,},() => {
+                   // 优化关闭形式
+                   this.setState({currentInfo:{}, passportUrl: ''})
+                 })
+               }}
+               footer={<div><Button onClick={() => {
+                 this.setState({userInfoModal:false,},() => {
+                   // 优化关闭形式
+                   this.setState({currentInfo:{}, passportUrl: ''})
+                 })
+               }}>确定</Button></div>}
+        >
+          <div><div className="label">出生年月日: </div>{currentInfo.birthday}</div>
+          <div><div className="label">国籍: </div>{currentInfo.nationality}</div>
+          <div><div className="label">护照号码: </div>{currentInfo.passportNum}</div>
+          <div><div className="label">性别: </div>{currentInfo.sex === 0 ? "男" :(currentInfo.sex === 1 ? "女" : "")}</div>
+          <div><div className="label">护照到期日: </div>{currentInfo.maturityDate}</div>
+          <div><div className="label">入店日期: </div>{currentInfo.arrivalDate}</div>
+          <div><div className="label">出境日期: </div>{currentInfo.outboundDate}</div>
+          <div><div className="label">出境时间: </div>{currentInfo.outboundDatetime}</div>
+          <div><div className="label">航班号: </div>{currentInfo.flightNo}</div>
+          <div><div className="label">机场: </div>{currentInfo.airportTerminal}</div>
+          <div>
+            <Button href={passportUrl}
+                    download={
+                      currentInfo.passport ? `${currentInfo.passportNum}.${currentInfo.passport.split('.')[currentInfo.passport.split('.').length-1]}` : ''
+                    }
+                    loading={!passportUrl}
+                    style={{margin:10,float:'right'}}
+            >下载护照图片</Button>
+          </div>
+          <div><img src={passportUrl} alt=""/></div>
+        </Modal>
         {/*驳回*/}
         <Modal
           title="是否驳回"
-          visible={this.state.rejectVisible}
+          visible={rejectVisible}
           onOk={this.sureReject.bind(this)}
           onCancel={this.cancelReject.bind(this)}
         >
