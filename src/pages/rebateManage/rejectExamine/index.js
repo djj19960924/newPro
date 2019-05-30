@@ -1,5 +1,5 @@
 import React from 'react';
-import {Select, Table, message, Pagination, Button, Icon} from 'antd';
+import {Select, Table, message, Pagination, Button, Icon, Modal} from 'antd';
 import countryList from '@js/country/';
 import moment from 'moment';
 import './index.less';
@@ -27,11 +27,6 @@ class rejectExamine extends React.Component{
       dataSource: [],
       //商品名
       mallName: undefined,
-      //遮罩层
-      mask: 'unShow',
-      //小票图片
-      pictureUrl: '',
-      ticketUrl: 'unShow'
     };
   }
   componentDidMount() {
@@ -125,7 +120,21 @@ class rejectExamine extends React.Component{
   }
   //查看小票
   checkTicket(pictureUrl) {
-    this.setState({pictureUrl:pictureUrl,mask:'mask',ticketUrl:'ticketUrl'})
+    Modal.info({
+      title: '查看小票图片',
+      icon: 'picture',
+      okText: '确定',
+      okType: 'default',
+      maskClosable: true,
+      width: 500,
+      content: (
+        <div>
+          <img alt={null}
+               style={{width:'100%'}}
+               src={pictureUrl} />
+        </div>
+      )
+    });
   }
   //取消小票图片 遮罩层
   removeMask() {
