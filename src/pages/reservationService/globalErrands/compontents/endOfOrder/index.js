@@ -98,6 +98,15 @@ class EndOfOrder extends React.Component {
         dataIndex: "productName",
         key: "productName",
         width: 150
+      },
+      {
+        title: "订单状态",
+        dataIndex: "choice",
+        key: "choice",
+        width: 150,
+        render: (text, record) => (
+          <div>{record.choice===0 ? "退款" : "完结"}</div>
+        )
       }
     ];
     const {dataSource, tableLoading, pageSize, pageNum, pageSizeOptions, orderNum} = this.state;

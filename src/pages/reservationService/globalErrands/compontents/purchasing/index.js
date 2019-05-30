@@ -1,8 +1,9 @@
 import React from "react";
-import {Table, Button, message, Modal,Pagination,Input} from "antd";
+import {Table, Button, message, Modal, Pagination, Input, Radio} from "antd";
 import moment from "moment";
 import XLSX from 'xlsx';
 import "./index.less";
+
 
 class WaitPurchasing extends React.Component {
   constructor(props) {
@@ -13,7 +14,7 @@ class WaitPurchasing extends React.Component {
       orderTotal: 0,
       pageNum: 1,
       pageSize: 50,
-      pageSizeOptions:["50","100","500","1000"],
+      pageSizeOptions: ["50", "100", "500", "1000"],
       //表格数据
       dataSource: [],
       //表格加载loading
@@ -22,7 +23,12 @@ class WaitPurchasing extends React.Component {
       orderId: null,
       //完结订单modal
       endVisible: false,
-
+      //完结订单状态(1 购完 0 退款)
+      endState: 1,
+      //未采购到的商品名称
+      noPurchased: null,
+      //结单按钮loading
+      btnLoading: false
     };
 
   }
@@ -32,7 +38,7 @@ class WaitPurchasing extends React.Component {
   }
 
   //获取表格数据
-  getOrderInfo(pageNum=this.state.pageNum,pageSize=this.state.pageSize,searchParm=this.state.searchParm ) {
+  getOrderInfo(pageNum = this.state.pageNum, pageSize = this.state.pageSize, searchParm = this.state.searchParm) {
     let data = {
       isEnd: 0,
       pageNum: pageNum,
@@ -48,18 +54,18 @@ class WaitPurchasing extends React.Component {
         this.setState({tableLoading: false});
         if (res.status === 10000) {
           message.success(res.msg);
-          this.setState({dataSource: res.data.list,orderTotal:res.data.total});
-          if(res.data.total>this.state.pageSizeOptions[this.state.pageSizeOptions.length-1]){
-            let pageSizeOptions=this.state.pageSizeOptions;
+          this.setState({dataSource: res.data.list, orderTotal: res.data.total});
+          if (res.data.total > this.state.pageSizeOptions[this.state.pageSizeOptions.length - 1]) {
+            let pageSizeOptions = this.state.pageSizeOptions;
             pageSizeOptions.push(res.data.total.toString());
-            this.setState({pageSizeOptions:pageSizeOptions});
+            this.setState({pageSizeOptions: pageSizeOptions});
           }
         } else if (res.status === 10004) {
           message.warn(res.msg);
-          this.setState({dataSource: [],orderTotal:0});
+          this.setState({dataSource: [], orderTotal: 0});
         } else {
           message.error(res.msg);
-          this.setState({dataSource: [],orderTotal:0});
+          this.setState({dataSource: [], orderTotal: 0});
         }
       }
     ).catch(r => {
@@ -70,55 +76,81 @@ class WaitPurchasing extends React.Component {
   }
 
   //编辑订单
-  editOrder (id){
-    this.props.history.push("/reservation-service/global-errands/edit-progress?id="+id);
+  editOrder(id) {
+    this.props.history.push("/reservation-service/global-errands/edit-progress?id=" + id);
   }
+
   //显示完结订单modal
   endOrder(id) {
     this.setState({orderId: id, endVisible: true})
   }
 
+//选择结单原因
+  statementReason(e) {
+    if (e.target.value === 1) {
+      this.setState({noPurchased: null});
+    }
+    this.setState({endState: e.target.value});
+  }
+
+//获取未采购商品名称
+  getNoPurchasedInfo(e) {
+    this.setState({noPurchased: e.target.value});
+  }
+
 //订单完结确定
   confirmOk() {
-    this.setState({tableLoading: true});
-    fetch(window.apiUrl + "/legworkBackend/setLegworkIsEnd", {
-      method: "post",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({id: this.state.orderId})
-    }).then(r => r.json()).then(res => {
-      this.setState({tableLoading: false});
-      if (res.status === 10000) {
-        message.success(res.msg);
-        this.setState({orderId: null, endVisible: false});
-        this.getOrderInfo();
-      } else if (res.status === 10004) {
-        message.warn(res.msg);
-      } else {
-        message.error(res.msg);
-      }
-    }).catch(r => {
-      this.setState({tableLoading: false});
-      console.error(r);
-      console.log('前端接口调取错误')
-    })
+    const {orderId, endState, noPurchased} = this.state;
+    if (endState === 0 && !noPurchased) {
+      message.warn("请填写未采购商品名");
+    } else if (!orderId) {
+      message.error("订单错误,请重新选择订单");
+      this.setState({orderId: null, endVisible: false, endState: 1, noPurchased: null});
+    }else{
+      this.setState({btnLoading: true});
+      fetch(window.apiUrl + "/legworkBackend/setLegworkIsEnd", {
+        method: "post",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({id: orderId,choice:endState,unpurchasedProductName:noPurchased})
+      }).then(r => r.json()).then(res => {
+        this.setState({btnLoading: false});
+        if (res.status === 10000) {
+          message.success(res.msg);
+          this.setState({orderId: null, endVisible: false, endState: 1, noPurchased: null});
+          this.getOrderInfo();
+        } else if (res.status === 10004) {
+          message.warn(res.msg);
+        } else {
+          message.error(res.msg);
+        }
+      }).catch(r => {
+        this.setState({tableLoading: false});
+        console.error(r);
+        console.log('前端接口调取错误')
+      })
+    }
+
   }
 
   //订单完结取消
   endCancel() {
     this.setState({orderId: null, endVisible: false})
   }
+
 //改变pageNum,pageSize
-  changePage(pageNum,pageSize) {
-    this.setState({pageNum:pageNum,pageSize:pageSize},function () {
-      this.getOrderInfo(pageNum,pageSize);
+  changePage(pageNum, pageSize) {
+    this.setState({pageNum: pageNum, pageSize: pageSize}, function () {
+      this.getOrderInfo(pageNum, pageSize);
     })
   }
+
   //导出
-  exportInfo (){
+  exportInfo() {
     let elt = document.getElementById('exportTable');
     let wb = XLSX.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
     XLSX.writeFile(wb, `采购信息 ${moment(new Date()).format('YYYY-MM-DD_HH.mm.ss')}.xlsx`);
   }
+
   render() {
     const columns = [
       {
@@ -128,7 +160,7 @@ class WaitPurchasing extends React.Component {
         width: 150,
         render: (text, record) => (
           <div>
-            <Button type="primary" onClick={this.editOrder.bind(this,record.id)}>编辑</Button>
+            <Button type="primary" onClick={this.editOrder.bind(this, record.id)}>编辑</Button>
             <Button onClick={this.endOrder.bind(this, record.id)} style={{
               "marginLeft": 10,
               "backgroundColor": "#e2bc14",
@@ -192,19 +224,22 @@ class WaitPurchasing extends React.Component {
         width: 150
       }
     ];
-    const {dataSource, tableLoading, endVisible,pageNum,pageSize,pageSizeOptions,orderTotal} = this.state;
-    const Search=Input.Search;
+    const {dataSource, tableLoading, endVisible, pageNum, pageSize, pageSizeOptions, orderTotal, endState, noPurchased,btnLoading} = this.state;
+    const Search = Input.Search;
     return (
       <div className="wait-purchasing">
-        <Button type={"primary"} disabled={dataSource.length===0} style={{"marginLeft":10}} onClick={this.exportInfo.bind(this)} >导出等待采购信息</Button>
-        <Search  className="searchInput" placeholder="输入关键字搜索"  onSearch={value => {this.getOrderInfo(undefined,undefined,value);this.setState({searchParm:value})}} />
+        <Button type={"primary"} disabled={dataSource.length === 0} style={{"marginLeft": 10}}
+                onClick={this.exportInfo.bind(this)}>导出等待采购信息</Button>
+        <Search className="searchInput" placeholder="输入关键字搜索" onSearch={value => {
+          this.getOrderInfo(undefined, undefined, value);
+          this.setState({searchParm: value})
+        }}/>
         {/*导出*/}
         <Table id="exportTable"
-               bordered
                columns={exportColumns}
                dataSource={dataSource}
                pagination={false}
-               style={{display:`none`}}
+               style={{display: `none`}}
                rowKey={(record, index) => `${record.id}`}
         />
         <Table bordered
@@ -219,7 +254,7 @@ class WaitPurchasing extends React.Component {
                     pageSize={pageSize}
                     pageSizeOptions={pageSizeOptions}
                     showSizeChanger
-                    showTotal={(total,range)=>`${range[1]=== 0 ? "" :` 当前为第${range[1]}-${range[0]}条 `}共${total}条记录`}
+                    showTotal={(total, range) => `${range[1] === 0 ? "" : ` 当前为第${range[1]}-${range[0]}条 `}共${total}条记录`}
                     style={{float: 'right', marginRight: '20px', marginTop: '10px'}}
                     total={orderTotal}
                     onChange={this.changePage.bind(this)}
@@ -232,11 +267,16 @@ class WaitPurchasing extends React.Component {
                visible={endVisible}
                closable={false}
                footer={[
-                 <Button type="primary" key="ok" onClick={this.confirmOk.bind(this)}>确认结单</Button>,
+                 <Button type="primary" key="ok"  loading={btnLoading} onClick={this.confirmOk.bind(this)}>确认结单</Button>,
                  <Button key="cancel" onClick={this.endCancel.bind(this)}>取消</Button>
                ]}
         >
-          <p>本次所有需要采购的商品已经和客户确认完毕,并已经支付尾款!</p>
+          <Radio.Group defaultValue={1} onChange={this.statementReason.bind(this)}>
+            <Radio value={1}>本次所有商品已经采购到</Radio>
+            <Radio value={0}>本次商品未采购完，可线下申请退款</Radio>
+          </Radio.Group>
+          <Input.TextArea autosize={true} disabled={endState !== 0} placeholder="请输入未采购到的商品名称" value={noPurchased}
+                          onChange={this.getNoPurchasedInfo.bind(this)}/>
         </Modal>
       </div>
     );
