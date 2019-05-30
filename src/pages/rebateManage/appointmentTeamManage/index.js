@@ -38,9 +38,10 @@ class appointmentTeamManage extends React.Component {
     this.getAppointmentByStatus()
   }
   // 搜索预约信息
-  getAppointmentByStatus(status = this.state.appointmentStatus,pageNum = this.state.pageNum, pageSize = this.state.pageSize) {
+  getAppointmentByStatus() {
+    const { appointmentStatus, pageNum, pageSize } = this.state;
     this.setState({tableIsLoading: true});
-    if (status === 4) {
+    if (appointmentStatus === 4) {
       fetch(`${window.fandianUrl}/AppointmentMangement/getMassNoByMallName`,{
         method: `POST`
       }).then(r => r.json()).then(r => {
@@ -71,7 +72,7 @@ class appointmentTeamManage extends React.Component {
       fetch(`${window.fandianUrl}/AppointmentMangement/getAppointmentByStatus`,{
         method: `POST`,
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: `status=${status}&pageNum=${pageNum}&pageSize=${pageSize}`
+        body: `status=${appointmentStatus}&pageNum=${pageNum}&pageSize=${pageSize}`
       }).then(r => r.json()).then(r => {
         if (!r.msg && !r.data) {
           message.error(`后端数据错误`)
@@ -102,40 +103,26 @@ class appointmentTeamManage extends React.Component {
       });
     }
   }
-  // 打开图片弹窗
-  openPreview(url) {
-    this.setState({
-      previewVisible: true,
-      previewImage: url,
-    })
-  }
   // 切换编辑
   toggleEdit(v,b) {
     const { showEdit, } = this.state;
     let dataObj = {};
-    for (let n in showEdit) {
-      dataObj[n] = false;
-    }
+    for (let n in showEdit) dataObj[n] = false;
     dataObj[`editRow_${v}`] = b;
     this.setState({showEdit: dataObj},()=>{
       // 当切换为 input 输入框时, 自动对焦, 使焦点锁定当前所打开的 input 框,
       // 从而使 input 失去焦点时, 可以恢复为其他显示方式
       let item = document.querySelector(`.input_${v}`);
-      if (!!item) {
-        // toggle 为双向绑定, 当关闭 input 时, 无需强制对焦
-        item.focus();
-      }
+      if (!!item) item.focus();
     })
   }
   // 失去焦点
   loseBlur(v,b) {
-    const { inputValue, } = this.state;
+    const { inputValue } = this.state;
     // 当输入框有值时, 默认无法直接在失去焦点时关闭输入框, 以防误操作
     // 阻止在失去焦点时, 强制刷新页面, 以防无法点击保存按钮
     // 这里逻辑无法将团号值置空
-    if (!inputValue[`input_${v}`]) {
-      this.toggleEdit(v,b);
-    }
+    if (!inputValue[`input_${v}`]) this.toggleEdit(v,b);
   }
   // 更改团号
   submitMassNo(i,v,momentDate,Date) {
@@ -144,8 +131,11 @@ class appointmentTeamManage extends React.Component {
       if (appointmentStatus === 4) {
         let dataObj = {mallName: v,};
         // 如果由日期选择插件调用, 则会带入Date参数, 以此为依据判断修改 massNo 还是 deadline
-        if (!!Date) { dataObj.deadline = Date
-        } else { dataObj.massNo = inputValue[`input_${i}`] }
+        if (!!Date) {
+          dataObj.deadline = Date
+        } else {
+          dataObj.massNo = inputValue[`input_${i}`]
+        }
         fetch(`${window.fandianUrl}/AppointmentMangement/editMassNoByMallName`, {
           method: `POST`,
           headers: {'Content-Type': 'application/json'},
@@ -171,10 +161,11 @@ class appointmentTeamManage extends React.Component {
           message.error(`接口调取失败`)
         })
       } else {
+        const dataObj = {id:v,massNo:inputValue[`input_${i}`]};
         fetch(`${window.fandianUrl}/AppointmentMangement/editMassNoById`, {
           method: `POST`,
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({id:v,massNo:inputValue[`input_${i}`]})
+          body: JSON.stringify(dataObj)
         }).then(r => r.json()).then(r => {
           if (!r.msg && !r.data) {
             message.error(`后端数据错误`)
@@ -225,7 +216,7 @@ class appointmentTeamManage extends React.Component {
       this.getAppointmentByStatus();
     })
   }
-  //显示驳回modal
+  // 显示驳回modal
   rejectRegiment (id){
     this.setState({rejectVisible:true,rejectId:id});
   }
@@ -277,10 +268,15 @@ class appointmentTeamManage extends React.Component {
       let wb = XLSX.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
       XLSX.writeFile(wb, `预约挂团 ${moment(new Date()).format('YYYY-MM-DD_HH.mm.ss')}.xlsx`);
 
+      const data = {
+        appointmentList:dataList,
+        appointmentIdList: idList
+      };
+
       fetch(`${window.fandianUrl}/AppointmentMangement/sendAppointmentInselected`, {
         method: `POST`,
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({appointmentList:dataList,appointmentIdList: idList})
+        body: JSON.stringify(data)
       }).then(r => r.json()).then(r => {
         // console.log(r)
         if (r.status === 10000) {
@@ -301,6 +297,30 @@ class appointmentTeamManage extends React.Component {
       message.error(`至少选择一列`)
     }
   }
+  // 展示详细信息
+  showDetail(record) {
+    Modal.info({
+      title: '用户详情',
+      icon: 'user',
+      content: <div>
+        <div><div className="label">出生年月日: </div>{record.birthday}</div>
+        <div><div className="label">国籍: </div>{record.nationality}</div>
+        <div><div className="label">护照号码: </div>{record.passportNum}</div>
+        <div><div className="label">性别: </div>{record.sex === 0 ? "男" :(record.sex === 1 ? "女" : "")}</div>
+        <div><div className="label">护照到期日: </div>{record.maturityDate}</div>
+        <div><div className="label">入店日期: </div>{record.arrivalDate}</div>
+        <div><div className="label">出境日期: </div>{record.outboundDate}</div>
+        <div><div className="label">出境时间: </div>{record.outboundDatetime}</div>
+        <div><div className="label">航班号: </div>{record.flightNo}</div>
+        <div><div className="label">机场: </div>{record.airportTerminal}</div>
+      </div>,
+      maskClosable: true,
+      autoFocusButton: 'ok',
+      okText: '确定',
+      okType: 'default',
+      className: 'appointmentTeamManageUserDetail'
+    });
+  }
 
   render() {
     const RadioButton = Radio.Button, RadioGroup = Radio.Group;
@@ -308,39 +328,40 @@ class appointmentTeamManage extends React.Component {
     // 表单头
     const columnsNoMassNo = [
       {title: '提交时间', dataIndex: 'createTime', key: 'createTime', width: 180,
-        render: (text,record)=>(
-          <p>{moment(text).format('YYYY-MM-DD HH:mm:ss')}</p>
-          )
+        render: (text)=>(
+          <div>{text ? moment(text).format('YYYY-MM-DD HH:mm:ss') : ''}</div>
+        )
       },
-
       {title: '姓名', dataIndex: 'passportName', key: 'passportName', width: 180},
-      {title: '出生年月日', dataIndex: 'birthday', key: 'birthday', width: 200,},
-      {title: '国籍', dataIndex: 'nationality', key: 'nationality', width: 100},
-      {title: '护照号码', dataIndex: 'passportNum', key: 'passportNum', width: 140},
-      {title: '性别', dataIndex: 'sex', key: 'sex', width: 100,
+      // {title: '出生年月日', dataIndex: 'birthday', key: 'birthday', width: 120,},
+      // {title: '国籍', dataIndex: 'nationality', key: 'nationality', width: 120},
+      // {title: '护照号码', dataIndex: 'passportNum', key: 'passportNum', width: 160},
+      {title: '信息详情', dataIndex: 'passportInfo', key: 'passportInfo', width: 120,
         render: (text, record) => (
-          <p>
-            {text==0 ? "男" :(text ==1 ? "女" : "")}
-          {/*<Button type="default"*/}
-                  {/*onClick={this.openPreview.bind(this,record.passport)}*/}
-          {/*>点击查看</Button>*/}
-          </p>
-        ),
+          <div>
+            <Button type="default"
+                    onClick={this.showDetail.bind(this,record)}
+            >详情</Button>
+          </div>
+        )
       },
-      {title: '护照到期日', dataIndex: 'maturityDate', key: 'maturityDate', width: 240},
-      {title: '入店日期', dataIndex: 'arrivalDate', key: 'arrivalDate', width: 240},
-      {title: '出境日期', dataIndex: 'outboundDate', key: 'outboundDate', width: 240},
-      {title: '出境时间', dataIndex: 'outboundDatetime', key: 'outboundDatetime', width: 180},
-      {title: '航班号', dataIndex: 'flightNo', key: 'flightNo', width: 160,},
-      {title: '机场', dataIndex: 'airportTerminal', key: 'airportTerminal', width: 160,},
-      {title: '商场', dataIndex: 'mallName', key: 'mallName', width: 250},
+      // {title: '性别', dataIndex: 'sex', key: 'sex', width: 80,
+      //   render: (text) => (
+      //     <div>{text === 0 ? "男" :(text === 1 ? "女" : "")}</div>
+      //   ),
+      // },
+      // {title: '护照到期日', dataIndex: 'maturityDate', key: 'maturityDate', width: 240},
+      {title: '入店日期', dataIndex: 'arrivalDate', key: 'arrivalDate', width: 120},
+      // {title: '出境日期', dataIndex: 'outboundDate', key: 'outboundDate', width: 240},
+      // {title: '出境时间', dataIndex: 'outboundDatetime', key: 'outboundDatetime', width: 180},
+      // {title: '航班号', dataIndex: 'flightNo', key: 'flightNo', width: 160,},
+      // {title: '机场', dataIndex: 'airportTerminal', key: 'airportTerminal', width: 160,},
+      {title: '商场', dataIndex: 'mallName', key: 'mallName'},
     ];
     const columns = [];
-    for (let v of columnsNoMassNo) {
-      columns.push(v)
-    }
+    for (let v of columnsNoMassNo) columns.push(v);
     columns.push(
-      {title: '团号', dataIndex: 'massNo', key: 'massNo',
+      {title: '团号', dataIndex: 'massNo', key: 'massNo', width: 340,
         render: (text, record, index) => (
           <div>
             {showEdit[`editRow_${index}`] ? <div className="editMassNo">
@@ -398,8 +419,7 @@ class appointmentTeamManage extends React.Component {
           </div>
         )
       },
-      {
-        title: '失效时间', dataIndex: 'date', key: 'date', width: 160,
+      {title: '失效时间', dataIndex: 'date', key: 'date', width: 160,
         render: (text, record, index) => (
           <div>
             <DatePicker style={{width: 130}}
@@ -460,8 +480,9 @@ class appointmentTeamManage extends React.Component {
         {/*这里给出表单和分页最大宽度, 防止 table 过宽*/}
         <div className="main"
              style={{maxWidth: (appointmentStatus === 4 ? 660
-                 : (appointmentStatus === 1 ? 1350
-                   : 1250))}}
+                 : (appointmentStatus === 1 ? 1250
+                   : (appointmentStatus === 2 ? 1250
+                     : 1150)))}}
         >
           {/*导出用表单*/}
           <Table className="tableListForExport"
@@ -475,17 +496,20 @@ class appointmentTeamManage extends React.Component {
           {/*表单主体*/}
           <Table className="tableList"
                  dataSource={dataList}
-                 columns={(appointmentStatus === 0 ? columnsNoMassNo.concat(columnsAdd) :(appointmentStatus === 3 ?
-                   columnsNoMassNo
-                   : ( appointmentStatus === 4 ?
-                     columnsMallMassNo
-                     :  columns )))}
+                 columns={(appointmentStatus === 0 ?
+                   columnsNoMassNo.concat(columnsAdd)
+                   : (appointmentStatus === 3 ?
+                     columnsNoMassNo
+                     : ( appointmentStatus === 4 ?
+                       columnsMallMassNo
+                       :  columns )))}
                  pagination={false}
                  loading={tableIsLoading}
                  bordered
                  scroll={{ y: 540, x: (appointmentStatus === 4 ? 560
-                     : (appointmentStatus === 1 ? 1300
-                       : 1150))}}
+                     : (appointmentStatus === 1 ? 1150
+                       : (appointmentStatus === 2 ? 1150
+                         : 950)))}}
                  rowKey={(record, index) => `${record.id}`}
                  rowSelection={appointmentStatus === 0 ? {
                    selectedRowKeys: selectedIds,
@@ -497,19 +521,21 @@ class appointmentTeamManage extends React.Component {
           />
 
           {/*分页*/}
-          {appointmentStatus === 4 || <Pagination className="tablePagination"
-                      total={pageTotal}
-                      pageSize={pageSize}
-                      current={pageNum}
-                      showTotal={(total, range) =>
-                        `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`
-                      }
-                      style={{float:'right',marginRight:20,marginTop:10,paddingBottom:20}}
-                      onChange={this.changePage.bind(this)}
-                      showSizeChanger
-                      pageSizeOptions={pageSizeOptions}
-                      onShowSizeChange={this.changePage.bind(this)}
-          />}
+          {appointmentStatus === 4
+            || <Pagination className="tablePagination"
+                           total={pageTotal}
+                           pageSize={pageSize}
+                           current={pageNum}
+                           showTotal={(total, range) =>
+                             `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`
+                           }
+                           style={{float:'right',marginRight:20,marginTop:10,paddingBottom:20}}
+                           onChange={this.changePage.bind(this)}
+                           showSizeChanger
+                           pageSizeOptions={pageSizeOptions}
+                           onShowSizeChange={this.changePage.bind(this)}
+            />
+          }
         </div>
 
         {/*图片预览弹窗*/}
