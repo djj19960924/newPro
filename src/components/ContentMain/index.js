@@ -111,9 +111,12 @@ class ContentMain extends React.Component {
 
   componentWillUpdate(nextProps, nextState, nextContext) {
     // 这里兼容未添加 allowSideList 传参的情况
-    if (this.props.allowSideList) if (this.props.allowSideList.length !== nextProps.allowSideList.length) {
-      // console.warn('渲染了路由');
-      this.getNewRoutesList(nextProps.allowSideList);
+    if (this.props.allowSideList) {
+      if (this.props.roleId !== nextProps.roleId ||
+        this.props.allowSideList.length !== nextProps.allowSideList.length) {
+        // console.warn('渲染了路由');
+        this.getNewRoutesList(nextProps.allowSideList);
+      }
     }
   }
 
