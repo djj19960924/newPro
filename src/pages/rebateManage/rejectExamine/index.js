@@ -22,7 +22,7 @@ class rejectExamine extends React.Component{
       pageSize: 10,
       pageSizeOptions: ['50', '100', '200', '300'],
       //总条数
-      pageTotal: null,
+      pageTotal: 0,
       //table数据
       dataSource: [],
       //商品名

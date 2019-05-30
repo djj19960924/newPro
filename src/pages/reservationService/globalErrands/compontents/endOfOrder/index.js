@@ -8,6 +8,7 @@ class EndOfOrder extends React.Component {
     super(props);
 
     this.state = {
+      orderNum: 0,
       pageNum: 1,
       pageSize: 50,
       pageSizeOptions:["50","100","500","1000"],
