@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, DatePicker, Form, Icon, Input, message, Select, Radio, notification, Badge, } from 'antd';
+import {Button, DatePicker, Form, Icon, Input, message, Select, Radio, notification, Badge, Modal} from 'antd';
 import moment from 'moment';
 import ImageViewer from '@components/imageViewer/main';
 import {inject, observer} from 'mobx-react/index';
@@ -65,10 +65,12 @@ class awaitingExamine extends React.Component {
       currentTicketId: 0,
       // 返点金额
       reciptMoney: 0,
-      // 驳回备注框的样式
-      remarks: 'unShow',
-      // 驳回备注原因
-      reason: null,
+      // 驳回modal
+      rejectVisible: false,
+      // 驳回备注原因Id
+      reasonId: null,
+      //驳回选择其他,填写具体原因
+      rejectSpecificReason: null,
       // 图片预览宽高自适应
       previewImageWH: 'width',
       // 默认汇率, 当以某一汇率提交成功小票以后
@@ -107,7 +109,7 @@ class awaitingExamine extends React.Component {
 
   // 获取国家当前剩余小票
   getCountryLeftTicket() {
-    fetch(`${window.fandianUrl}/recipt/countReciptByNationName`,{
+    fetch(`${window.fandianUrl}/recipt/countReciptByNationName`, {
       method: 'POST'
     }).then(r => r.json()).then(r => {
       if (r.status === 10000) {
@@ -218,8 +220,8 @@ class awaitingExamine extends React.Component {
           hasTicket: !!r.data.pageInfo.total,
           currentTicketId: 0,
           ticketTotal: r.data.pageInfo.total,
-          remarks: 'unShow',
-          reason: null
+          rejectVisible: false,
+          reasonId: null
         });
       } else {
         if (r.retcode) {
@@ -244,9 +246,9 @@ class awaitingExamine extends React.Component {
   changeReciptMoney(data = this.state.totalData, isAdd = false) {
     let totalMoney = 0, totalReciptMoney = 0, currentBrandList = [], totalClear = true;
     for (let n in data) {
-      totalMoney += ( !!data[n].totalMoney ? data[n].totalMoney : 0 );
-      totalReciptMoney += ( (!!data[n].totalMoney && !!data[n].brandRebate) ?
-        (data[n].totalMoney / 100 * data[n].brandRebate) : 0 );
+      totalMoney += (!!data[n].totalMoney ? data[n].totalMoney : 0);
+      totalReciptMoney += ((!!data[n].totalMoney && !!data[n].brandRebate) ?
+        (data[n].totalMoney / 100 * data[n].brandRebate) : 0);
       currentBrandList.push(data[n].brand);
       if (!data[n].totalMoney && data[n].totalMoney !== 0) totalClear = false;
     }
@@ -255,9 +257,9 @@ class awaitingExamine extends React.Component {
     // console.log(`返点金额为: ${ (!!totalReciptMoney && !!exchangeRate) ?
     //   parseFloat((totalReciptMoney * exchangeRate).toFixed(2)) : '0' }\n总金额为: ${totalMoney}`);
     this.setState({
-      reciptMoney: ( (!!totalReciptMoney && !!exchangeRate) ?
+      reciptMoney: ((!!totalReciptMoney && !!exchangeRate) ?
         parseFloat((totalReciptMoney * exchangeRate).toFixed(2))
-        : '0' ),
+        : '0'),
       totalMoney: totalMoney,
       totalData: data,
       currentBrandList: currentBrandList,
@@ -292,7 +294,7 @@ class awaitingExamine extends React.Component {
 
   // 通过 - 提交表单
   handleSubmit() {
-    const { country, totalClear, totalData, } = this.state;
+    const {country, totalClear, totalData,} = this.state;
     //.log(this.props.form.getFieldsValue());
     this.props.form.validateFields((err, val) => {
       let the = this.state;
@@ -313,7 +315,7 @@ class awaitingExamine extends React.Component {
           teamNo: val.teamNo,
           consumeMoney: the.totalMoney,
           // 这里直接保存数组作为json字符串保存
-          brandName: ( the.totalData.length === 0 ? dataList[0] : JSON.stringify(dataList) ),
+          brandName: (the.totalData.length === 0 ? dataList[0] : JSON.stringify(dataList)),
           consumeDate: moment(val.ticketDate).format('YYYY-MM-DD'),
           exchangeRate: val.exchangeRate,
           // 数据库未保存, 扩展字段
@@ -321,8 +323,8 @@ class awaitingExamine extends React.Component {
           reciptMoney: the.reciptMoney,
           unionId: the.ticketList[the.currentTicketId].unionId,
         };
-        if (country === '韩国') data.reciptAttribute= val.reciptAttribute;
-        if( val.exchangeRate===0){
+        if (country === '韩国') data.reciptAttribute = val.reciptAttribute;
+        if (val.exchangeRate === 0) {
           message.error('汇率不能为零')
         } else if (!totalClear || the.totalMoney === null) {
           message.error('消费金额不能为空');
@@ -332,7 +334,7 @@ class awaitingExamine extends React.Component {
               dataList.push(m)
             }
           }
-          this.setState({emptyList:dataList})
+          this.setState({emptyList: dataList})
         } else if (repeatList.length !== 0) {
           message.error('品牌重复');
           this.setState({repeatList: repeatList});
@@ -342,7 +344,7 @@ class awaitingExamine extends React.Component {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(data)
           }).then(r => r.json()).then(r => {
-            if(r.retcode.status==='10000'){
+            if (r.retcode.status === '10000') {
               message.success(`执行通过审核成功`);
               this.setState({defaultExchangeRate: val.exchangeRate,});
               this.hasSubmit();
@@ -368,7 +370,7 @@ class awaitingExamine extends React.Component {
     // 可以对本地数据进行同步改变, 使得角标以及商场剩余小票数量一直处于与服务器内部数据
     // 数值同步的状态, 虽然没有实时交互, 但也从本地计算的方式达到了类似的效果
     let dataObj = the.countryLeftTicket;
-    dataObj[the.country] = dataObj[the.country]-1;
+    dataObj[the.country] = dataObj[the.country] - 1;
     let d = document.querySelector(`.brandLine.line_0`).querySelector('.noHandlerWrap');
     d.style.border = '';
     this.setState({
@@ -391,8 +393,8 @@ class awaitingExamine extends React.Component {
       this.setState({
         currentTicketId: the.currentTicketId + 1,
         // 清空驳回列表
-        remarks: 'unShow',
-        reason: null
+        rejectVisible: false,
+        reasonId: null
       });
     }
     // 将汇率修正为成功提交的数值
@@ -403,38 +405,54 @@ class awaitingExamine extends React.Component {
 
   //驳回备注确定
   openNotification() {
-    if (this.state.reason !== null) {
-      let reject = {
-        reciptId: this.state.ticketList[this.state.currentTicketId].reciptId,
-        note: this.state.reason
-      };
-      fetch(window.fandianUrl + '/recipt/checkReciptRejected', {
-        method: 'post',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(reject)
-      }).then(res => res.json()).then(r => {
-        if (r.retcode.status === `10000`) {
-          message.success(`执行驳回成功`);
-          this.hasSubmit()
-        } else {
-          if (r.retcode) {
-            message.error(`${r.retcode.msg}, 状态码为:${r.retcode.status}`)
-          } else {
-            message.error(`后端数据错误`)
-          }
-        }
-      }).catch(() => {
-        message.error(`驳回小票接口调取失败`)
-      })
-    } else if (this.state.reason === null) {
+    const {reasonId, rejectSpecificReason} = this.state;
+    if (reasonId !== null) {
+      if (reasonId === 3 && rejectSpecificReason) {
+        let reject = {
+          reciptId: this.state.ticketList[this.state.currentTicketId].reciptId,
+          note: reasonId + rejectSpecificReason
+        };
+        this.rejectMethod(reject);
+      } else if (reasonId === 3 && !rejectSpecificReason) {
+        message.warn("请填写具体原因")
+      } else {
+        let reject = {
+          reciptId: this.state.ticketList[this.state.currentTicketId].reciptId,
+          note: reasonId
+        };
+        this.rejectMethod(reject);
+      }
+    } else if (this.state.reasonId === null) {
       notification['warning']({
         message: '请选择驳回原因'
       });
     }
   }
 
+  //驳回方法
+  rejectMethod(data) {
+    fetch(window.fandianUrl + '/recipt/checkReciptRejected', {
+      method: 'post',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    }).then(res => res.json()).then(r => {
+      if (r.retcode.status === `10000`) {
+        message.success(`执行驳回成功`);
+        this.hasSubmit()
+      } else {
+        if (r.retcode) {
+          message.error(`${r.retcode.msg}, 状态码为:${r.retcode.status}`)
+        } else {
+          message.error(`后端数据错误`)
+        }
+      }
+    }).catch(() => {
+      message.error(`驳回小票接口调取失败`)
+    })
+  }
+
   render() {
-    let {showImageViewer, shopList, currentShop, hasTicket, brandListOrigin, ticketList, currentTicketId, reciptMoney, defaultExchangeRate, previewImageWH, ticketTotal, country, ticketDate, hasChange, repeatList, emptyList, } = this.state;
+    let {showImageViewer, shopList, currentShop, hasTicket, brandListOrigin, ticketList, currentTicketId, reciptMoney, defaultExchangeRate, previewImageWH, ticketTotal, country, ticketDate, hasChange, repeatList, emptyList, rejectVisible, reasonId, rejectSpecificReason} = this.state;
     const {getFieldDecorator} = this.props.form;
     return (
       <div className="awaitingExamine">
@@ -447,7 +465,7 @@ class awaitingExamine extends React.Component {
                       onChange={this.selectCountry.bind(this)}
           >
             {/*当使用map遍历生成的 react dom 对象时, 才可将对象内部参数为动态值*/}
-            {countryList.map((item,i) => (
+            {countryList.map((item, i) => (
               <Badge key={i}
                      count={this.state.countryLeftTicket[item.nationName]}
                      overflowCount={99}
@@ -485,8 +503,10 @@ class awaitingExamine extends React.Component {
             <img className="previewImage"
                  src={!!ticketList.length ? ticketList[currentTicketId].pictureUrl : ''}
                  alt=""
-                 // 打开图片弹窗
-                 onClick={ () => { this.setState({showImageViewer: true,}) } }
+              // 打开图片弹窗
+                 onClick={() => {
+                   this.setState({showImageViewer: true,})
+                 }}
                  style={{
                    width: previewImageWH === 'width' ? '100%' : 'auto',
                    height: previewImageWH === 'height' ? '100%' : 'auto',
@@ -534,7 +554,7 @@ class awaitingExamine extends React.Component {
                   rules: [{required: true}],
                   initialValue: moment(new Date())
                 })(
-                  <DatePicker style={{width: 130,marginLeft: 10}}
+                  <DatePicker style={{width: 130, marginLeft: 10}}
                               dropdownClassName="datePickerPopup"
                               allowClear={false}
                               disabledDate={this.disabledDate}
@@ -586,15 +606,15 @@ class awaitingExamine extends React.Component {
                          type="number"
                          id="exchangeRate"
                          placeholder="请输入汇率"
-                         // 修正汇率触发
-                         onChange={ () => this.changeReciptMoney() }
+                    // 修正汇率触发
+                         onChange={() => this.changeReciptMoney()}
                   />
                 )}
               </FormItem>
 
               {/* 显示返点金额 */}
               <p>
-                <span style={{marginLeft: 10,color: '#999'}}>返点金额(¥)：{reciptMoney}</span>
+                <span style={{marginLeft: 10, color: '#999'}}>返点金额(¥)：{reciptMoney}</span>
               </p>
 
               <FormItem>
@@ -607,8 +627,8 @@ class awaitingExamine extends React.Component {
                   通过
                 </Button>
                 <Button type="danger"
-                        // 打开驳回原因窗口
-                        onClick={ () => this.setState({remarks: 'showRemark'}) }
+                  // 打开驳回原因窗口
+                        onClick={() => this.setState({rejectVisible: true,})}
                         style={{marginLeft: '20px'}}
                 >
                   驳回
@@ -619,33 +639,41 @@ class awaitingExamine extends React.Component {
         </div>
 
         {/* 驳回相关模块 */}
-        <div className={this.state.remarks + ' popup'}>
-          <div className='remark-title'>
-            <Icon type='close'
-                  // 关闭驳回原因选择窗口
-                  onClick={ () => this.setState({remarks: 'unShow'}) }
-            />
-            <span>请选择驳回原因</span>
-          </div>
+        <Modal visible={rejectVisible}
+               centered
+               closable={false}
+               width={300}
+               title="请选择驳回原因"
+               wrapClassName="ticketRejectModal"
+               onOk={
+                 this.openNotification.bind(this)
+               }
+               onCancel={() => {
+                 this.setState({rejectVisible: false})
+               }}>
           <RadioGroup className='allReasons'
-                      onChange={ (e) => { this.setState({reason: e.target.value}) }}
-                      value={this.state.reason}
+                      onChange={(e) => {
+                        this.setState({reasonId: e.target.value});
+                      }}
+                      value={reasonId}
           >
             <Radio value={0}>小票不清晰</Radio>
             <Radio value={1}>凭证号不正确</Radio>
             <Radio value={2}>小票重复</Radio>
-            <Radio value={3}>其他</Radio>
             <Radio value={4}>小票不完整</Radio>
+            <Radio value={3}>其他</Radio>
           </RadioGroup>
-          <Button type="primary" onClick={this.openNotification.bind(this)}>确定</Button>
-        </div>
-
+          <Input.TextArea placeholder="请输入具体原因" autosize={true} disabled={reasonId !== 3} value={rejectSpecificReason}
+                          onChange={(e) => {
+                            this.setState({rejectSpecificReason: e.target.value})
+                          }}/>
+        </Modal>
         {/* 图片查看弹窗组件 */}
         {showImageViewer &&
         <ImageViewer // 图片链接, 上为图片查看器开关
           imgSrc={!!ticketList.length ? ticketList[currentTicketId].pictureUrl : ''}
           // 关闭图片查看
-          closeImageViewer={() => this.setState({showImageViewer: false,}) }
+          closeImageViewer={() => this.setState({showImageViewer: false,})}
           option={{
             // 添加图片拖拽功能
             move: true,
