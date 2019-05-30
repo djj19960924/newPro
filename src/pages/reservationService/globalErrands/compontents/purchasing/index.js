@@ -255,7 +255,7 @@ class WaitPurchasing extends React.Component {
                     pageSizeOptions={pageSizeOptions}
                     showSizeChanger
                     showTotal={(total, range) => `${range[1] === 0 ? "" : ` 当前为第${range[1]}-${range[0]}条 `}共${total}条记录`}
-                    style={{float: 'right', marginRight: '20px', marginTop: '10px'}}
+                    style={{float: 'right', marginRight: 20, marginTop: 10,marginBottom:20}}
                     total={orderTotal}
                     onChange={this.changePage.bind(this)}
                     onShowSizeChange={this.changePage.bind(this)}
