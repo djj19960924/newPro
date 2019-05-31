@@ -536,6 +536,7 @@ class commoditiesCreateAndEdit extends React.Component {
                   <RadioButton value={0}>未备案</RadioButton>
                   <RadioButton value={1}>已备案</RadioButton>
                   <RadioButton value={2}>备案中</RadioButton>
+                  <RadioButton value={4}>临时已备案</RadioButton>
                   <RadioButton value={3}>作废</RadioButton>
                 </RadioGroup>
               )}

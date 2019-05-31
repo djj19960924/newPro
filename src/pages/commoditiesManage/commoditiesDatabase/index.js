@@ -666,6 +666,7 @@ class commoditiesDataBase extends React.Component {
           <RadioButton value={1}>已备案</RadioButton>
           <RadioButton value={2}>待导出备案(未备案)</RadioButton>
           <RadioButton value={3}>备案中</RadioButton>
+          <RadioButton value={5}>临时已备案</RadioButton>
           <RadioButton value={4}>作废</RadioButton>
         </RadioGroup>
 
@@ -679,11 +680,11 @@ class commoditiesDataBase extends React.Component {
                                    className="exportExcelBtn"
                                    onClick={this.exportExcel_record_1.bind(this)}
           >导出已备案资料</Button>}
-          {record === 2 && <Button type="primary"
+          {(record === 2 ||  record === 5) && <Button type="primary"
                                    className="exportExcelBtn"
                                    onClick={() => this.setState({exportModalVisible: true})}
           >excel导出</Button>}
-          {record === 2 && <Button type="primary"
+          {(record === 2 ||  record === 5) && <Button type="primary"
                                    className="importExcelBtn"
                                    onClick={()=>this.setState({downloadImageVisible: true})}
           >下载图片</Button>}
