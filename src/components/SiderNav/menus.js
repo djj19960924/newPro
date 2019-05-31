@@ -145,7 +145,7 @@ const menus = [
         title: '全球运转',
         id: 30,
         icon: 'global',
-        key: '/logistics-manage',
+        key: '/logistics-manage/globalTranshipment',
         subs: [
           {
             title: '未到货',
