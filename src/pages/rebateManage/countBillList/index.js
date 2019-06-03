@@ -307,7 +307,14 @@ class countBillList extends React.Component {
                onOk={this.clickOkBtn.bind(this)}
                confirmLoading={isOkLoading}
                onCancel={() => {
-                 closeIsAllowed ? this.setState({downloadModalVisible: false})
+                 closeIsAllowed ? this.setState({
+                         downloadModalVisible: false,
+                         ticketSuccessList: [],
+                         ticketSuccessIdList: [],
+                         ticketErrorList: [],
+                         passportSuccessList: [],
+                         passportErrorList: []
+                      })
                    : message.warn(`图片下载中, 请勿关闭`)
                }}
         >
