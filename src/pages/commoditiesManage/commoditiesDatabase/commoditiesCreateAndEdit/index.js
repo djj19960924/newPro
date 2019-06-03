@@ -505,9 +505,6 @@ class commoditiesCreateAndEdit extends React.Component {
               {/*选择货币类型*/}
               <Select className="originalType"
                       style={{width: 100,marginLeft: 10}}
-                // 当存在 defaultValue 时, 则无需 placeholder
-                //       defaultValue={0}
-                //       defaultValue={costType}
                       value={originalType}
                       onChange={(v) => this.setState({originalType: v})}
               >
