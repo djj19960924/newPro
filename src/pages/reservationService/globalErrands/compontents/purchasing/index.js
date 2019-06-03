@@ -213,7 +213,7 @@ class WaitPurchasing extends React.Component {
         key: "followUper",
         width: 300,
         render: (text, record) => (
-          <div>
+          <div style={{"display":"flex","justifyContent":"space-between"}}>
             {record.followUper !== null &&
             <span style={{"color": "#FF5406", "marginRight": 10}}>{record.followUper}</span>}
             {record.followUper === null && <span style={{"marginRight": 10}}>暂无跟进人</span>}
@@ -343,7 +343,7 @@ class WaitPurchasing extends React.Component {
                  this.setState({orderId: null, followVisible: false,followUpper: null})
                }}
         >
-          <Input placeholder="请填写跟进人" value={followUpper} onChange={(e) => {
+          <Input.TextArea placeholder="请填写跟进人" value={followUpper} autosize={true} maxLength={50} onChange={(e) => {
             this.setState({followUpper: e.target.value})
           }}/>
         </Modal>
