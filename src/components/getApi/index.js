@@ -60,7 +60,7 @@ class Ajax {
   }
 
   // post方法
-  post(path,data,headers,originType) {
+  post(path, data, headers, originType) {
     let request = new XMLHttpRequest();
     // 开启 request 对象, 指定 post 方法, 输入 url
     request.open('POST', `${this.origin}${path}`, true);
@@ -70,7 +70,7 @@ class Ajax {
   }
 
   // get方法
-  get(path,string,headers) {
+  get(path, string, headers) {
     let request = new XMLHttpRequest();
     const queryString = string ? `?${string}` : '';
     // 开启 request 对象, 指定 get 方法, 输入 url
@@ -80,12 +80,12 @@ class Ajax {
     return this.promise(request);
   }
 
-  // 判断是否为object
+  // 判断是否为 Object
   isObject(data) {
     return Object.prototype.toString.call(data) === '[object Object]'
   }
 
-  // 判断是否为object
+  // 判断是否为 XMLHttpRequest
   isXMLHttpRequest(data) {
     return Object.prototype.toString.call(data) === '[object XMLHttpRequest]'
   }
