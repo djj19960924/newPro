@@ -1,9 +1,9 @@
 import React from "react";
-import {Radio,Input} from "antd";
+import {Radio, Input} from "antd";
 import "./index.less";
-import  PurchaseTrip from "./compontents/purchaseTrip";
-import  WaitPurchasing from "./compontents/purchasing";
-import  EndOfOrder from "./compontents/endOfOrder";
+import PurchaseTrip from "./compontents/purchaseTrip";
+import WaitPurchasing from "./compontents/purchasing";
+import EndOfOrder from "./compontents/endOfOrder";
 
 class GlobalErrands extends React.Component {
   constructor(props) {
@@ -16,28 +16,36 @@ class GlobalErrands extends React.Component {
   }
 
   componentWillMount() {
-    if(window.getQueryString("contentType")!==null) {
+    if (window.getQueryString("contentType") !== null) {
       this.setState({contentType: window.getQueryString("contentType")})
     }
   }
 
+  componentWillUnmount() {
+    this.setState = () => {
+      return null
+    }
+  }
   render() {
-    const {contentType}=this.state;
+    const {contentType} = this.state;
     return (
       <div className="globalErrands">
-        <Radio.Group defaultValue={contentType}  buttonStyle="solid" onChange={(e)=>{this.props.history.push("/reservation-service/global-errands?contentType="+e.target.value);this.setState({contentType:e.target.value})}} className="menu-selection">
-          <Radio.Button value="0" >等待采购</Radio.Button>
-          <Radio.Button value="1" >订单完结</Radio.Button>
-          <Radio.Button value="2" >采购行程</Radio.Button>
+        <Radio.Group defaultValue={contentType} buttonStyle="solid" onChange={(e) => {
+          this.props.history.push("/reservation-service/global-errands?contentType=" + e.target.value);
+          this.setState({contentType: e.target.value})
+        }} className="menu-selection">
+          <Radio.Button value="0">等待采购</Radio.Button>
+          <Radio.Button value="1">订单完结</Radio.Button>
+          <Radio.Button value="2">采购行程</Radio.Button>
         </Radio.Group>
         {
-          contentType==="0" && <WaitPurchasing history={this.props.history}></WaitPurchasing>
+          contentType === "0" && <WaitPurchasing history={this.props.history}></WaitPurchasing>
         }
         {
-          contentType==="1" && <EndOfOrder ></EndOfOrder>
+          contentType === "1" && <EndOfOrder></EndOfOrder>
         }
         {
-          contentType==="2" && <PurchaseTrip ></PurchaseTrip>
+          contentType === "2" && <PurchaseTrip></PurchaseTrip>
         }
       </div>
     );

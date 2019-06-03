@@ -89,6 +89,19 @@ class EndOfOrder extends React.Component {
         )
       },
       {
+        title: "跟进人",
+        dataIndex: "followUper",
+        key: "followUper",
+        width: 300,
+        render: (text, record) => (
+          <div>
+            {record.followUper !== null &&
+            <span style={{"color": "#FF5406", "marginRight": 10}}>{record.followUper}</span>}
+            {record.followUper === null && <span style={{"marginRight": 10}}>暂无跟进人</span>}
+          </div>
+        )
+      },
+      {
         title: "微信号",
         dataIndex: "wechatNo",
         key: "wechatNo",
