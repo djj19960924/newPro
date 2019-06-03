@@ -8,13 +8,11 @@
 import { message } from 'antd';
 
 class Ajax {
-  name = 'Ajax';
-  version = 'V1.1';
-  info = '这是基于原生ajax功能所扩展的ajax工具, 可以更加快捷方便的调用ajax, 并且可以根据环境灵活改变内部配置.';
   headers = {
     'Content-Type': 'application/json'
   };
-  origin = '//47.98.221.129:8088/quanhai';
+  // origin = window.fandianUrl;
+  origin = '//no-href';
 
   // 注入公共配置
   injectMethod(request,headers) {
@@ -24,7 +22,7 @@ class Ajax {
     request.responseType = 'json';
     // 设置头
     if (!headers) headers = this.headers;
-    for (let n in headers) request.setRequestHeader(n,headers[n],);
+    for (let n in headers) request.setRequestHeader(n, headers[n]);
   }
 
   // promise方法
@@ -46,7 +44,7 @@ class Ajax {
         }
       };
       request.onerror = () => {
-        console.log(request)
+        console.error(request)
       };
       // 开始发送请求
       if (data) {
@@ -67,8 +65,8 @@ class Ajax {
     // 开启 request 对象, 指定 post 方法, 输入 url
     request.open('POST', `${this.origin}${path}`, true);
     // 注入公共配置
-    this.injectMethod(request,headers);
-    return this.promise(request,data,originType);
+    this.injectMethod(request, headers);
+    return this.promise(request, data, originType);
   }
 
   // get方法
@@ -78,7 +76,7 @@ class Ajax {
     // 开启 request 对象, 指定 get 方法, 输入 url
     request.open('GET', `${this.origin}${path}${queryString}`, true);
     // 注入公共配置
-    this.injectMethod(request,headers,'get');
+    this.injectMethod(request, headers, 'get');
     return this.promise(request);
   }
 
@@ -93,11 +91,11 @@ class Ajax {
   }
 
   // 处理重定向等失去用户权限错误
-  isReturnLogin(r,that) {
+  isReturnLogin(r, that) {
     if (this.isXMLHttpRequest(r)) {
       if (r.status === 0) {
         message.error('登录信息验证失败, 请重新登陆');
-        const { history, location } = that.props;
+        const {history, location} = that.props;
         window.delCookie('isLogin');
         history.push(`/login?historyPath=${location.pathname}${encodeURIComponent(location.search)}`);
       }
