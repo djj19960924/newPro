@@ -144,7 +144,7 @@ class EditProgress extends React.Component {
     fetch(window.apiUrl + "/legworkBackend/delLegworkSchedule", {
       method: "post",
       headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({id: this.state.deleteId,legworkId:window.getQueryString("id")})
+      body: JSON.stringify({id: this.state.deleteId, legworkId: window.getQueryString("id")})
     }).then(r => r.json()).then(res => {
       if (res.status === 10000) {
         message.success(res.msg)
@@ -153,14 +153,20 @@ class EditProgress extends React.Component {
       } else {
         message.error(res.msg);
       }
-    }).catch(r=>{
+    }).catch(r => {
       console.error(r);
       console.log('前端接口调取错误')
     })
   }
 
+  componentWillUnmount() {
+    this.setState = () => {
+      return null
+    }
+  }
+
   render() {
-    const {bookingTime, wechatNo, commodityContent, commodityImgList, schedules, addVisible, updateContent, updateImg, btnLoading, deleteVisible, showImageViewer,imgSrc} = this.state;
+    const {bookingTime, wechatNo, commodityContent, commodityImgList, schedules, addVisible, updateContent, updateImg, btnLoading, deleteVisible, showImageViewer, imgSrc} = this.state;
     return (
       <div className="edit-progress">
         <h1>编辑采购进度</h1>
@@ -173,7 +179,9 @@ class EditProgress extends React.Component {
               (item, index) => {
                 return (
                   <div className="commodity-img" key={index}>
-                    <img src={item} className="img-list"  onClick={ () => { this.setState({showImageViewer: true,imgSrc:item}) } }/>
+                    <img src={item} className="img-list" onClick={() => {
+                      this.setState({showImageViewer: true, imgSrc: item})
+                    }}/>
                   </div>
                 )
               }
@@ -185,7 +193,7 @@ class EditProgress extends React.Component {
         <ImageViewer // 图片链接, 上为图片查看器开关
           imgSrc={!!imgSrc ? imgSrc : ''}
           // 关闭图片查看
-          closeImageViewer={() => this.setState({showImageViewer: false,imgSrc:null}) }
+          closeImageViewer={() => this.setState({showImageViewer: false, imgSrc: null})}
           option={{
             // 添加图片拖拽功能
             move: true,
@@ -218,7 +226,8 @@ class EditProgress extends React.Component {
             }
           )
         }
-        <Button className="add-progress" type="primary" ghost size={"large"} onClick={this.addProgress.bind(this)}>+增加进度</Button>
+        <Button className="add-progress" type="primary" ghost size={"large"}
+                onClick={this.addProgress.bind(this)}>+增加进度</Button>
         {/*增加进度*/}
         <Modal centered
                closable={false}

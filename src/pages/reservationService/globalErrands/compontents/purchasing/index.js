@@ -28,7 +28,11 @@ class WaitPurchasing extends React.Component {
       //未采购到的商品名称
       noPurchased: null,
       //结单按钮loading
-      btnLoading: false
+      btnLoading: false,
+      //跟进人
+      followUpper: null,
+      //跟进modal确定loading
+      confirmLoading: false
     };
 
   }
@@ -76,13 +80,21 @@ class WaitPurchasing extends React.Component {
   }
 
   //编辑订单
-  editOrder(id) {
-    this.props.history.push("/reservation-service/global-errands/edit-progress?id=" + id);
+  editOrder(id, followUper) {
+    if (followUper === null) {
+      message.warn("请先编辑跟进人");
+    } else {
+      this.props.history.push("/reservation-service/global-errands/edit-progress?id=" + id);
+    }
   }
 
   //显示完结订单modal
-  endOrder(id) {
-    this.setState({orderId: id, endVisible: true})
+  endOrder(id, followUper) {
+    if (followUper === null) {
+      message.warn("请先编辑跟进人");
+    } else {
+      this.setState({orderId: id, endVisible: true})
+    }
   }
 
 //选择结单原因
@@ -106,12 +118,12 @@ class WaitPurchasing extends React.Component {
     } else if (!orderId) {
       message.error("订单错误,请重新选择订单");
       this.setState({orderId: null, endVisible: false, endState: 1, noPurchased: null});
-    }else{
+    } else {
       this.setState({btnLoading: true});
       fetch(window.apiUrl + "/legworkBackend/setLegworkIsEnd", {
         method: "post",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({id: orderId,choice:endState,unpurchasedProductName:noPurchased})
+        body: JSON.stringify({id: orderId, choice: endState, unpurchasedProductName: noPurchased})
       }).then(r => r.json()).then(res => {
         this.setState({btnLoading: false});
         if (res.status === 10000) {
@@ -151,6 +163,31 @@ class WaitPurchasing extends React.Component {
     XLSX.writeFile(wb, `采购信息 ${moment(new Date()).format('YYYY-MM-DD_HH.mm.ss')}.xlsx`);
   }
 
+//显示跟进人modal
+  editFollowUp() {
+    const {followUpper,orderId}=this.state;
+    if(followUpper){
+      this.setState({confirmLoading: true});
+      fetch(window.apiUrl+"/legworkBackend/updateFollowUper",{
+        method:"post",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({id: orderId,followUper:followUpper})
+      }).then(r=>r.json()).then(res=>{
+        this.setState({confirmLoading: false});
+        if(res.status===10000){
+          this.setState({orderId: null,followUpper: null,followVisible: false});
+          message.success(res.msg)
+          this.getOrderInfo();
+        }else{
+          message.error(res.msg);
+        }
+      })
+    }else{
+      message.warn("请先填写编辑人")
+    }
+
+  }
+
   render() {
     const columns = [
       {
@@ -160,13 +197,29 @@ class WaitPurchasing extends React.Component {
         width: 150,
         render: (text, record) => (
           <div>
-            <Button type="primary" onClick={this.editOrder.bind(this, record.id)}>编辑</Button>
-            <Button onClick={this.endOrder.bind(this, record.id)} style={{
+            <Button type="primary" onClick={this.editOrder.bind(this, record.id, record.followUper)}>编辑</Button>
+            <Button onClick={this.endOrder.bind(this, record.id, record.followUper)} style={{
               "marginLeft": 10,
               "backgroundColor": "#e2bc14",
               "color": "#fff",
               "borderColor": "transparent"
             }}>订单完结</Button>
+          </div>
+        )
+      },
+      {
+        title: "跟进人",
+        dataIndex: "followUper",
+        key: "followUper",
+        width: 300,
+        render: (text, record) => (
+          <div>
+            {record.followUper !== null &&
+            <span style={{"color": "#FF5406", "marginRight": 10}}>{record.followUper}</span>}
+            {record.followUper === null && <span style={{"marginRight": 10}}>暂无跟进人</span>}
+            <Button type="primary" onClick={() => {
+              this.setState({orderId: record.id, followVisible: true, followUpper: record.followUper})
+            }}>编辑</Button>
           </div>
         )
       },
@@ -197,8 +250,7 @@ class WaitPurchasing extends React.Component {
       {
         title: "商品内容",
         dataIndex: "productName",
-        key: "productName",
-        width: 150
+        key: "productName"
       }
     ];
     const exportColumns = [
@@ -224,7 +276,7 @@ class WaitPurchasing extends React.Component {
         width: 150
       }
     ];
-    const {dataSource, tableLoading, endVisible, pageNum, pageSize, pageSizeOptions, orderTotal, endState, noPurchased,btnLoading} = this.state;
+    const {dataSource, tableLoading, endVisible, pageNum, pageSize, pageSizeOptions, orderTotal, endState, noPurchased, btnLoading, followVisible, followUpper,confirmLoading} = this.state;
     const Search = Input.Search;
     return (
       <div className="wait-purchasing">
@@ -255,19 +307,20 @@ class WaitPurchasing extends React.Component {
                     pageSizeOptions={pageSizeOptions}
                     showSizeChanger
                     showTotal={(total, range) => `${range[1] === 0 ? "" : ` 当前为第${range[1]}-${range[0]}条 `}共${total}条记录`}
-                    style={{float: 'right', marginRight: 20, marginTop: 10,marginBottom:20}}
+                    style={{float: 'right', marginRight: 20, marginTop: 10, marginBottom: 20}}
                     total={orderTotal}
                     onChange={this.changePage.bind(this)}
                     onShowSizeChange={this.changePage.bind(this)}
         />
+
+        {/*结单modal*/}
         <Modal title="请确认"
-               centered
                destroyOnClose
                wrapClassName="globalErrandsModal"
                visible={endVisible}
                closable={false}
                footer={[
-                 <Button type="primary" key="ok"  loading={btnLoading} onClick={this.confirmOk.bind(this)}>确认结单</Button>,
+                 <Button type="primary" key="ok" loading={btnLoading} onClick={this.confirmOk.bind(this)}>确认结单</Button>,
                  <Button key="cancel" onClick={this.endCancel.bind(this)}>取消</Button>
                ]}
         >
@@ -277,6 +330,22 @@ class WaitPurchasing extends React.Component {
           </Radio.Group>
           <Input.TextArea autosize={true} disabled={endState !== 0} placeholder="请输入未采购到的商品名称" value={noPurchased}
                           onChange={this.getNoPurchasedInfo.bind(this)}/>
+        </Modal>
+        {/*跟进人modal*/}
+        <Modal title="请确认"
+               visible={followVisible}
+               destroyOnClose
+               closable={false}
+               confirmLoading={confirmLoading}
+               wrapClassName="globalErrandsModal"
+               onOk={this.editFollowUp.bind(this)}
+               onCancel={() => {
+                 this.setState({orderId: null, followVisible: false,followUpper: null})
+               }}
+        >
+          <Input placeholder="请填写跟进人" value={followUpper} onChange={(e) => {
+            this.setState({followUpper: e.target.value})
+          }}/>
         </Modal>
       </div>
     );
