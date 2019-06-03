@@ -83,7 +83,6 @@ class awaitingExamine extends React.Component {
       // 为空金额
       emptyList: []
     };
-    // window.awaitingExamine = this;
   }
 
   componentDidMount() {
@@ -453,6 +452,10 @@ class awaitingExamine extends React.Component {
     })
   }
 
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
+  }
   render() {
     let {showImageViewer, shopList, currentShop, hasTicket, brandListOrigin, ticketList, currentTicketId, reciptMoney, defaultExchangeRate, previewImageWH, ticketTotal, country, ticketDate, hasChange, repeatList, emptyList, rejectVisible, reasonId, rejectSpecificReason} = this.state;
     const {getFieldDecorator} = this.props.form;

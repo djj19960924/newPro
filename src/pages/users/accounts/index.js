@@ -1,9 +1,9 @@
 import React from 'react';
 import { Button, Table, message, Pagination, Modal, Input, Form, Select, } from 'antd';
-import { observer } from 'mobx-react/index';
+import { inject, observer } from 'mobx-react/index';
 import './index.less';
 
-@observer @Form.create()
+@inject('appStore') @observer @Form.create()
 class accounts extends React.Component {
   constructor(props) {
     super(props);
@@ -28,6 +28,8 @@ class accounts extends React.Component {
       currentInfo: {},
     };
   }
+
+  allow = this.props.appStore.getAllow.bind(this);
 
   componentDidMount() {
     this.getRoleList();
@@ -148,8 +150,8 @@ class accounts extends React.Component {
 
   // 提交表单
   submitForm() {
-    const { validateFields } = this.props.form;
-    const { detailState, currentInfo } = this.state;
+    const {validateFields} = this.props.form;
+    const {detailState, currentInfo} = this.state;
     validateFields((err, val) => {
       if (!err) {
         const dataObj = {
@@ -161,15 +163,19 @@ class accounts extends React.Component {
           company: val.company ? val.company.trim() : '',
         };
         if (detailState === 'add') {
-          this.changeUser(dataObj,'addUser');
+          this.changeUser(dataObj, 'addUser');
         } else if (detailState === 'edit') {
           dataObj.userId = currentInfo.userId;
-          this.changeUser(dataObj,'updateUser');
+          this.changeUser(dataObj, 'updateUser');
         }
       }
     })
   }
 
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
+  }
   render() {
     const { tableDataList, tableIsLoading, pageTotal, pageSize, pageNum, pageSizeOptions, detailState, showDetails, rolesOptions, currentInfo, rolesObject, } = this.state;
     const FormItem = Form.Item;
@@ -189,14 +195,14 @@ class accounts extends React.Component {
             <Button type="primary"
                     onClick={this.showDetails.bind(this,'detail',record)}
             >查看</Button>
-            <Button type="primary"
+            {this.allow(4) && <Button type="primary"
                     style={{marginLeft: 10}}
                     onClick={this.showDetails.bind(this,'edit',record)}
-            >修改</Button>
-            <Button type="danger"
+            >修改</Button>}
+            {this.allow(5) && <Button type="danger"
                     style={{marginLeft: 10}}
                     onClick={this.deleteUser.bind(this,record.userId)}
-            >删除</Button>
+            >删除</Button>}
           </div>
       },
     ];
@@ -204,9 +210,9 @@ class accounts extends React.Component {
       <div className="accounts">
         <div className="title">账户管理</div>
         <div className="btnLine">
-          <Button type="primary"
+          {this.allow(3) && <Button type="primary"
                   onClick={this.showDetails.bind(this,'add')}
-          >新增账户</Button>
+          >新增账户</Button>}
         </div>
         <Modal className="details"
                wrapClassName="accountsDetailsModal"
@@ -218,7 +224,6 @@ class accounts extends React.Component {
                onOk={this.submitForm.bind(this)}
                okText={detailState === 'edit' ? '修改' : (detailState === 'add' ? '新增' : '')}
                footer={detailState === 'detail' ? null : undefined}
-               forceRender={true}
         >
           {/* 用户名称/邮箱/电话/公司/角色 */}
           <Form className=""

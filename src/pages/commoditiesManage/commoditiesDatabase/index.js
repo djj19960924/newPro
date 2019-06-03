@@ -4,8 +4,10 @@ import XLSX from 'xlsx';
 import moment from 'moment/';
 import Country from '@js/countryForCD/';
 import JsZip from 'jszip';
+import { inject, observer } from 'mobx-react';
 import './index.less';
 
+@inject('appStore') @observer
 class commoditiesDataBase extends React.Component {
   constructor(props) {
     super(props);
@@ -64,10 +66,9 @@ class commoditiesDataBase extends React.Component {
       // 导出状态
       isExport: false,
     };
-    window.commoditiesDataBase = this;
-    // window.moment = moment;
-    // window.React = React;
+    // window.commoditiesDataBase = this;
   }
+  allow = this.props.appStore.getAllow.bind(this);
   // 这里需要在组件即将加载时优先生成input
   componentWillMount() {
     const {zip} = this.state;
@@ -83,10 +84,7 @@ class commoditiesDataBase extends React.Component {
   componentDidMount() {
     // 默认载入表格数据
     const record = window.getQueryString('record');
-    this.setState({
-      tableIsLoading: true,
-      record: record && (record !== 'null') ? parseInt(record) : 0
-    },() => {
+    this.setState({record: record && (record !== 'null') ? parseInt(record) : 0},() => {
       this.getSku();
     });
   }
@@ -136,6 +134,7 @@ class commoditiesDataBase extends React.Component {
               // 获取图片文件成功
               imageFolder.file(`JD${dataList[picNum].skuCode}.${type}`, r);
               imageSuccessList.push(dataList[picNum]);
+              // 下载单张图片成功时, 静默处理
               // console.log(dataList[picNum].skuCode,', 图片下载成功');
               //
               // 这里需要额外说明, 当商品图片为空或不符合格式而跳过时, 由本地判断的速度会非常快
@@ -144,7 +143,6 @@ class commoditiesDataBase extends React.Component {
               // this.forceUpdate()也可以达成这个效果,
               // 但是出于安全考虑, 建议使用this.setState({})
               this.setState({});
-              //
               addPicNum();
             }).catch(()=>{
               // 代码出现解析问题, 或文件类型有误
@@ -238,41 +236,40 @@ class commoditiesDataBase extends React.Component {
   }
 
   // 获取表单列表
-  getSku(searchValue = this.state.searchValue,
-         record = this.state.record,
-         pageNum = this.state.pageNum,
-         pageSize = this.state.pageSize) {
-    fetch(`${window.fandianUrl}/sku/getSku`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        choice: record,
-        pageNum: pageNum,
-        pageSize: pageSize,
-        searchParm: searchValue.trim()
-      })
-    }).then(r => r.json()).then(r => {
-      this.setState({tableIsLoading: false, dataList: []});
-      if (r.status) {
-        if (r.status === 10000) {
-          this.setState({
-            dataList: r.data.list,
-            pageNum: r.data.pageNum,
-            pageSize: r.data.pageSize,
-            pageTotal: r.data.total,
-            pageSizeOptions: [`50`, `100`, `200`, `${r.data.total > 300 ? r.data.total : 300}`]
-          })
-        } else if (r.status === 10001) {
-          message.warn(`${r.msg}`);
-        } else {
-          message.error(`${r.msg} 状态码:${r.status}`);
-        }
-      } else {
-        message.error(`后端数据错误`)
+  getSku() {
+    const { pageNum, pageSize, searchValue, record } = this.state;
+    this.setState({tableIsLoading: true});
+    let dataObj = {
+      choice: record,
+      pageNum: pageNum,
+      pageSize: pageSize,
+      searchParm: searchValue.trim()
+    };
+    this.ajax.post('/sku/getSku',dataObj).then(r => {
+      const { data, status } = r.data;
+      let dataObj = {};
+      if (status === 10000) {
+        dataObj = {
+          dataList: data.list,
+          pageNum: data.pageNum,
+          pageSize: data.pageSize,
+          pageTotal: data.total,
+          pageSizeOptions: [`50`, `100`, `200`, `${data.total > 300 ? data.total : 300}`]
+        };
+      } else if (status < 10000) {
+        dataObj = {
+          dataList: [],
+          pageNum: 1,
+          pageTotal: 0,
+          pageSizeOptions: [`50`, `100`, `200`, `300`]
+        };
       }
-    }).catch(() => {
-      this.setState({tableIsLoading: false, dataList: []});
-      message.error(`商品列表接口调取失败`)
+      this.setState(dataObj);
+      r.showError();
+      this.setState({tableIsLoading: false});
+    }).catch(r => {
+      this.setState({tableIsLoading: false});
+      this.ajax.isReturnLogin(r,this);
     });
   }
 
@@ -302,47 +299,24 @@ class commoditiesDataBase extends React.Component {
     }
     // loading
     this.setState({isExport: true});
-    fetch(`${window.fandianUrl}/sku/sendExcel`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(dataArrayAll)
-    }).then(r => r.json()).then(r => {
-      if (r.status) {
-        if (r.status === 10000) {
-          // 当备份excel文件接口调取成功以后,再行处理更改备案状态接口以做保险
-          // message.success(`${r.msg}`);
-          fetch(`${window.fandianUrl}/sku/updateProductRecordState`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(dataArray)
-          }).then(r => r.json()).then(r => {
-            if (r.status) {
-              if (r.status === 10000) {
-                message.success(`${r.msg}`);
-                this.setState({exportModalVisible: false})
-              } else {
-                message.error(`${r.msg}, 错误码:${r.status}`)
-              }
-            } else {
-              message.error(`后端数据错误`)
-            }
-            this.setState({tableIsLoading: true, isExport: false}, () => {
-              this.getSku();
-            });
-          }).catch(() => {
-            message.error(`前端错误: 将未备案数据改为已备案状态接口调取失败`)
-          })
-        } else {
-          message.error(`${r.msg}, 错误码: ${r.status}`)
-        }
-      } else {
-        message.error(`后端数据错误`)
+    this.ajax.post('/sku/sendExcel',dataArrayAll).then(r => {
+      if (r.data.status === 10000) {
+        this.ajax.post('/sku/updateProductRecordState',dataArray).then(r => {
+          if (r.data.status === 1000) {
+            message.success(`${r.msg}`);
+            this.setState({exportModalVisible: false})
+          }
+          this.setState({isExport: false}, () => {
+            this.getSku();
+          });
+          r.showError();
+        }).catch(r => {
+          this.ajax.isReturnLogin(r,this);
+        })
       }
-    }).catch(() => {
-      message.error(`前端错误: 备份excel文件接口调取失败`);
-      this.setState({tableIsLoading: true, isExport: false}, () => {
-        this.getSku();
-      });
+      r.showError();
+    }).catch(r => {
+      this.ajax.isReturnLogin(r,this);
     });
   }
 
@@ -369,7 +343,6 @@ class commoditiesDataBase extends React.Component {
   changeRecord(e) {
     this.props.history.push(`/commodities-manage/commodities-database?record=${e.target.value}`);
     this.setState({
-      tableIsLoading: true,
       record: e.target.value,
       pageNum: 1,
       pageSize: 100,
@@ -383,75 +356,59 @@ class commoditiesDataBase extends React.Component {
     const {Num, excelDataList, successList, failList, failListNum,} = this.state;
     if (Num < excelDataList.length) {
       this.setState({isSubmit: true});
-      fetch(`${window.fandianUrl}/sku/updateSkuByUploadExcel`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          // skuCode: excelDataList[Num].skuCode,
-          skuCode: excelDataList[Num].skuCode.split(`JD`)[1],
-          recordPrice: excelDataList[Num].recordPrice,
-          isRecord: 1,
-          brand: excelDataList[Num].brand,
-          name: excelDataList[Num].name,
-          netWeight: excelDataList[Num].netWeight,
-          grossWeight: excelDataList[Num].grossWeight,
-          purchaseArea: excelDataList[Num].purchaseArea,
-          specificationType: excelDataList[Num].specificationType
-        })
-      }).then(r => r.json()).then(r => {
-        if (r.status) {
-          if (r.status === 10000) {
-            successList.push(excelDataList[Num]);
-            // 后端处理数据成功
-            this.setState({Num: (Num + 1), successList: successList,}, () => {
-              this.updateSkuByUploadExcel();
-            })
-          } else {
-            // 后端处理数据失败
-            // 于后端约定, 10000 为成功,当大于 10000 为 error 报错, 当小于 10000 则为 warn 警告
-            if (parseInt(r.status) < 10000) {
-              message.warn(`${r.msg}, 状态码: ${r.status}`);
-            } else {
-              message.error(`${r.msg}, 状态码: ${r.status}`);
-            }
-            let dataObj = Object.assign({}, excelDataList[Num]);
-            dataObj.msg = r.msg;
-            dataObj.status = r.status;
-            failList.push(dataObj);
-            failListNum.push(dataObj.Num + 2);
-            this.setState({Num: (Num + 1), failList: failList, failListNum: failListNum,}, () => {
-              this.updateSkuByUploadExcel();
-            })
-          }
+      const dataObj = {
+        skuCode: excelDataList[Num].skuCode.split(`JD`)[1],
+        recordPrice: excelDataList[Num].recordPrice,
+        isRecord: 1,
+        brand: excelDataList[Num].brand,
+        name: excelDataList[Num].name,
+        netWeight: excelDataList[Num].netWeight,
+        grossWeight: excelDataList[Num].grossWeight,
+        purchaseArea: excelDataList[Num].purchaseArea,
+        specificationType: excelDataList[Num].specificationType
+      };
+      this.ajax.post('/sku/updateSkuByUploadExcel',dataObj).then(r => {
+        if (r.data.status === 10000) {
+          successList.push(excelDataList[Num]);
+          this.setState({Num: (Num + 1), successList: successList,}, () => {
+            this.updateSkuByUploadExcel();
+          })
         } else {
-          message.error(`后端数据类型错误`)
+          // 非同源策略
+          let dataObj = Object.assign({}, excelDataList[Num]);
+          dataObj.msg = r.msg;
+          dataObj.status = r.status;
+          failList.push(dataObj);
+          failListNum.push(dataObj.Num + 2);
+          this.setState({Num: (Num + 1), failList: failList, failListNum: failListNum,}, () => {
+            this.updateSkuByUploadExcel();
+          })
         }
-      }).catch(() => {
-        message.error(`更改备案价接口调取失败`)
-      })
+        r.showError();
+      }).catch(r => {
+        this.ajax.isReturnLogin(r,this);
+      });
     } else {
       message.success(`导入结束, 如需继续, 请重新选择excel文件`);
-      this.setState({tableIsLoading: true, isSubmit: false}, () => {
+      this.setState({ isSubmit: false}, () => {
         this.getSku();
       });
     }
   }
 
   // 更改当前页或每页显示条数
-  changePage(n, s) {
+  changePage(pageNum, pageSize) {
     this.setState({
-      pageNum: n,
-      pageSize: s,
-      tableIsLoading: true
+      pageNum: pageNum,
+      pageSize: pageSize
     }, () => {
-      this.getSku(undefined, undefined)
+      this.getSku()
     });
-
   }
 
   // 跳转至编辑界面
   toCE(type, skuId) {
-    const {record,} = this.state;
+    const { record } = this.state;
     // 使用query传值
     // 在这里清空本地相关数据, 使得编辑和新增功能不受干扰
     localStorage.removeItem('imgList');
@@ -459,6 +416,10 @@ class commoditiesDataBase extends React.Component {
     this.props.history.push(`/commodities-manage/commodities-database/create-and-edit?type=${type}&skuId=${skuId}&record=${record}`);
   }
 
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
+  }
   render() {
     const RadioButton = Radio.Button, RadioGroup = Radio.Group;
     const { dataList, searchValue, pageNum, pageSize, pageTotal, pageSizeOptions, record, importModalVisible, input, errorList, isSubmit, failList, failListNum, excelDataList, successList, tableIsLoading, exportModalVisible, isExport, downloadImageVisible, imageLoading, imageFailList, imageSuccessList, imageIsDownload, } = this.state;
@@ -474,7 +435,7 @@ class commoditiesDataBase extends React.Component {
       {title: '商品名称', dataIndex: 'name', key: 'name', width: 160},
       {title: '商品条码', dataIndex: 'skuCode', key: 'skuCode', width: 160},
       {
-        title: '备案价(¥)', dataIndex: 'recordPrice', key: 'recordPrice', width: 120,
+        title: '备案价', dataIndex: 'recordPrice', key: 'recordPrice', width: 120,
         render: (text, record) => (
           // 这里调用方法判断行邮方式
           <div>{record.recordPrice ? record.recordPrice : '无'}</div>
@@ -487,8 +448,8 @@ class commoditiesDataBase extends React.Component {
           <div>{this.postWay(record.sugPostway)}</div>
         ),
       },
-      {title: '商品品牌', dataIndex: 'brand', key: 'brand', width: 140},
-      {title: '毛重(kg)', dataIndex: 'grossWeight', key: 'grossWeight', width: 80},
+      {title: '商品品牌', dataIndex: 'brand', key: 'brand'},
+      {title: '毛重(kg)', dataIndex: 'grossWeight', key: 'grossWeight', width: 90},
       {title: '采购价', dataIndex: 'costPrice', key: 'costPrice', width: 120},
       // {title: '商品品类', dataIndex: 'category', key: 'category', width: 140},
       {title: '数量', dataIndex: 'stock', key: 'stock', width: 80},
@@ -498,21 +459,21 @@ class commoditiesDataBase extends React.Component {
           // 这里调用方法判断行邮方式
           <div>{record.taxRate ? `${record.taxRate}%` : '无'}</div>
         ),
-      },
-      {
-        title: '操作', dataIndex: '操作', key: '操作',
-        width: 100,
-        fixed: 'right',
-        render: (text, record) => (
-          <div>
-            <Button type="primary"
-                    style={{'margin': 0}}
-                    onClick={this.toCE.bind(this, 'edit', record.skuId)}
-            >编辑</Button>
-          </div>
-        ),
       }
     ];
+    if (this.allow(60)) columns.push({
+      title: '操作', dataIndex: '操作', key: '操作',
+      width: 100,
+      fixed: 'right',
+      render: (text, record) => (
+        <div>
+          <Button type="primary"
+                  style={{'margin': 0}}
+                  onClick={this.toCE.bind(this,'edit', record.skuId)}
+          >编辑</Button>
+        </div>
+      ),
+    });
     const columnsForExport = [
       // 非必填字段于表中隐藏, 不对应实际dataIndex, 只填写必须部分
       // {title: `商家编码`, dataIndex: `商家编码`, key: `商家编码`, width: 80},
@@ -645,9 +606,9 @@ class commoditiesDataBase extends React.Component {
                }}
         >
           {imageLoading &&
-            <p style={{fontSize:'24px',color:'rgba(255,0,0,.7)'}}>
-              <Icon type="loading" /> 正在下载图片, 请稍后...
-            </p>
+          <p style={{fontSize:'24px',color:'rgba(255,0,0,.7)'}}>
+            <Icon type="loading" /> 正在下载图片, 请稍后...
+          </p>
           }
           <p>当前处理完成图片: {imageFailList.length + imageSuccessList.length}/{dataList.length}</p>
           <p>当前错误图片:</p>
@@ -672,64 +633,67 @@ class commoditiesDataBase extends React.Component {
 
         {/*新增按钮 excel导出 搜索框*/}
         <div className="searchLine">
-          <Button type="primary"
-                  className="createNew"
-                  onClick={this.toCE.bind(this, 'create', null)}
-          >新增商品</Button>
+          {this.allow(60) && <Button type="primary"
+                                     className="createNew"
+                                     onClick={this.toCE.bind(this,'create', null)}
+          >新增商品</Button>}
           {record === 1 && <Button type="primary"
                                    className="exportExcelBtn"
                                    onClick={this.exportExcel_record_1.bind(this)}
           >导出已备案资料</Button>}
-          {(record === 2 ||  record === 5) && <Button type="primary"
-                                   className="exportExcelBtn"
-                                   onClick={() => this.setState({exportModalVisible: true})}
+          {this.allow(56) && (record === 2 ||  record === 5) && <Button type="primary"
+                                                     className="exportExcelBtn"
+                                                     onClick={() => this.setState({exportModalVisible: true})}
           >excel导出</Button>}
-          {(record === 2 ||  record === 5) && <Button type="primary"
-                                   className="importExcelBtn"
-                                   onClick={()=>this.setState({downloadImageVisible: true})}
+          {this.allow(56) && (record === 2 ||  record === 5) && <Button type="primary"
+                                                     className="importExcelBtn"
+                                                     onClick={()=>this.setState({downloadImageVisible: true})}
           >下载图片</Button>}
-          {record === 3 &&
+          {this.allow(58) && record === 3 &&
           <Button type="primary"
                   onClick={this.clickIT.bind(this)}
                   className="importExcelBtn"
-          >excel导入更新备案价</Button>}
+          >excel导入更新备案价</Button>
+          }
           <Search className="searchInput"
                   placeholder="请输入关键字进行搜索"
                   value={searchValue}
-                  // 根据条件搜索
+            // 根据条件搜索
                   onSearch={(e) => this.getSku(e)}
-                  // 保存搜索框值
+            // 保存搜索框值
                   onChange={(e) => this.setState({searchValue: e.target.value})}
           />
         </div>
 
-        {/*表单主体*/}
-        <Table className="tableList"
-               ref={'commoditiesTable'}
-               dataSource={dataList}
-               // columns={record === 2 ? columnsForExport : columns}
-               columns={columns}
-               pagination={false}
-               bordered
-               scroll={{y: 500, x: 1400}}
-               rowKey={(record, index) => `id_${index}`}
-               loading={tableIsLoading}
-        />
+        <div className="tableMain">
+          {/*表单主体*/}
+          <Table className="tableList"
+                 ref={'commoditiesTable'}
+                 dataSource={dataList}
+            // columns={record === 2 ? columnsForExport : columns}
+                 columns={columns}
+                 pagination={false}
+                 bordered
+                 scroll={{y: 500, x: 1300}}
+                 rowKey={(record, index) => `id_${index}`}
+                 loading={tableIsLoading}
+          />
 
-        {/*分页*/}
-        <Pagination className="tablePagination"
-                    total={pageTotal}
-                    pageSize={pageSize}
-                    current={pageNum}
-                    showTotal={(total, range) =>
-                      `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 `}共 ${total} 条记录`
-                    }
-                    style={{float: 'right', marginRight: 20, marginTop: 10, marginBottom: 20}}
-                    onChange={this.changePage.bind(this)}
-                    showSizeChanger
-                    pageSizeOptions={pageSizeOptions}
-                    onShowSizeChange={this.changePage.bind(this)}
-        />
+          {/*分页*/}
+          <Pagination className="tablePagination"
+                      total={pageTotal}
+                      pageSize={pageSize}
+                      current={pageNum}
+                      showTotal={(total, range) =>
+                        `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 `}共 ${total} 条记录`
+                      }
+                      style={{float: 'right', marginRight: 20, marginTop: 10, marginBottom: 20}}
+                      onChange={this.changePage.bind(this)}
+                      showSizeChanger
+                      pageSizeOptions={pageSizeOptions}
+                      onShowSizeChange={this.changePage.bind(this)}
+          />
+        </div>
 
         {/*导出用表单*/}
         {record === 2 && <Table className="tableListForExport"

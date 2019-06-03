@@ -70,6 +70,10 @@ class orderUnmatched extends React.Component{
     this.setState({ selectedRowKeys });
   }
 
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
+  }
   render() {
     const { selectedRowKeys } = this.state;
     const rowSelection = {

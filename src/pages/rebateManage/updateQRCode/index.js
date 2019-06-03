@@ -14,7 +14,6 @@ class updateQRCode extends React.Component {
       previewVisible: false,
       previewImage: '',
     };
-    window.updateQRCode = this;
   }
   componentDidMount() {
     this.selectMaxRebateByRebateDate()
@@ -74,6 +73,10 @@ class updateQRCode extends React.Component {
     }
   }
 
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
+  }
   render() {
     const { imgUrl, previewVisible, previewImage, fileList, uploadLoading, } = this.state;
     const uploadButton = <div><Icon type="plus" /><div className="ant-upload-text">添加图片</div></div>;

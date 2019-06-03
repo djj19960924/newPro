@@ -1,9 +1,10 @@
-import React from 'react'
-import {Link,withRouter} from 'react-router-dom'
-import {Menu, Icon} from 'antd'
+import React from 'react';
+import { Link, withRouter } from 'react-router-dom';
+import { inject, observer } from 'mobx-react';
+import { Menu, Icon } from 'antd';
 
 //此组件的意义就是将数据抽离出来，通过传递数据去渲染
-@withRouter
+@withRouter @inject('appStore') @observer
 class CustomMenu extends React.Component {
   state = {
     openKeys: [],
@@ -14,7 +15,7 @@ class CustomMenu extends React.Component {
     // 防止页面刷新侧边栏又初始化了
     const pathname = this.props.location.pathname;
     //获取当前所在的目录层级
-    const rank = pathname.split('/')
+    const rank = pathname.split('/');
     switch (rank.length) {
       case 2 :  //一级目录
         this.setState({
@@ -70,7 +71,8 @@ class CustomMenu extends React.Component {
     }
   }
 
-  renderMenuItem = ({key, icon, title, testType}) => {
+  renderMenuItem = ({key, icon, title, testType, id}) => {
+    if (![...this.props.appStore.allowSideList].includes(id)) return false;
     // 如果菜单内存在testType(不存在则始终显示,包括正式版)
     if (testType)
       // 如果全局testType不为本地测试时(如果为本地测试则始终显示所有侧边栏)
@@ -86,7 +88,8 @@ class CustomMenu extends React.Component {
       </Menu.Item>
     )
   }
-  renderSubMenu = ({key, icon, title, subs, testType}) => {
+  renderSubMenu = ({key, icon, title, subs, testType, id}) => {
+    if (![...this.props.appStore.allowSideList].includes(id)) return false;
     if (testType)
       if (window.testType !== 'localTest')
         if (testType !== window.testType) return false;
@@ -99,6 +102,10 @@ class CustomMenu extends React.Component {
         }
       </Menu.SubMenu>
     )
+  }
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
   }
 
   render() {

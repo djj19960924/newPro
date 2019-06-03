@@ -1,8 +1,9 @@
 import React from 'react';
 import {Layout} from 'antd';
-import SiderNav from '../../components/SiderNav';
-import ContentMain from '../../components/ContentMain';
-import HeaderBar from '../../components/HeaderBar';
+import SiderNav from '@components/SiderNav/';
+import HeaderBar from '@components/HeaderBar/';
+import GetAppStore from '@components/GetAppStore/';
+import ContentMain from "@components/ContentMain/";
 
 import './index.less';
 
@@ -13,19 +14,23 @@ class Index extends React.Component {
     super(props);
     this.state = {
       collapsed: false,
-    }
+      allowSideList: [],
+      roleId: null,
+    };
   }
-  // toggle = () => {
-  //   // console.log(this)  状态提升后，到底是谁调用的它
-  //   this.setState({
-  //     collapsed: !this.state.collapsed
-  //   })
-  // }
+  setInfo(list,roleId) {
+    this.setState({
+      allowSideList: list,
+      roleId: roleId
+    })
+  }
   render(){
+    const { allowSideList, roleId } = this.state;
     return(
       <div name="Index" id='indexPage'>
         <Layout>
-          <Sider // 是否可收起
+          <Sider style={{position: 'fixed', left: 0, top: 64, bottom: 0}}
+            // 是否可收起
             collapsible
             // 当前是否为收起状态
             collapsed={this.state.collapsed}
@@ -33,18 +38,19 @@ class Index extends React.Component {
             trigger={null}
             // 定义侧边栏宽度
             width={200}
-            style={{position: 'fixed', left: 0, top: 64, bottom: 0}}>
+          >
             <SiderNav />
           </Sider>
           <Layout>
-            <Header style={{position: 'fixed', left: 0, right: 0, height: 64, }}
-            >
+            <Header style={{position: 'fixed', left: 0, right: 0, height: 64, }} >
               <HeaderBar />
             </Header>
-            <Content style={{position: 'fixed', left: 200, top: 64, bottom: 0, right: 0, width:'calc(100% - 200px)'}}>
-              <ContentMain />
+            <Content style={{position: 'fixed', left: 200, top: 64, bottom: 0, right: 0, width:'calc(100% - 200px)'}} >
+              <GetAppStore setInfo={this.setInfo.bind(this)} />
+              <ContentMain allowSideList={allowSideList} roleId={roleId}/>
             </Content>
-            <Footer></Footer>
+            {/*预留页脚*/}
+            <Footer />
           </Layout>
         </Layout>
       </div>

@@ -24,6 +24,10 @@ class orderMatched extends React.Component{
     var wb = XLSX$Consts.utils.table_to_book(elt, {raw: true, sheet:"Sheet JS"});
     XLSX$Consts.writeFile(wb, (new Date()+'已匹配订单.xlsx'));
   }
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
+  }
   render() {
     return (
       <div className="orderMatched">

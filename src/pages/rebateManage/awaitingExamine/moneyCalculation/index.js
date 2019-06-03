@@ -14,7 +14,6 @@ class MoneyCalculation extends React.Component {
       number: null,
       mainDataList: [],
     };
-    // window.MoneyCalculation = this;
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -115,6 +114,10 @@ class MoneyCalculation extends React.Component {
     })
   }
 
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
+  }
   render() {
     const { brandList, mainDataList, defaultBrand, defaultBrandRebate, } = this.state;
     const { country, changeReciptMoney, repeatList, emptyList, } = this.props;

@@ -36,12 +36,10 @@ class commoditiesImgList extends React.Component {
       // Loading提示文字
       loadingTxt: 'Loading...'
     };
-    window.commoditiesImgList = this;
+    // window.commoditiesImgList = this;
   }
   componentDidMount() {
-    const type = window.getQueryString('type');
-    const skuId = window.getQueryString('skuId');
-    const record = window.getQueryString('record');
+    const { type, skuId, record } = window.getAllQueryString();
     this.setState({
       type: type,
       skuId: skuId,
@@ -62,43 +60,27 @@ class commoditiesImgList extends React.Component {
         }
         this.setState({ imgList: dataList },() => { this.makeImgToFile() });
       } else {
-        fetch(`${window.fandianUrl}/sku/selectEditSkuBySkuId`, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-          body:`skuId=${skuId}`
-        }).then(r => r.json()).then(r => {
-          if (r.status === 10000) {
-            // 成功
-            // 将图片地址保存在本地缓存
+        this.ajax.post('/sku/selectEditSkuBySkuId',{skuId:skuId}).then(r => {
+          if (r.data.status === 10000) {// 将图片地址保存在本地缓存
             const d = r.data;
             localStorage.imgList = JSON.stringify({imgList: d.imgList});
             const dataList = [];
-            if (Array.isArray(d.imgList)) {
-              for (let v of d.imgList) {
-                dataList.push(`//${v.split('//')[1]}`)
-              }
-            } else {
-              // d.imgList为空时, 值恒定为null, 这里不做处理, 直接赋值空数组
-            }
-            this.setState({ imgList: dataList },() => { this.makeImgToFile() });
-          } else {
-            // 错误,并返回错误码
-            message.error(`${r.msg} 错误码:${r.status}`);
+            if (Array.isArray(d.imgList)) for (let v of d.imgList) dataList.push(`//${v.split('//')[1]}`);
+            this.setState({ imgList: dataList },() => {
+              this.makeImgToFile()
+            });
           }
-        })
+          r.showError();
+        }).catch(r => {
+          this.ajax.isReturnLogin(r,this);
+        });
       }
     } else if (type === 'create') {
       // 如果类型为创建, 则将上传的图片所返回的图片地址, 保存在本地数据库, 传入创建商品页面
       if (!!localStorage.newImgList) {
         const imgList = JSON.parse(localStorage.newImgList).imgList;
         const dataList = [];
-        if (Array.isArray(imgList)) {
-          for (let v of imgList) {
-            dataList.push(`//${v.split('//')[1]}`)
-          }
-        } else {
-          // d.imgList为空时, 值恒定为null, 这里不做处理, 直接赋值空数组
-        }
+        if (Array.isArray(imgList)) for (let v of imgList) dataList.push(`//${v.split('//')[1]}`);
         this.setState({ imgList: dataList },() => { this.makeImgToFile() });
       }
     } else {
@@ -106,13 +88,6 @@ class commoditiesImgList extends React.Component {
       this.props.history.push(`/commodities-manage/commodities-database?record=${record}`);
     }
   }
-  // 组件渲染值完成以后触发
-  // componentDidUpdate() {
-  //   const { cameraModalVisible, isFileTooLarge, } = this.state;
-  //   // 这里根据摄像头页面弹出渲染完成以后, 触发调取摄像头
-  //   // if (cameraModalVisible) this.getMedia();
-  //   if (isFileTooLarge) message.error('单个文件大小不能超过10m');
-  // }
   // img图片转file
   makeImgToFile() {
     // 异步加载图片, img初始化设置, 这里放开头部验证, 防止canvas转码出现跨域问题
@@ -260,27 +235,24 @@ class commoditiesImgList extends React.Component {
   }
   // 获取摄像头
   getMedia() {
-    let constraints = {
-      video: {width: 480, height: 480},
-      audio: true
-    };
     if (navigator.mediaDevices === undefined) {
       message.warn('暂时无法使用摄像头');
       return false;
     }
     // 获取摄像头内容,显示在video中
-    let promise = navigator.mediaDevices.getUserMedia(constraints);
-    promise.then(function(MediaStream) {
-      document.getElementById("video").srcObject = MediaStream;
-      document.getElementById("video").play();
-      // console.log(`promise success`);
-      window.commoditiesImgList.setState({hasCamera:true});
-    }).catch(function(error) {
+    const promise = navigator.mediaDevices.getUserMedia({
+      video: {width: 480, height: 480}, audio: true
+    }), the = this;
+    promise.then(MediaStream => {
+      const video = document.getElementById("video");
+      video.srcObject = MediaStream;
+      video.play();
+      the.setState({hasCamera: true});
+    }).catch(error => {
       message.error('调取摄像头失败, 请确保电脑已经成功链接摄像头, 并通过浏览器调用摄像头的申请!');
       console.log(error.name);
       console.log(error.message);
-      // console.log(`promise error`);
-      window.commoditiesImgList.setState({hasCamera:false})
+      the.setState({hasCamera: false});
     })
   }
   // 拍照
@@ -364,38 +336,30 @@ class commoditiesImgList extends React.Component {
       // 多文件格式
       for (let i in fileList) {
         formData.append(`file${parseInt(i)+1}`,fileList[i].originFileObj);
-        // formData.append(`files[${i}]`,this.state.fileList[i].originFileObj);
         fileListData.push(fileList[i].originFileObj)
       }
       // 上传接口
-      fetch(`${window.fandianUrl}/skuUpimg/headImgUpload`,{
-        method: 'POST',
-        body: formData
-      }).then(r=>r.json()).then(r=>{
+      this.ajax.post('/skuUpimg/skuImgUpload',formData,{},true).then(r => {
         // 关闭loading
         this.setState({
           isLoading: false,
           loadingTxt: 'Loading...'
         });
-        // 这里获取返回的imgUrl
-        if (r.code === 2000) {
+        if (r.data.status === 10000) {
           // 图片上传成功以后根据类型判断下一步行为
           if (type === 'create') {
             // localStorage 只能存储字符串, 但是可以自动将数组转化为由 ',' 分割的 string
             message.success('图片上传成功, 请继续填写信息以完成商品录入');
-            localStorage.newImgList = JSON.stringify({imgList:r.imgList});
+            localStorage.newImgList = JSON.stringify({imgList: r.data.data});
             this.props.history.push(`/commodities-manage/commodities-database/create-and-edit?type=${type}&skuId=${skuId}&record=${record}`);
           } else if (type === 'edit') {
-            this.editSkuImg(type,skuId,r);
+            this.editSkuImg(type,skuId,r.data.data);
           }
-        } else {
-          message.error(`${r.msg} 错误码为:${r.code}`)
         }
-      }).catch(() => {
-        message.error('图片上传接口调取失败!');
-        // 关闭loading
-        this.setState({ isLoading: false, loadingTxt: 'Loading...' });
-      })
+        r.showError();
+      }).catch(r => {
+        this.ajax.isReturnLogin(r,this)
+      });
     } else {
       // 关闭loading
       this.setState({ isLoading: false, loadingTxt: 'Loading...' });
@@ -408,27 +372,23 @@ class commoditiesImgList extends React.Component {
     }
   }
   // 修改sku图片地址
-  editSkuImg(type,skuId,r) {
+  editSkuImg(type,skuId,newImgList) {
     const { record, } = this.state;
-    fetch(`${window.fandianUrl}/sku/editSkuImg`,{
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        skuId: skuId,
-        newImgList: r.imgList
-      })
-    }).then(r=>r.json()).then(r=>{
-      if (r.status === 10000) {
+    const data = {
+      skuId: skuId,
+      newImgList: newImgList
+    };
+    this.ajax.post('/sku/editSkuImg',data).then(r => {
+      if (r.data.status === 10000) {
         // 修改成功
         message.success(`${r.msg}`);
         // 返回上一页面
         this.props.history.push(`/commodities-manage/commodities-database/create-and-edit?type=${type}&skuId=${skuId}&record=${record}`);
-      } else {
-        message.error(`${r.msg} 错误码为:${r.status}`)
       }
-    }).catch(() => {
-      message.error('图片修改接口调取失败!')
-    })
+      r.showError();
+    }).catch(r => {
+      this.ajax.isReturnLogin(r,this)
+    });
   }
   // 保存按钮
   submit() {
@@ -436,18 +396,16 @@ class commoditiesImgList extends React.Component {
     const { type, skuId, } = this.state;
     this.uploadFunction(type,skuId)
   }
-  // 上传前控制 - 禁用自动上传
-  beforeUploadFunction(file,fileList) {
-    // 可以获取到 file, fileList, 也可以在这里做文件校验处理
-    // 禁用默认上传行为
-    return false;
-  }
   // 返回上一个界面
   backTo() {
     const { type, skuId, record } = this.state;
     this.props.history.push(`/commodities-manage/commodities-database/create-and-edit?type=${type}&skuId=${skuId}&record=${record}`);
   }
 
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
+  }
   render() {
     const { fileList, cameraModalVisible, previewVisible, previewImage, hasCamera, isLoading, loadingTxt, } = this.state;
     const uploadButton = (
@@ -473,7 +431,7 @@ class commoditiesImgList extends React.Component {
         >
           <Upload fileList={fileList}
                      supportServerRender
-                     beforeUpload={this.beforeUploadFunction.bind(this)}
+                     beforeUpload={() => {return false}}
                      // 允许一次上传多个文件
                      multiple
                      // 预览类型

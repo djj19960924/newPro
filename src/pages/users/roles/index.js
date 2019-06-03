@@ -163,21 +163,21 @@ class roles extends React.Component {
     //   {menuName: '菜单测试5:菜单测试202:菜单测试20202', perms: '操作测试1', menuId: 19},
     //   {menuName: '菜单测试5:菜单测试202:菜单测试20202', perms: '操作测试2', menuId: 60},
     // ];
-    this.rebuildData(record.permissions);
+    // this.rebuildData(record.permissions);
     this.setState({detailState: 'detail', currentRecord: record});
   }
 
   // 展示详情-修改
   showDetailsModalForEdit(record) {
     const { allPermissionsList } = this.state;
-    this.rebuildData(allPermissionsList, record.permissions);
+    // this.rebuildData(allPermissionsList, record.permissions);
     this.setState({detailState: 'edit', currentRecord: record});
   }
 
   // 展示详情-新增
   showDetailsModalForAdd() {
     const { allPermissionsList } = this.state;
-    this.rebuildData(allPermissionsList, []);
+    // this.rebuildData(allPermissionsList, []);
     this.setState({detailState: 'add'});
   }
 
@@ -292,14 +292,18 @@ class roles extends React.Component {
     })
   }
 
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
+  }
   render() {
     const { tableDataList, tableIsLoading, pageTotal, pageSize, pageNum, pageSizeOptions, showDetails, detailsList, detailState, newMenuIdList, newRoleName, } = this.state;
     const columns = [
       {title: 'ID', dataIndex: 'roleId', key: 'roleId', width: 80},
       {title: '角色名称', dataIndex: 'roleName', key: 'roleName', width: 140},
-      {title: '权限', dataIndex: 'permissions', key: 'permissions',
-        render: (text, record) => this.renderPermissions(text, record)
-      },
+      // {title: '权限', dataIndex: 'permissions', key: 'permissions',
+      //   render: (text, record) => this.renderPermissions(text, record)
+      // },
       {title: '操作', dataIndex: '操作', key: '操作', width: 250, fixed: 'right',
         render: (text, record) => {
           if (record.roleId === 1) {
@@ -307,15 +311,18 @@ class roles extends React.Component {
           } else {
             return <div>
               <Button type="primary"
-                      onClick={this.showDetailsModal.bind(this, record)}
+                      disabled={true}
+                      // onClick={this.showDetailsModal.bind(this, record)}
               >查看</Button>
               <Button type="primary"
                       style={{marginLeft: 10}}
-                      onClick={this.showDetailsModalForEdit.bind(this, record)}
+                      disabled={true}
+                      // onClick={this.showDetailsModalForEdit.bind(this, record)}
               >修改</Button>
               <Button type="danger"
                       style={{marginLeft: 10}}
-                      onClick={this.deleteRole.bind(this, record.roleId)}
+                      disabled={true}
+                      // onClick={this.deleteRole.bind(this, record.roleId)}
               >删除</Button>
             </div>
           }
@@ -355,66 +362,66 @@ class roles extends React.Component {
           }
           <div className="detailsMain">
             {/*渲染三级菜单*/}
-            {detailsList.map((item,index) => (
-              <div key={index}
-                   className="menu_1"
-                   style={index === detailsList.length - 1 ? {} : {borderBottom:'1px #ddd solid'}}
-              >
-                <div className="menu_name">{item.name}</div>
-                <div className="menu_body">
-                  {item.permsList
-                    // 渲染权限列表
-                    ? item.permsList.map((item,index) => (
-                      <div className={`menu_perms ${newMenuIdList.includes(item.menuId) ? 'own_perms' : 'not_own'} ${detailState !== 'detail' ? 'can_edit' : ''}`}
-                           key={item.menuId}
-                           onClick={detailState !== 'detail' ?
-                             this.changeOwn.bind(this,item.menuId) : null}
-                      >{item.perms}</div>
-                    ))
-                    // 渲染菜单列表
-                    : item.list.map((item1,index) => (
-                      <div className="menu_2"
-                           key={index}
-                           style={index === item.list.length - 1 ? {} : {borderBottom:'1px #ddd solid'}}
-                      >
-                        <div className="menu_name">{item1.name}</div>
-                        <div className="menu_body">
-                          {item1.permsList
-                            // 渲染权限列表
-                            ? item1.permsList.map((item2,index) => (
-                              <div className={`menu_perms ${newMenuIdList.includes(item2.menuId) ? 'own_perms' : 'not_own'} ${detailState !== 'detail' ? 'can_edit' : ''}`}
-                                   key={item2.menuId}
-                                   onClick={detailState !== 'detail' ?
-                                     this.changeOwn.bind(this,item2.menuId) : null}
-                              >{item2.perms}</div>
-                            ))
-                            // 渲染菜单列表
-                            : item1.list.map((item2,index) => (
-                              <div className="menu_3"
-                                   key={index}
-                                   style={index === item1.list.length - 1 ? {} : {borderBottom:'1px #ddd solid'}}
-                              >
-                                <div className="menu_name">{item2.name}</div>
-                                <div className="menu_body">
-                                  {/* 渲染权限列表*/}
-                                  {item2.permsList.map((item3,index) => (
-                                    <div className={`menu_perms ${newMenuIdList.includes(item3.menuId) ? 'own_perms' : 'not_own'} ${detailState !== 'detail' ? 'can_edit' : ''}`}
-                                         key={item3.menuId}
-                                         onClick={detailState !== 'detail' ?
-                                           this.changeOwn.bind(this,item3.menuId) : null}
-                                    >{item3.perms}</div>
-                                  ))}
-                                </div>
-                              </div>
-                            ))
-                          }
-                        </div>
-                      </div>
-                    ))
-                  }
-                </div>
-              </div>
-            ))}
+            {/*{detailsList.map((item,index) => (*/}
+              {/*<div key={index}*/}
+                   {/*className="menu_1"*/}
+                   {/*style={index === detailsList.length - 1 ? {} : {borderBottom:'1px #ddd solid'}}*/}
+              {/*>*/}
+                {/*<div className="menu_name">{item.name}</div>*/}
+                {/*<div className="menu_body">*/}
+                  {/*{item.permsList*/}
+                    {/*// 渲染权限列表*/}
+                    {/*? item.permsList.map((item,index) => (*/}
+                      {/*<div className={`menu_perms ${newMenuIdList.includes(item.menuId) ? 'own_perms' : 'not_own'} ${detailState !== 'detail' ? 'can_edit' : ''}`}*/}
+                           {/*key={item.menuId}*/}
+                           {/*onClick={detailState !== 'detail' ?*/}
+                             {/*this.changeOwn.bind(this,item.menuId) : null}*/}
+                      {/*>{item.perms}</div>*/}
+                    {/*))*/}
+                    {/*// 渲染菜单列表*/}
+                    {/*: item.list.map((item1,index) => (*/}
+                      {/*<div className="menu_2"*/}
+                           {/*key={index}*/}
+                           {/*style={index === item.list.length - 1 ? {} : {borderBottom:'1px #ddd solid'}}*/}
+                      {/*>*/}
+                        {/*<div className="menu_name">{item1.name}</div>*/}
+                        {/*<div className="menu_body">*/}
+                          {/*{item1.permsList*/}
+                            {/*// 渲染权限列表*/}
+                            {/*? item1.permsList.map((item2,index) => (*/}
+                              {/*<div className={`menu_perms ${newMenuIdList.includes(item2.menuId) ? 'own_perms' : 'not_own'} ${detailState !== 'detail' ? 'can_edit' : ''}`}*/}
+                                   {/*key={item2.menuId}*/}
+                                   {/*onClick={detailState !== 'detail' ?*/}
+                                     {/*this.changeOwn.bind(this,item2.menuId) : null}*/}
+                              {/*>{item2.perms}</div>*/}
+                            {/*))*/}
+                            {/*// 渲染菜单列表*/}
+                            {/*: item1.list.map((item2,index) => (*/}
+                              {/*<div className="menu_3"*/}
+                                   {/*key={index}*/}
+                                   {/*style={index === item1.list.length - 1 ? {} : {borderBottom:'1px #ddd solid'}}*/}
+                              {/*>*/}
+                                {/*<div className="menu_name">{item2.name}</div>*/}
+                                {/*<div className="menu_body">*/}
+                                  {/*/!* 渲染权限列表*!/*/}
+                                  {/*{item2.permsList.map((item3,index) => (*/}
+                                    {/*<div className={`menu_perms ${newMenuIdList.includes(item3.menuId) ? 'own_perms' : 'not_own'} ${detailState !== 'detail' ? 'can_edit' : ''}`}*/}
+                                         {/*key={item3.menuId}*/}
+                                         {/*onClick={detailState !== 'detail' ?*/}
+                                           {/*this.changeOwn.bind(this,item3.menuId) : null}*/}
+                                    {/*>{item3.perms}</div>*/}
+                                  {/*))}*/}
+                                {/*</div>*/}
+                              {/*</div>*/}
+                            {/*))*/}
+                          {/*}*/}
+                        {/*</div>*/}
+                      {/*</div>*/}
+                    {/*))*/}
+                  {/*}*/}
+                {/*</div>*/}
+              {/*</div>*/}
+            {/*))}*/}
           </div>
         </Modal>
         <div className="TableMain">

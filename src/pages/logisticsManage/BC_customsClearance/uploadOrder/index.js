@@ -120,6 +120,10 @@ class BCUploadOrder extends React.Component {
     })
   }
 
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
+  }
   render() {
     const columns = [
       // 商品名称	数量	成本价	库存地	商品规格	品牌	净重	毛重	原产国

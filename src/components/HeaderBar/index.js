@@ -1,6 +1,7 @@
 import React from 'react';
 import { inject, observer } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
+import { message } from 'antd';
 
 import './index.less';
 
@@ -10,7 +11,7 @@ class HeaderBar extends React.Component{
     super(props);
     this.state = {
       // 这里保存当前用户名
-      userName: 'admin',
+      userName: this.props.appStore.userData.userName,
       // message: 3,
     };
   }
@@ -21,9 +22,23 @@ class HeaderBar extends React.Component{
   // }
   loginOut() {
     const { history, location, } = this.props;
-    // 清除cookie中所保存的登录信息, 这里只清除模拟数据isLogin
+    const { clearAllData } = this.props.appStore;
+    // 清除登录状态isLogin
     window.delCookie('isLogin');
+    // 清除cookie中所保存的登录信息
+    clearAllData();
+    // 清除服务器错存储的cookie状态
+    this.ajax.post('/login/logout').then(r => {
+      // 静默登出, 只报成功, 通常接口调取失败则不考虑
+      if (r.data.status === 10000) message.success(r.data.msg);
+    }).catch(r => {
+      console.error(r)
+    });
     history.push(`/login?historyPath=${location.pathname}${encodeURIComponent(location.search)}`);
+  }
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
   }
   render() {
     return(
@@ -31,7 +46,7 @@ class HeaderBar extends React.Component{
         <div className="logo">BuyersHouse后台管理系统</div>
         <div className="userInfo">
           <ul>
-            {/*简单判断剩余消息信息*/}
+            {/*简单判断剩余消息信息(试做功能)*/}
             {/*<li className={this.state.message ? 'message hasMessage' : 'message'}
                    onClick={this.clearMessage.bind(this)}>*/}
             {/*{this.state.message ? '有 ' : '暂无'}*/}

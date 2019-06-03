@@ -30,7 +30,6 @@ class importExcel extends React.Component{
       url: 'http://192.168.31.60:8088',
     };
     window.importExcel = this;
-    window.XLSX = XLSX;
   }
 
   componentDidMount() {
@@ -57,7 +56,6 @@ class importExcel extends React.Component{
       // 使用 showError 方法, 进行统一报错
       r.showError(message);
     }).catch(r => {
-      console.error(r);
       message.error('前端接口调取/数据处理出现错误, 请联系管理员');
     })
   }
@@ -68,7 +66,6 @@ class importExcel extends React.Component{
       // 使用 showError 方法, 进行统一报错
       r.showError(message);
     }).catch(r => {
-      console.error(r);
       message.error('前端接口调取/数据处理出现错误, 请联系管理员');
     })
   }
@@ -235,6 +232,11 @@ class importExcel extends React.Component{
   clickIIT() {
     const { input, } = this.state;
     input.click();
+  }
+
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
   }
   render() {
     const { processedDataList, Num, successList, failList, repeatList, failListNum, repeatListNum, isStart, failListReason, } = this.state;

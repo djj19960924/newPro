@@ -38,7 +38,6 @@ class appointmentTeamManage extends React.Component {
       // 当前用户信息
       currentInfo: {},
     };
-    window.appointmentTeamManage = this;
   }
   componentDidMount() {
     this.getAppointmentByStatus()
@@ -48,64 +47,44 @@ class appointmentTeamManage extends React.Component {
     const { appointmentStatus, pageNum, pageSize } = this.state;
     this.setState({tableIsLoading: true});
     if (appointmentStatus === 4) {
-      fetch(`${window.fandianUrl}/AppointmentMangement/getMassNoByMallName`,{
-        method: `POST`
-      }).then(r => r.json()).then(r => {
-        if (!r.msg && !r.data) {
-          message.error(`后端数据错误`)
-        } else {
-          if (r.status === 10000) {
-            let dataObj = {};
-            for (let n in r.data) dataObj[`input_${n}`] = r.data[n].massNo;
-            this.setState({
-              dataList: r.data,
-              inputValue: dataObj,
-            })
-          } else {
-            if (r.status) {
-              message.error(`${r.msg} 错误码: ${r.status}`)
-            } else {
-              message.error(`后端数据错误`)
-            }
-          }
+      this.ajax.post('/AppointmentMangement/getMassNoByMallName').then(r => {
+        if (r.data.status === 10000) {
+          const data = r.data.data;
+          let dataObj = {};
+          for (let n in data) dataObj[`input_${n}`] = data[n].massNo;
+          this.setState({
+            dataList: data,
+            inputValue: dataObj,
+          })
         }
         this.setState({tableIsLoading: false});
-      }).catch(()=>{
-        message.error(`前端接口调取出错`);
+        r.showError();
+      }).catch(r => {
         this.setState({tableIsLoading: false});
-      })
+        this.ajax.isReturnLogin(r,this);
+      });
     } else {
-      fetch(`${window.fandianUrl}/AppointmentMangement/getAppointmentByStatus`,{
-        method: `POST`,
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: `status=${appointmentStatus}&pageNum=${pageNum}&pageSize=${pageSize}`
-      }).then(r => r.json()).then(r => {
-        if (!r.msg && !r.data) {
-          message.error(`后端数据错误`)
-        } else {
-          if (r.status === 10000) {
-            let dataObj = {};
-            if (!!r.data.list) if (!!r.data.list[0].massNo) for (let n in r.data.list) dataObj[`input_${n}`] = r.data.list[n].massNo;
-            this.setState({
-              inputValue: dataObj,
-              dataList: r.data.list,
-              pageSizeOptions: [`50`,`100`,`200`, `${r.data.total > 300 ? r.data.total : 300}`],
-              pageTotal: r.data.total,
-              selectedList: [],
-              selectedIds: [],
-            })
-          } else {
-            if (r.status) {
-              message.error(`${r.msg} 错误码: ${r.status}`)
-            } else {
-              message.error(`后端数据错误`)
-            }
-          }
+      const data = { status: appointmentStatus, pageNum: pageNum, pageSize: pageSize };
+      this.ajax.post('/AppointmentMangement/getAppointmentByStatus',data).then(r => {
+        if (r.data.status === 10000) {
+          const data = r.data.data;
+          let dataObj = {};
+          if (!!data.list) if (!!data.list[0].massNo)
+            for (let n in data.list) dataObj[`input_${n}`] = data.list[n].massNo;
+          this.setState({
+            inputValue: dataObj,
+            dataList: data.list,
+            pageSizeOptions: [`50`,`100`,`200`, `${data.total > 300 ? data.total : 300}`],
+            pageTotal: data.total,
+            selectedList: [],
+            selectedIds: []
+          })
         }
         this.setState({tableIsLoading: false});
-      }).catch(()=>{
-        message.error(`接口调取失败`);
+        r.showError();
+      }).catch(r => {
         this.setState({tableIsLoading: false});
+        this.ajax.isReturnLogin(r,this);
       });
     }
   }
@@ -142,55 +121,28 @@ class appointmentTeamManage extends React.Component {
         } else {
           dataObj.massNo = inputValue[`input_${i}`]
         }
-        fetch(`${window.fandianUrl}/AppointmentMangement/editMassNoByMallName`, {
-          method: `POST`,
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(dataObj)
-        }).then(r => r.json()).then(r => {
-          // console.log(r);
-          if (!r.msg && !r.data) {
-            message.error(`后端数据错误`)
-          } else {
-            if (r.status === 10000) {
-              message.success(r.data);
-              this.getAppointmentByStatus();
-              this.toggleEdit(i, false);
-            } else {
-              if (r.status) {
-                message.error(`${r.msg} 错误码: ${r.status}`)
-              } else {
-                message.error(`后端数据错误`)
-              }
-            }
+        this.ajax.post('/AppointmentMangement/editMassNoByMallName',dataObj).then(r => {
+          if (r.data.status === 10000) {
+            message.success(r.data.data);
+            this.getAppointmentByStatus();
+            this.toggleEdit(i, false);
           }
-        }).catch(()=>{
-          message.error(`接口调取失败`)
-        })
+          r.showError();
+        }).catch(r => {
+          this.ajax.isReturnLogin(r,this);
+        });
       } else {
         const dataObj = {id:v,massNo:inputValue[`input_${i}`]};
-        fetch(`${window.fandianUrl}/AppointmentMangement/editMassNoById`, {
-          method: `POST`,
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(dataObj)
-        }).then(r => r.json()).then(r => {
-          if (!r.msg && !r.data) {
-            message.error(`后端数据错误`)
-          } else {
-            if (r.status === 10000) {
-              message.success(r.data);
-              this.getAppointmentByStatus();
-              this.toggleEdit(i, false);
-            } else {
-              if (r.status) {
-                message.error(`${r.msg} 错误码: ${r.status}`)
-              } else {
-                message.error(`后端数据错误`)
-              }
-            }
+        this.ajax.post('/AppointmentMangement/editMassNoById',dataObj).then(r => {
+          if (r.data.status === 10000) {
+            message.success(r.data.data);
+            this.getAppointmentByStatus();
+            this.toggleEdit(i, false);
           }
-        }).catch(()=>{
-          message.error(`接口调取失败`)
-        })
+          r.showError();
+        }).catch(r => {
+          this.ajax.isReturnLogin(r,this);
+        });
       }
     } else {
       // 理论上说, 当对应的 inputValue 为空时, 无法点击进入该事件
@@ -235,24 +187,15 @@ class appointmentTeamManage extends React.Component {
   }
   // 驳回用户的预约挂团数据
   apointmentToRejected(id) {
-    fetch(`${window.fandianUrl}/AppointmentMangement/apointmentToRejected`, {
-      method: `POST`,
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({id: id})
-    }).then(r => r.json()).then(r => {
-      if (!r.msg && !r.data) {
-        message.error(`后端数据错误`)
-      } else {
-        if (r.status === 10000) {
-          message.success(`${r.msg}`);
-          this.getAppointmentByStatus();
-        } else {
-          message.error(`${r.msg} 错误码: ${r.status}`)
-        }
+    this.ajax.post('/AppointmentMangement/apointmentToRejected',{id: id}).then(r => {
+      if (r.data.status === 10000) {
+        message.success(`${r.data.msg}`);
+        this.getAppointmentByStatus();
       }
-    }).catch(()=>{
-      message.error(`前端接口调取失败`)
-    })
+      r.showError();
+    }).catch(r => {
+      this.ajax.isReturnLogin(r,this);
+    });
   }
   // 发送申请
   submitAppointment() {
@@ -278,27 +221,17 @@ class appointmentTeamManage extends React.Component {
         appointmentList:dataList,
         appointmentIdList: idList
       };
-
-      fetch(`${window.fandianUrl}/AppointmentMangement/sendAppointmentInselected`, {
-        method: `POST`,
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(data)
-      }).then(r => r.json()).then(r => {
-        // console.log(r)
-        if (r.status === 10000) {
-          message.success(`${r.data}`);
+      this.ajax.post('/AppointmentMangement/sendAppointmentInselected',data).then(r => {
+        if (r.data.status === 10000) {
+          message.success(`${r.data.data}`);
           this.getAppointmentByStatus();
-          this.setState({isLoading: false})
-        } else {
-          if (r.status) {
-            message.error(`${r.msg} 错误码: ${r.status}`)
-          } else {
-            message.error(`后端数据错误`)
-          }
         }
-      }).catch(()=>{
-        message.error(`接口调取失败`)
-      })
+        this.setState({isLoading: false});
+        r.showError();
+      }).catch(r => {
+        this.setState({isLoading: false});
+        this.ajax.isReturnLogin(r,this);
+      });
     } else {
       message.error(`至少选择一列`)
     }
@@ -317,6 +250,10 @@ class appointmentTeamManage extends React.Component {
     });
   }
 
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
+  }
   render() {
     const RadioButton = Radio.Button, RadioGroup = Radio.Group;
     const {dataList, pageTotal, pageSize, pageNum, pageSizeOptions, appointmentStatus, previewVisible, previewImage, showEdit, selectedIds, isLoading, inputValue, selectedList, tableIsLoading, rejectVisible, userInfoModal, currentInfo, passportUrl} = this.state;
@@ -440,19 +377,21 @@ class appointmentTeamManage extends React.Component {
     };
     return (
       <div className="appointmentTeamManage">
-        {/*查询条件单选行*/}
-        <RadioGroup defaultValue={0}
-                    buttonStyle="solid"
-                    className="radioBtn"
-                    value={appointmentStatus}
-                    onChange={this.changeAppointmentStatus.bind(this)}
-        >
-          <RadioButton value={0}>申请挂团</RadioButton>
-          <RadioButton value={1}>待反馈团号</RadioButton>
-          <RadioButton value={2}>已反馈团号</RadioButton>
-          <RadioButton value={3}>已驳回团号</RadioButton>
-          <RadioButton value={4}>编辑商场团号</RadioButton>
-        </RadioGroup>
+        <div className="btnLine">
+          {/*查询条件单选行*/}
+          <RadioGroup defaultValue={0}
+                      buttonStyle="solid"
+                      className="radioBtn"
+                      value={appointmentStatus}
+                      onChange={this.changeAppointmentStatus.bind(this)}
+          >
+            <RadioButton value={0}>申请挂团</RadioButton>
+            <RadioButton value={1}>待反馈团号</RadioButton>
+            <RadioButton value={2}>已反馈团号</RadioButton>
+            <RadioButton value={3}>已驳回团号</RadioButton>
+            <RadioButton value={4}>编辑商场团号</RadioButton>
+          </RadioGroup>
+        </div>
         {/*详情弹窗*/}
         <Modal title="用户信息"
                wrapClassName="appointmentTeamManageUserDetail"
@@ -470,24 +409,26 @@ class appointmentTeamManage extends React.Component {
                  })
                }}>确定</Button></div>}
         >
-          <div><div className="label">出生年月日: </div>{currentInfo.birthday}</div>
-          <div><div className="label">国籍: </div>{currentInfo.nationality}</div>
-          <div><div className="label">护照号码: </div>{currentInfo.passportNum}</div>
-          <div><div className="label">性别: </div>{currentInfo.sex === 0 ? "男" :(currentInfo.sex === 1 ? "女" : "")}</div>
-          <div><div className="label">护照到期日: </div>{currentInfo.maturityDate}</div>
-          <div><div className="label">入店日期: </div>{currentInfo.arrivalDate}</div>
-          <div><div className="label">出境日期: </div>{currentInfo.outboundDate}</div>
-          <div><div className="label">出境时间: </div>{currentInfo.outboundDatetime}</div>
-          <div><div className="label">航班号: </div>{currentInfo.flightNo}</div>
-          <div><div className="label">机场: </div>{currentInfo.airportTerminal}</div>
-          <div>
-            <Button href={passportUrl}
-                    download={
-                      currentInfo.passport ? `${currentInfo.passportNum}.${currentInfo.passport.split('.')[currentInfo.passport.split('.').length-1]}` : ''
-                    }
-                    loading={!passportUrl}
-                    style={{margin:10,float:'right'}}
-            >下载护照图片</Button>
+          <div style={{width: 300, margin: '0 auto'}}>
+            <div><div className="label">出生年月日: </div>{currentInfo.birthday}</div>
+            <div><div className="label">国籍: </div>{currentInfo.nationality}</div>
+            <div><div className="label">护照号码: </div>{currentInfo.passportNum}</div>
+            <div><div className="label">性别: </div>{currentInfo.sex === 0 ? "男" :(currentInfo.sex === 1 ? "女" : "")}</div>
+            <div><div className="label">护照到期日: </div>{currentInfo.maturityDate}</div>
+            <div><div className="label">入店日期: </div>{currentInfo.arrivalDate}</div>
+            <div><div className="label">出境日期: </div>{currentInfo.outboundDate}</div>
+            <div><div className="label">出境时间: </div>{currentInfo.outboundDatetime}</div>
+            <div><div className="label">航班号: </div>{currentInfo.flightNo}</div>
+            <div><div className="label">机场: </div>{currentInfo.airportTerminal}</div>
+            <div>
+              <Button href={passportUrl}
+                      download={
+                        currentInfo.passport ? `${currentInfo.passportNum}.${currentInfo.passport.split('.')[currentInfo.passport.split('.').length-1]}` : ''
+                      }
+                      loading={!passportUrl}
+                      style={{margin:10}}
+              >下载护照图片</Button>
+            </div>
           </div>
           <div><img src={passportUrl} alt=""/></div>
         </Modal>

@@ -7,6 +7,10 @@ class Home extends React.Component {
     this.state = {};
   }
 
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
+  }
   render() {
     return (
       <div className="Home">
