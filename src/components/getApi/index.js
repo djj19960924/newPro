@@ -12,7 +12,8 @@ class Ajax {
     'Content-Type': 'application/json'
   };
   // origin = window.fandianUrl;
-  origin = '//no-href';
+  // origin = '//192.168.31.60:8088';
+  origin = '//47.98.221.129:8088/quanhai';
 
   // 注入公共配置
   injectMethod(request,headers) {
@@ -93,11 +94,14 @@ class Ajax {
   // 处理重定向等失去用户权限错误
   isReturnLogin(r, that) {
     if (this.isXMLHttpRequest(r)) {
+      // 判断内容依然为 request 对象时触发
       if (r.status === 0) {
         message.error('登录信息验证失败, 请重新登陆');
         const {history, location} = that.props;
         window.delCookie('isLogin');
         history.push(`/login?historyPath=${location.pathname}${encodeURIComponent(location.search)}`);
+      } else {
+        message.error('接口调取异常, 请联系管理员');
       }
     } else {
       message.error('接口调取或接口数据处理失败, 请联系管理员');
