@@ -91,7 +91,7 @@ class Home extends React.Component {
           <div className="updateInfo">
             <div className="infoTitle">2019-04-09 更新</div>
             <div className="dividingLine shot"/>
-            <p>商品资料库－待到出备案，支持下载图片包</p>
+            <p>商品资料库－待导出备案，支持下载图片包</p>
           </div>
 
         </div>
