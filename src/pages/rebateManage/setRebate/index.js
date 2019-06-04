@@ -52,6 +52,7 @@ class setRebate extends React.Component{
       tableIsLoading: false,
     };
   }
+  allow = this.props.appStore.getAllow.bind(this);
   componentDidMount() {
     let countries = [];
     for (let i of countryList) countries.push(<Option key={i.id} value={i.nationName}>{i.nationName}</Option>);
@@ -283,11 +284,20 @@ class setRebate extends React.Component{
           <div>
             <Button type="primary"
                     style={{'margin':0}}
-                    onClick={this.openEdit.bind(this,record)}
+                    onClick={this.allow(74) ? this.openEdit.bind(this,record) : null}
+                    disabled={!this.allow(74)}
+                    title={this.allow(74) ? null : '没有该操作权限'}
             >编辑</Button>
             <Button type="danger"
                     style={{'marginLeft':8}}
-                    onClick={()=>{this.setState({deleteModalVisible: true,currentRecord: record})}}
+                    onClick={()=>{
+                      if (this.allow(72)) this.setState({
+                        deleteModalVisible: true,
+                        currentRecord: record
+                      }
+                    )}}
+                    disabled={!this.allow(72)}
+                    title={this.allow(72) ? null : '没有该操作权限'}
             >删除</Button>
           </div>
         ),
@@ -298,6 +308,7 @@ class setRebate extends React.Component{
     return (
       <div className="setRebate">
         <div className="title">设置返点</div>
+        <div className="titleLine" />
         <div className="shopSelect">
           <span>所属国家: </span>
           <Select className="selectShops"
@@ -317,9 +328,9 @@ class setRebate extends React.Component{
         </div>
 
         <div className="btnLine">
-          <Button className="createNew" type="primary"
+          {this.allow(74) && <Button className="createNew" type="primary"
                   onClick={this.openCreate.bind(this)}
-          >新增品牌</Button>
+          >新增品牌</Button>}
         </div>
 
         <div className="tableMain">
