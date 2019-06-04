@@ -278,6 +278,10 @@ class countBillList extends React.Component {
     const {tableDataList, verifyStatus, previewVisible, previewImage, selectedList, selectedIds, pageTotal, pageSize, pageNum, pageSizeOptions, tableIsLoading, downloadModalVisible, isOkLoading, textInfoList, textType, ticketSuccessList, passportSuccessList, closeIsAllowed, loadingTextList, ticketErrorList, passportErrorList, } = this.state;
     return (
       <div className="countBillList">
+        <div className="title">
+          <div className="titleMain">对账管理</div>
+          <div className="titleLine" />
+        </div>
         {/*查询条件单选行*/}
         <RadioGroup buttonStyle="solid"
                     className="radioBtn"
@@ -381,7 +385,7 @@ class countBillList extends React.Component {
                       showTotal={(total, range) =>
                         `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 `}共 ${total} 条记录`
                       }
-                      style={{float: 'right', marginRight: 20, marginTop: 10, marginBottom: 20}}
+                      style={{float:'right',marginRight:20,marginTop:10,paddingBottom:20}}
                       onChange={this.changePage.bind(this)}
                       showSizeChanger
                       pageSizeOptions={pageSizeOptions}
