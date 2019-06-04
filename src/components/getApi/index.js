@@ -115,7 +115,7 @@ class resolveResponse {
     this.data = r;
   }
   // 处理错误
-  showError(showNoStatus) {
+  showError(warnShowNoStatus) {
     if (!this.data.msg && !this.data.data) {
       // 后端未处理报错, 返回为后端错误
       message.error('服务器接口处理错误, 请联系管理员')
@@ -128,7 +128,7 @@ class resolveResponse {
         message.error(`${this.data.msg} 状态码:${this.data.status}`)
       } else if (this.data.status < 10000) {
         // 后端约定: 小于 10000 做警告处理
-        message.warn(`${this.data.msg}${showNoStatus === true ? '' : ` 状态码:${this.data.status}`}`)
+        message.warn(`${this.data.msg}${warnShowNoStatus === true ? '' : ` 状态码:${this.data.status}`}`)
       }
     }
   }
