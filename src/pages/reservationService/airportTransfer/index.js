@@ -119,6 +119,10 @@ class airportTransfer extends React.Component {
     ]);
     return (
       <div className="airportTransfer">
+        <div className="title">
+          <div className="titleMain">预约接送机</div>
+          <div className="titleLine" />
+        </div>
         <RadioGroup buttonStyle="solid"
                     className="radioBtn"
                     value={infoType}
@@ -162,7 +166,7 @@ class airportTransfer extends React.Component {
                       pageSize={pageSize}
                       current={pageNum}
                       showTotal={(total, range) => `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`}
-                      style={{float:'right',marginRight:'20px',marginTop:'10px'}}
+                      style={{float:'right',marginRight:20,marginTop:10,paddingBottom:20}}
                       onChange={this.changePage.bind(this)}
                       showSizeChanger
                       pageSizeOptions={pageSizeOptions}
