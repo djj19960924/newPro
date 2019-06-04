@@ -66,12 +66,14 @@ class setRebate extends React.Component{
       pageTotal: 0,
       mallName: '',
       currentShop: undefined
+    }, () => {
+      this.getMallListByNationName();
     });
-    this.getMallListByNationName(nationName);
   }
   // 根据国家名称获取商场列表
-  getMallListByNationName(nationName) {
-    this.ajax.post('/mall/getMallListByNationName',{nationName:nationName}).then(r => {
+  getMallListByNationName() {
+    const {country} = this.state;
+    this.ajax.post('/mall/getMallListByNationName',{nationName:country}).then(r => {
       if (r.data.status === 10000) {
         const dataList = [];
         for (let i of r.data.data) dataList.push(<Option key={i.mallId} value={i.mallName}>{i.mallName}</Option>);
