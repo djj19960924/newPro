@@ -68,6 +68,10 @@ class appointmentInfo extends React.Component{
     const { tableDataList, tableIsLoading, pageTotal, pageSize, pageNum, pageSizeOptions } = this.state;
     return (
       <div className="appointmentInfo">
+        <div className="title">
+          <div className="titleMain">预约上门打包</div>
+          <div className="titleLine" />
+        </div>
         <div className="tableMain">
           <Table className="tableList"
                  dataSource={tableDataList}
@@ -83,7 +87,7 @@ class appointmentInfo extends React.Component{
                       pageSize={pageSize}
                       current={pageNum}
                       showTotal={(total, range) => `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`}
-                      style={{float:'right',marginRight:'20px',marginTop:'10px'}}
+                      style={{float:'right',marginRight:20,marginTop:10,paddingBottom:20}}
                       onChange={this.changePage.bind(this)}
                       showSizeChanger
                       pageSizeOptions={pageSizeOptions}

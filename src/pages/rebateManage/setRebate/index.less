@@ -52,8 +52,17 @@
     }
   }
 
-  .tableList {
-    margin: 16px 10px;
+  .tableList{
+    min-height: 300px;
+    //max-height: 600px;
+    margin: 10px;
+
+    .ellipsis{
+      word-break: keep-all;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
     th {
       padding: 10px;
