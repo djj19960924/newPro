@@ -371,6 +371,10 @@ class appointmentTeamManage extends React.Component {
     };
     return (
       <div className="appointmentTeamManage">
+        <div className="title">
+          <div className="titleMain">预约挂团</div>
+          <div className="titleLine" />
+        </div>
         <div className="btnLine">
           {/*查询条件单选行*/}
           <RadioGroup defaultValue={0}
