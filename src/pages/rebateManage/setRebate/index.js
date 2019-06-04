@@ -307,8 +307,10 @@ class setRebate extends React.Component{
     const {getFieldDecorator} = this.props.form;
     return (
       <div className="setRebate">
-        <div className="title">设置返点</div>
-        <div className="titleLine" />
+        <div className="title">
+          <div className="title">设置返点</div>
+          <div className="titleLine" />
+        </div>
         <div className="shopSelect">
           <span>所属国家: </span>
           <Select className="selectShops"
