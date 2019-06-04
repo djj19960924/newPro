@@ -308,7 +308,7 @@ class setRebate extends React.Component{
     return (
       <div className="setRebate">
         <div className="title">
-          <div className="title">设置返点</div>
+          <div className="titleMain">设置返点</div>
           <div className="titleLine" />
         </div>
         <div className="shopSelect">
