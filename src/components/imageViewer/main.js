@@ -50,7 +50,12 @@ class ImageViewer extends React.Component{
         <img className="image"
              src={imgSrc}
              alt=""
-             style={{ width: '100%', transform: `rotate(${this.state.imgRotate}deg)` }}
+             style={{
+               width: '100%',
+               transform: `rotate(${this.state.imgRotate}deg)`,
+               position: 'absolute',
+               zIndex: 1999
+             }}
         />
         {shadow && <div className="shadow"
                         onClick={closeImageViewer}
