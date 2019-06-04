@@ -2,8 +2,10 @@ import React from 'react';
 import { Radio, Table, Button, Modal, message, Pagination, Input, DatePicker, } from 'antd';
 import moment from 'moment';
 import XLSX from 'xlsx';
+import { inject, observer } from 'mobx-react';
 import './index.less';
 
+@inject('appStore') @observer
 class appointmentTeamManage extends React.Component {
   constructor(props) {
     super(props);
@@ -39,6 +41,7 @@ class appointmentTeamManage extends React.Component {
       currentInfo: {},
     };
   }
+  allow = this.props.appStore.getAllow.bind(this);
   componentDidMount() {
     this.getAppointmentByStatus()
   }
@@ -90,7 +93,7 @@ class appointmentTeamManage extends React.Component {
   }
   // 切换编辑
   toggleEdit(v,b) {
-    const { showEdit, } = this.state;
+    const {showEdit} = this.state;
     let dataObj = {};
     for (let n in showEdit) dataObj[n] = false;
     dataObj[`editRow_${v}`] = b;
@@ -103,15 +106,15 @@ class appointmentTeamManage extends React.Component {
   }
   // 失去焦点
   loseBlur(v,b) {
-    const { inputValue } = this.state;
+    const {inputValue} = this.state;
     // 当输入框有值时, 默认无法直接在失去焦点时关闭输入框, 以防误操作
     // 阻止在失去焦点时, 强制刷新页面, 以防无法点击保存按钮
     // 这里逻辑无法将团号值置空
     if (!inputValue[`input_${v}`]) this.toggleEdit(v,b);
   }
   // 更改团号
-  submitMassNo(i,v,momentDate,Date) {
-    const { inputValue, appointmentStatus, } = this.state;
+  submitMassNo(i, v, momentDate, Date) {
+    const {inputValue, appointmentStatus,} = this.state;
     if (!!inputValue[`input_${i}`]) {
       if (appointmentStatus === 4) {
         let dataObj = {mallName: v,};
@@ -121,7 +124,7 @@ class appointmentTeamManage extends React.Component {
         } else {
           dataObj.massNo = inputValue[`input_${i}`]
         }
-        this.ajax.post('/AppointmentMangement/editMassNoByMallName',dataObj).then(r => {
+        this.ajax.post('/AppointmentMangement/editMassNoByMallName', dataObj).then(r => {
           if (r.data.status === 10000) {
             message.success(r.data.data);
             this.getAppointmentByStatus();
@@ -129,11 +132,11 @@ class appointmentTeamManage extends React.Component {
           }
           r.showError();
         }).catch(r => {
-          this.ajax.isReturnLogin(r,this);
+          this.ajax.isReturnLogin(r, this);
         });
       } else {
-        const dataObj = {id:v,massNo:inputValue[`input_${i}`]};
-        this.ajax.post('/AppointmentMangement/editMassNoById',dataObj).then(r => {
+        const dataObj = {id: v, massNo: inputValue[`input_${i}`]};
+        this.ajax.post('/AppointmentMangement/editMassNoById', dataObj).then(r => {
           if (r.data.status === 10000) {
             message.success(r.data.data);
             this.getAppointmentByStatus();
@@ -141,7 +144,7 @@ class appointmentTeamManage extends React.Component {
           }
           r.showError();
         }).catch(r => {
-          this.ajax.isReturnLogin(r,this);
+          this.ajax.isReturnLogin(r, this);
         });
       }
     } else {
@@ -153,12 +156,8 @@ class appointmentTeamManage extends React.Component {
   // 改变团号输入框
   changeMassNo(n,e) {
     const { inputValue, } = this.state;
-    let dataObj = {};
-    for (let name in inputValue) {
-      dataObj[name] = ``
-    }
-    dataObj[n] = e.target.value;
-    this.setState({inputValue: dataObj})
+    inputValue[n] = e.target.value;
+    this.setState({});
   }
   // 换页
   changePage(pageNum,pageSize) {
@@ -168,8 +167,13 @@ class appointmentTeamManage extends React.Component {
   }
   // 更改状态
   changeAppointmentStatus(v) {
+    // 切换 tabs 时收起编辑窗口
+    const {showEdit} = this.state;
+    for (let n in showEdit) showEdit[n] = false;
     this.setState({
-      appointmentStatus: v.target.value,pageNum: 1,pageSize: 30
+      appointmentStatus: v.target.value,
+      pageNum: 1,
+      pageSize: 30
     },()=>{
       this.getAppointmentByStatus();
     })
@@ -265,9 +269,6 @@ class appointmentTeamManage extends React.Component {
         )
       },
       {title: '姓名', dataIndex: 'passportName', key: 'passportName', width: 180},
-      // {title: '出生年月日', dataIndex: 'birthday', key: 'birthday', width: 120,},
-      // {title: '国籍', dataIndex: 'nationality', key: 'nationality', width: 120},
-      // {title: '护照号码', dataIndex: 'passportNum', key: 'passportNum', width: 160},
       {title: '信息详情', dataIndex: 'passportInfo', key: 'passportInfo', width: 120,
         render: (text, record) => (
           <div>
@@ -277,17 +278,7 @@ class appointmentTeamManage extends React.Component {
           </div>
         )
       },
-      // {title: '性别', dataIndex: 'sex', key: 'sex', width: 80,
-      //   render: (text) => (
-      //     <div>{text === 0 ? "男" :(text === 1 ? "女" : "")}</div>
-      //   ),
-      // },
-      // {title: '护照到期日', dataIndex: 'maturityDate', key: 'maturityDate', width: 240},
       {title: '入店日期', dataIndex: 'arrivalDate', key: 'arrivalDate', width: 120},
-      // {title: '出境日期', dataIndex: 'outboundDate', key: 'outboundDate', width: 240},
-      // {title: '出境时间', dataIndex: 'outboundDatetime', key: 'outboundDatetime', width: 180},
-      // {title: '航班号', dataIndex: 'flightNo', key: 'flightNo', width: 160,},
-      // {title: '机场', dataIndex: 'airportTerminal', key: 'airportTerminal', width: 160,},
       {title: '商场', dataIndex: 'mallName', key: 'mallName'},
     ];
     const columns = [];
@@ -313,8 +304,9 @@ class appointmentTeamManage extends React.Component {
                         onClick={this.toggleEdit.bind(this,index,false)}
                 >取消</Button>
               </div>
-              : <div className={`showMassNo editable-cell-value-wrap editRow_${index}`}
-                     onClick={this.toggleEdit.bind(this,index,true)}
+              : <div className={`showMassNo editable-cell-value-wrap editRow_${index}${this.allow(66) ? '' : ' noPermission'}`}
+                     onClick={this.allow(66) ? this.toggleEdit.bind(this,index,true) : null}
+                     title={this.allow(66) ? null : '没有该操作权限'}
               >
                 {record.massNo ? record.massNo : `编辑团号`}
               </div>}
@@ -343,10 +335,11 @@ class appointmentTeamManage extends React.Component {
                         onClick={this.toggleEdit.bind(this,index,false)}
                 >取消</Button>
               </div>
-              : <div className={`showMassNo editable-cell-value-wrap editRow_${index}`}
-                     onClick={this.toggleEdit.bind(this,index,true)}
+              : <div className={`showMassNo editable-cell-value-wrap editRow_${index}${this.allow(68) ? '' : ' noPermission'}`}
+                     onClick={this.allow(68) ? this.toggleEdit.bind(this,index,true) : null}
+                     title={this.allow(68) ? null : '没有该操作权限'}
               >
-                {record.massNo ? record.massNo : `编辑团号`}
+                {record.massNo ? record.massNo : `编辑商场团号`}
               </div>}
           </div>
         )
@@ -359,6 +352,7 @@ class appointmentTeamManage extends React.Component {
                         allowClear={false}
                         value={moment(record.deadline)}
                         onChange={this.submitMassNo.bind(this,index,record.mallName)}
+                        disabled={!this.allow(68)}
             />
           </div>
         )
@@ -443,7 +437,7 @@ class appointmentTeamManage extends React.Component {
         </Modal>
         {/*按钮行*/}
         <div className="btnLine">
-          {appointmentStatus === 0 &&
+          {this.allow(67) && appointmentStatus === 0 &&
           <Button type="primary"
                   onClick={this.submitAppointment.bind(this)}
                   loading={isLoading}
@@ -452,7 +446,7 @@ class appointmentTeamManage extends React.Component {
         </div>
 
         {/*这里给出表单和分页最大宽度, 防止 table 过宽*/}
-        <div className="main"
+        <div className="tableMain"
              style={{maxWidth: (appointmentStatus === 4 ? 660
                  : (appointmentStatus === 1 ? 1250
                    : (appointmentStatus === 2 ? 1250
@@ -471,7 +465,7 @@ class appointmentTeamManage extends React.Component {
           <Table className="tableList"
                  dataSource={dataList}
                  columns={(appointmentStatus === 0 ?
-                   columnsNoMassNo.concat(columnsAdd)
+                   (this.allow(70) ? columnsNoMassNo.concat(columnsAdd) : columnsNoMassNo)
                    : (appointmentStatus === 3 ?
                      columnsNoMassNo
                      : ( appointmentStatus === 4 ?
