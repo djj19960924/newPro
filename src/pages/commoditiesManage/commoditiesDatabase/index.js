@@ -518,6 +518,10 @@ class commoditiesDataBase extends React.Component {
     ];
     return (
       <div className="dataBase">
+        <div className="title">
+          <div className="titleMain">商品资料库</div>
+          <div className="titleLine" />
+        </div>
 
         {/*导出弹窗*/}
         <Modal title="导出"
