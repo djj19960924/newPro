@@ -52,7 +52,7 @@ class airportTransfer extends React.Component {
         })
       }
       this.setState({tableIsLoading: false});
-      r.showError();
+      r.showError(true);
     }).catch(r => {
       this.ajax.isReturnLogin(r,this)
     });
