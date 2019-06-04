@@ -337,7 +337,9 @@ class setRebate extends React.Component{
           >新增品牌</Button>}
         </div>
 
-        <div className="tableMain">
+        <div className="tableMain"
+             style={{maxWidth: 1200}}
+        >
           {/*表单*/}
           <Table className="tableList"
                  dataSource={tableDataList}
