@@ -173,6 +173,10 @@ class adoptExamineUnpaid extends React.Component{
     const {Option} = Select;
     return (
       <div className="adoptExamineUnpaid">
+        <div className="title">
+          <div className="titleMain">待返款</div>
+          <div className="titleLine" />
+        </div>
         <div className="btnLine">
           {/*提现方式*/}
           <span>提现方式：</span>
