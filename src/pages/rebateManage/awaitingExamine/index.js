@@ -87,6 +87,7 @@ class awaitingExamine extends React.Component {
       ticketIsLoading: false,
     };
   }
+  allow = this.props.appStore.getAllow.bind(this);
 
   componentDidMount() {
     this.getCountryLeftTicket()
@@ -315,7 +316,7 @@ class awaitingExamine extends React.Component {
           reciptMoney: reciptMoney,
           unionId: ticketList[currentTicketId].unionId,
         };
-        // 为韩国时添加属性
+        // country值为韩国时添加属性(业务逻辑)
         if (country === '韩国') data.reciptAttribute = val.reciptAttribute;
         if (val.exchangeRate === 0) {
           // 判断汇率不能为0
@@ -331,36 +332,17 @@ class awaitingExamine extends React.Component {
           message.error('品牌重复');
           this.setState({repeatList: repeatList});
         } else {
-          // this.ajax.post().then(r => {
-          //   r.showError(true);
-          // }).catch(r => {
-          //   console.error(r);
-          //   this.ajax.isReturnLogin(r, this);
-          // });
-          // return false;
-          //
-          //
-          //
-          //
-          fetch(window.fandianUrl + '/recipt/checkReciptAllow', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(data)
-          }).then(r => r.json()).then(r => {
-            if (r.retcode.status === '10000') {
-              message.success(`执行通过审核成功`);
-              this.setState({defaultExchangeRate: val.exchangeRate,});
+          this.ajax.post('/recipt/checkReciptAllow', data).then(r => {
+            if (r.data.status === 10000) {
+              message.success(r.data.msg);
+              this.setState({defaultExchangeRate: val.exchangeRate});
               this.hasSubmit();
-            } else {
-              if (r.retcode) {
-                message.error(`${r.retcode.msg}, 状态码为:${r.retcode.status}`)
-              } else {
-                message.error(`后端数据错误`)
-              }
             }
-          }).catch(() => {
-            message.error(`通过审核接口调取失败`)
-          })
+            r.showError(true);
+          }).catch(r => {
+            console.error(r);
+            this.ajax.isReturnLogin(r, this);
+          });
         }
       }
     });
@@ -432,31 +414,16 @@ class awaitingExamine extends React.Component {
 
   //驳回方法
   rejectMethod(data) {
-    // this.ajax.post('/recipt/checkReciptRejected', data).then(r => {
-    //   r.showError();
-    // }).catch(r => {
-    //   console.error(r);
-    //   this.ajax.isReturnLogin(r, this);
-    // });
-    // return false;
-    fetch(window.fandianUrl + '/recipt/checkReciptRejected', {
-      method: 'post',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(data)
-    }).then(res => res.json()).then(r => {
-      if (r.retcode.status === `10000`) {
-        message.success(`执行驳回成功`);
-        this.hasSubmit()
-      } else {
-        if (r.retcode) {
-          message.error(`${r.retcode.msg}, 状态码为:${r.retcode.status}`)
-        } else {
-          message.error(`后端数据错误`)
-        }
+    this.ajax.post('/recipt/checkReciptRejected', data).then(r => {
+      if (r.data.status === 10000) {
+        message.success(r.data.msg);
+        this.hasSubmit();
       }
-    }).catch(() => {
-      message.error(`驳回小票接口调取失败`)
-    })
+      r.showError();
+    }).catch(r => {
+      console.error(r);
+      this.ajax.isReturnLogin(r, this);
+    });
   }
 
   // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
@@ -639,16 +606,17 @@ class awaitingExamine extends React.Component {
                         className="examineFormButton"
                         style={{marginTop: '15px', marginLeft: '10px'}}
                         onClick={this.handleSubmit.bind(this)}
-                >
-                  通过
-                </Button>
-                <Button type="danger"
-                  // 打开驳回原因窗口
+                        disabled={!this.allow(101)}
+                        title={!this.allow(101) ? '没有该操作权限' : null}
+                >通过</Button>
+                <Button type={this.allow(102) ? 'danger' : 'default'}
+                        // 这里动态控制 type, 该组件版本 danger 类型下, 无法正常显示 disabled 样式
+                        // 打开驳回原因窗口
                         onClick={() => this.setState({rejectVisible: true,})}
                         style={{marginLeft: '20px'}}
-                >
-                  驳回
-                </Button>
+                        disabled={!this.allow(102)}
+                        title={!this.allow(102) ? '没有该操作权限' : null}
+                >驳回</Button>
               </FormItem>
             </Form>
           </div>
