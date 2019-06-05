@@ -19,7 +19,7 @@ class rejectExamine extends React.Component{
       // 商场列表
       shopList: [],
       pageNum: 1,
-      pageSize: 10,
+      pageSize: 100,
       pageSizeOptions: ['50', '100', '200', '300'],
       //总条数
       pageTotal: 0,
@@ -152,7 +152,10 @@ class rejectExamine extends React.Component{
     const {countries, shopList, country, mallName, pageTotal, pageSize, pageSizeOptions, pageNum, dataSource} = this.state;
     return (
       <div className="rejectExamine">
-        <div className="title">驳回小票</div>
+        <div className="title">
+          <div className="titleMain">已驳回小票</div>
+          <div className="titleLine" />
+        </div>
         <div className="shopSelect">
           <span>所属国家: </span>
           <Select className="selectShops"
