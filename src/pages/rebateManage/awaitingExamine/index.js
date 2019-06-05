@@ -599,26 +599,25 @@ class awaitingExamine extends React.Component {
               <p>
                 <span style={{marginLeft: 10, color: '#999'}}>返点金额(¥)：{reciptMoney}</span>
               </p>
-
-              <FormItem>
-                <Button type="primary"
-                        htmlType="submit"
-                        className="examineFormButton"
-                        style={{marginTop: '15px', marginLeft: '10px'}}
-                        onClick={this.handleSubmit.bind(this)}
-                        disabled={!this.allow(101)}
-                        title={!this.allow(101) ? '没有该操作权限' : null}
-                >通过</Button>
-                <Button type={this.allow(102) ? 'danger' : 'default'}
-                        // 这里动态控制 type, 该组件版本 danger 类型下, 无法正常显示 disabled 样式
-                        // 打开驳回原因窗口
-                        onClick={() => this.setState({rejectVisible: true,})}
-                        style={{marginLeft: '20px'}}
-                        disabled={!this.allow(102)}
-                        title={!this.allow(102) ? '没有该操作权限' : null}
-                >驳回</Button>
-              </FormItem>
             </Form>
+
+            <div>
+              <Button type="primary"
+                      htmlType="submit"
+                      className="examineFormButton"
+                      style={{marginTop: '15px', marginLeft: '10px'}}
+                      onClick={this.handleSubmit.bind(this)}
+                      disabled={!this.allow(101)}
+                      title={!this.allow(101) ? '没有该操作权限' : null}
+              >通过</Button>
+              <Button type="danger"
+                      // 打开驳回原因窗口
+                      onClick={() => this.setState({rejectVisible: true,})}
+                      style={{marginLeft: '20px'}}
+                      disabled={!this.allow(102)}
+                      title={!this.allow(102) ? '没有该操作权限' : null}
+              >驳回</Button>
+            </div>
           </div>
         </div>
 
