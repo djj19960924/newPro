@@ -76,7 +76,7 @@ class EndOfOrder extends React.Component {
         key: "updateTime",
         width: 150,
         render: (text, record) => (
-          <div>{moment(record.updateTime).format("YYYY-MM-DD HH:mm:ss")}</div>
+          <div>{record.updateTime===null ? "暂无进度" : moment(record.updateTime).format("YYYY-MM-DD HH:mm:ss")}</div>
         )
       },
       {
