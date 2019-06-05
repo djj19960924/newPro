@@ -117,7 +117,10 @@ class adoptExaminePaid extends React.Component {
     const {dataList, pageSizeOptions, pageTotal, pageSize, pageNum, payment, searchValue, tableIsLoading} = this.state;
     return (
       <div className="adoptExaminePaid">
-        <div className="title">已返款</div>
+        <div className="title">
+          <div className="titleMain">已返款</div>
+          <div className="titleLine" />
+        </div>
         <div className="btnLine">
           {/*支付方式*/}
           <span>支付方式：</span>
@@ -176,7 +179,6 @@ class adoptExaminePaid extends React.Component {
                       pageSize={pageSize}
                       current={pageNum}
                       showTotal={(total, range) => `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 `}共 ${total} 条记录`}
-                      style={{float: 'right', marginRight: '20px', marginTop: '10px'}}
                       onChange={this.changePage.bind(this)}
                       showSizeChanger
                       pageSizeOptions={pageSizeOptions}

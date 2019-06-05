@@ -210,7 +210,6 @@ class adoptExamineUnpaid extends React.Component{
                       pageSize={pageSize}
                       current={pageNum}
                       showTotal={(total, range) => `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`}
-                      style={{float:'right',marginRight:'20px',marginTop:'10px'}}
                       onChange={this.changePage.bind(this)}
                       showSizeChanger
                       pageSizeOptions={pageSizeOptions}
