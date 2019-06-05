@@ -45,9 +45,7 @@ class commoditiesCreateAndEdit extends React.Component {
       submitLoading: false,
       record: null,
     };
-
   }
-  allow = this.props.appStore.getAllow.bind(this);
 
   componentDidMount() {
     const { type, skuId, record } = window.getAllQueryString();
