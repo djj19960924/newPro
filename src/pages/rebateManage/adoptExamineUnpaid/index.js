@@ -1,7 +1,9 @@
 import React from 'react';
 import {Button, Table, Icon, message, Pagination, Select, Modal} from 'antd';
-import './index.less'
+import { inject, observer } from 'mobx-react';
+import './index.less';
 
+@inject('appStore') @observer
 class adoptExamineUnpaid extends React.Component{
   constructor(props) {
     super(props);
@@ -16,6 +18,8 @@ class adoptExamineUnpaid extends React.Component{
       makeMoneyIsLoading: false,
     };
   }
+  allow = this.props.appStore.getAllow.bind(this);
+
   componentDidMount() {
     this.getTableList();
   }
@@ -157,19 +161,22 @@ class adoptExamineUnpaid extends React.Component{
         render: (text, record) => (  //塞入内容
           <div className={"ellipsis"} >{(record.returningMoney*0.99).toFixed(2)}</div>
         ),
-      },
-      {title: '操作',dataIndex: 'operation',key: 'operation',width: 100,
-        render: (text, record) => (  //塞入内容
-          <div className={record.payment ? "ellipsis":'unShow'} >
-            <Button type="primary"
-                    onClick={this.makeMoney.bind(this,record)}
-                    style={{'margin':0}}
-                    disabled={payment === null}
-                    loading={makeMoneyIsLoading}
-            >打款</Button>
-          </div>
-        ),
       }];
+    const columnsAdd = {
+      title: '操作', dataIndex: 'operation', key: 'operation', width: 100,
+      render: (text, record) => (  //塞入内容
+        <div className={record.payment ? "ellipsis" : 'unShow'}>
+          <Button type="primary"
+                  onClick={this.makeMoney.bind(this, record)}
+                  style={{'margin': 0}}
+                  disabled={!this.allow(80)}
+                  title={!this.allow(80) ? '没有该操作权限' : null}
+                  loading={makeMoneyIsLoading}
+          >打款</Button>
+        </div>
+      ),
+    };
+    if (payment !== null) columns.push(columnsAdd);
     const {Option} = Select;
     return (
       <div className="adoptExamineUnpaid">
