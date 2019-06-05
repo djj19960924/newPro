@@ -272,7 +272,7 @@ class setRebate extends React.Component{
     const columns=[
       {title: '商场', dataIndex: 'mallName', key: 'mallName', width: 160},
       {title: '品牌', dataIndex: 'brandName', key: 'brandName', },
-      {title: '商品码', dataIndex: 'productCode', key: 'productCode', width: 200},
+      {title: '商品码', dataIndex: 'productCode', key: 'productCode', width: 160},
       {title: '最近更新时间', dataIndex: 'updateTime', key: 'updateTime', width: 200,
       render: (text, record) => (
           <div>{!!record.updateTime ?
@@ -286,14 +286,14 @@ class setRebate extends React.Component{
           <div>
             <Button type="primary"
                     style={{'margin':0}}
-                    onClick={this.allow(74) ? this.openEdit.bind(this,record) : null}
+                    onClick={this.openEdit.bind(this,record)}
                     disabled={!this.allow(74)}
                     title={this.allow(74) ? null : '没有该操作权限'}
             >编辑</Button>
             <Button type="danger"
                     style={{'marginLeft':8}}
                     onClick={()=>{
-                      if (this.allow(72)) this.setState({
+                      this.setState({
                         deleteModalVisible: true,
                         currentRecord: record
                       }
@@ -347,7 +347,7 @@ class setRebate extends React.Component{
                  pagination={false}
                  loading={tableIsLoading}
                  bordered
-                 scroll={{ y: 460, x: 1000 }}
+                 scroll={{ y: 500, x: 1000 }}
                  rowKey={(record, index) => `id_${index}`}
                  locale={{
                    emptyText: <div className="noShop">

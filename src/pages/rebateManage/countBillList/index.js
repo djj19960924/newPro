@@ -2,9 +2,11 @@ import React from 'react';
 import {Radio, Table, Button, Modal, message, Pagination, Icon,} from 'antd';
 import moment from 'moment';
 import JsZip from 'jszip';
+import { inject, observer } from 'mobx-react';
 
 import './index.less';
 
+@inject('appStore') @observer
 class countBillList extends React.Component {
   constructor(props) {
     super(props);
@@ -66,6 +68,8 @@ class countBillList extends React.Component {
       tableIsLoading: false,
     };
   }
+
+  allow = this.props.appStore.getAllow.bind(this);
 
   // 默认读取表格
   componentDidMount() {
@@ -296,7 +300,7 @@ class countBillList extends React.Component {
 
         {/*执行行*/}
         <div className="btnLine" style={{marginLeft: 10}}>
-          {verifyStatus === 0 &&
+          {this.allow(76) && verifyStatus === 0 &&
             <Button type="primary"
                     onClick={()=>{this.setState({ downloadModalVisible: true, textType: 0})}}
                     disabled={selectedList.length === 0}
