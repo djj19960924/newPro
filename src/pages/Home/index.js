@@ -18,6 +18,11 @@ class Home extends React.Component {
 
         <div className="main">
           <div className="updateInfo">
+            <div className="infoTitle">2019-6-3 更新</div>
+            <div className="dividingLine shot"/>
+            <p>全球跑腿: 增加跟进人编辑功能</p>
+          </div>
+          <div className="updateInfo">
             <div className="infoTitle">2019-5-31 更新</div>
             <div className="dividingLine shot"/>
             <p>商品库增加: 临时已备案 状态</p>
