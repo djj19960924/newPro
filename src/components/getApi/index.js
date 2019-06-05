@@ -5,14 +5,21 @@
 // ┃以下代码将被注入至 React.Component.prototype   ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
 //
+//
+// 使用示例:
+// this.ajax.post('', data).then(r => {
+//   r.showError();
+// }).catch(r => {
+//   console.error(r);
+//   this.ajax.isReturnLogin(r, this);
+// });
+//
 import { message } from 'antd';
 
 class Ajax {
   headers = {
     'Content-Type': 'application/json'
   };
-  // origin = window.fandianUrl;
-  // origin = '//192.168.31.60:8088';
   origin = '//47.98.221.129:8088/quanhai';
 
   // 注入公共配置
