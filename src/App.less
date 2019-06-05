@@ -6,3 +6,51 @@
 ::-webkit-scrollbar-thumb {
   background-color: #777;
 }
+
+// 标题公共样式
+.title {
+  .titleMain {
+    font-size: 26px;
+    line-height: 48px;
+    padding-left: 12px;
+    color: #333;
+  }
+  .titleLine {
+    width: calc( 100% - 20px );
+    height: 1px;
+    background-color: #ddd;
+    margin: 0 10px;
+  }
+}
+
+// 表单公共样式
+.tableMain {
+  .tableList{
+    margin: 0 10px;
+
+    .ellipsis {
+      word-break: keep-all;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    th {
+      padding: 10px;
+      line-height: 1.1;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    td {
+      padding: 5px 10px;
+      text-align: center;
+      vertical-align: middle;
+    }
+  }
+  .tablePagination {
+    float: right;
+    margin-top: 10px;
+    padding-bottom: 20px;
+  }
+}
