@@ -76,7 +76,7 @@ class EndOfOrder extends React.Component {
         key: "updateTime",
         width: 150,
         render: (text, record) => (
-          <div>{record.updateTime===null ? "暂无进度" : moment(record.updateTime).format("YYYY-MM-DD HH:mm:ss")}</div>
+          <div>{record.updateTime ? moment(record.updateTime).format("YYYY-MM-DD HH:mm:ss") : "暂无进度"}</div>
         )
       },
       {
@@ -85,7 +85,7 @@ class EndOfOrder extends React.Component {
         key: "createTime",
         width: 150,
         render: (text, record) => (
-          <div>{moment(record.createTime).format("YYYY-MM-DD HH:mm:ss")}</div>
+          <div>{record.createTime ? moment(record.createTime).format("YYYY-MM-DD HH:mm:ss") : ""}</div>
         )
       },
       {
@@ -127,25 +127,30 @@ class EndOfOrder extends React.Component {
     const Search=Input.Search;
     return (
       <div className="end-order">
-        <Search  className="searchInput" placeholder="输入关键字搜索"  onSearch={value => {this.getOrderInfo(undefined,undefined,value);this.setState({searchParm:value})}} />
-        <Table bordered
-               columns={columns}
-               dataSource={dataSource}
-               loading={tableLoading}
-               rowKey={(record, index) => `${record.id}`}
-               pagination={false}
-               scroll={{x: 960, y: 600}}
-        />
-        <Pagination current={pageNum}
-                    pageSize={pageSize}
-                    pageSizeOptions={pageSizeOptions}
-                    total={orderNum}
-                    showSizeChanger
-                    showTotal={(total, range) => `${range[1] === 0 ? '' : `当前为第 ${range[1]}-${range[0]} 条 `}共 ${total} 条记录`}
-                    style={{float: 'right', marginRight: 20, marginTop: 10,marginBottom:20}}
-                    onChange={this.changePage.bind(this)}
-                    onShowSizeChange={this.changePage.bind(this)}
-        />
+        <Search  className="searchInput btnLine" placeholder="输入关键字搜索"  onSearch={value => {this.getOrderInfo(undefined,undefined,value);this.setState({searchParm:value})}} />
+        <div className="tableMain">
+          <Table className="tableList"
+                 bordered
+                 columns={columns}
+                 dataSource={dataSource}
+                 loading={tableLoading}
+                 rowKey={(record, index) => `${record.id}`}
+                 pagination={false}
+                 scroll={{x: 1080, y: 600}}
+          />
+          <Pagination className="tablePagination"
+                      current={pageNum}
+                      pageSize={pageSize}
+                      pageSizeOptions={pageSizeOptions}
+                      total={orderNum}
+                      showSizeChanger
+                      showTotal={(total, range) => `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 `}共 ${total} 条记录`}
+                      style={{float: 'right', marginRight: 20, marginTop: 10,marginBottom:20}}
+                      onChange={this.changePage.bind(this)}
+                      onShowSizeChange={this.changePage.bind(this)}
+          />
+        </div>
+
       </div>
     );
   }

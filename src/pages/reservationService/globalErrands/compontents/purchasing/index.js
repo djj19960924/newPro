@@ -194,10 +194,10 @@ class WaitPurchasing extends React.Component {
         title: "操作",
         dataIndex: "id",
         key: "id",
-        width: 150,
+        width: 250,
         render: (text, record) => (
           <div>
-            <Button type="primary" onClick={this.editOrder.bind(this, record.id, record.followUper)}>编辑</Button>
+            <Button type="primary" onClick={this.editOrder.bind(this, record.id, record.followUper)}>编辑进度</Button>
             <Button onClick={this.endOrder.bind(this, record.id, record.followUper)} style={{
               "marginLeft": 10,
               "backgroundColor": "#e2bc14",
@@ -211,7 +211,7 @@ class WaitPurchasing extends React.Component {
         title: "跟进人",
         dataIndex: "followUper",
         key: "followUper",
-        width: 300,
+        width: 250,
         render: (text, record) => (
           <div style={{"display":"flex","justifyContent":"space-between"}}>
             {record.followUper !== null &&
@@ -229,7 +229,7 @@ class WaitPurchasing extends React.Component {
         key: "updateTime",
         width: 150,
         render: (text, record) => (
-          <div>{record.updateTime===null ? "暂无进度" : moment(record.updateTime).format("YYYY-MM-DD HH:mm:ss")}</div>
+          <div>{record.updateTime ? moment(record.updateTime).format("YYYY-MM-DD HH:mm:ss") : "暂无进度" }</div>
         )
       },
       {
@@ -238,7 +238,7 @@ class WaitPurchasing extends React.Component {
         key: "createTime",
         width: 150,
         render: (text, record) => (
-          <div>{moment(record.createTime).format("YYYY-MM-DD HH:mm:ss")}</div>
+          <div>{record.createTime ? moment(record.createTime).format("YYYY-MM-DD HH:mm:ss") : ""}</div>
         )
       },
       {
@@ -280,12 +280,16 @@ class WaitPurchasing extends React.Component {
     const Search = Input.Search;
     return (
       <div className="wait-purchasing">
-        <Button type={"primary"} disabled={dataSource.length === 0} style={{"marginLeft": 10}}
-                onClick={this.exportInfo.bind(this)}>导出等待采购信息</Button>
-        <Search className="searchInput" placeholder="输入关键字搜索" onSearch={value => {
-          this.getOrderInfo(undefined, undefined, value);
-          this.setState({searchParm: value})
-        }}/>
+
+        <div className="btnLine">
+          <Button type={"primary"} disabled={dataSource.length === 0} style={{"marginLeft": 10}}
+                  onClick={this.exportInfo.bind(this)}>导出等待采购信息</Button>
+          <Search className="searchInput" placeholder="输入关键字搜索" onSearch={value => {
+            this.getOrderInfo(undefined, undefined, value);
+            this.setState({searchParm: value})
+          }}/>
+        </div>
+
         {/*导出*/}
         <Table id="exportTable"
                columns={exportColumns}
@@ -294,24 +298,29 @@ class WaitPurchasing extends React.Component {
                style={{display: `none`}}
                rowKey={(record, index) => `${record.id}`}
         />
-        <Table bordered
-               columns={columns}
-               dataSource={dataSource}
-               pagination={false}
-               loading={tableLoading}
-               rowKey={(record, index) => `${record.id}`}
-               scroll={{x: 960, y: 600}}
-        />
-        <Pagination current={pageNum}
-                    pageSize={pageSize}
-                    pageSizeOptions={pageSizeOptions}
-                    showSizeChanger
-                    showTotal={(total, range) => `${range[1] === 0 ? "" : ` 当前为第${range[1]}-${range[0]}条 `}共${total}条记录`}
-                    style={{float: 'right', marginRight: 20, marginTop: 10, marginBottom: 20}}
-                    total={orderTotal}
-                    onChange={this.changePage.bind(this)}
-                    onShowSizeChange={this.changePage.bind(this)}
-        />
+        <div className="purchaseTableMain tableMain">
+          <Table className="tableList"
+                 bordered
+                 columns={columns}
+                 dataSource={dataSource}
+                 pagination={false}
+                 loading={tableLoading}
+                 rowKey={(record, index) => `${record.id}`}
+                 scroll={{x: 960, y: 600}}
+          />
+          <Pagination className="tablePagination"
+                      current={pageNum}
+                      pageSize={pageSize}
+                      pageSizeOptions={pageSizeOptions}
+                      showSizeChanger
+                      showTotal={(total, range) => `${range[1] === 0 ? "" : ` 当前为第${range[0]}-${range[1]}条 `}共${total}条记录`}
+                      style={{float: 'right', marginRight: 20, marginTop: 10, marginBottom: 20}}
+                      total={orderTotal}
+                      onChange={this.changePage.bind(this)}
+                      onShowSizeChange={this.changePage.bind(this)}
+          />
+        </div>
+
 
         {/*结单modal*/}
         <Modal title="请确认"

@@ -30,6 +30,10 @@ class GlobalErrands extends React.Component {
     const {contentType} = this.state;
     return (
       <div className="globalErrands">
+        <div className="title">
+          <div className="titleMain">全球跑腿</div>
+          <div className="titleLine"></div>
+        </div>
         <Radio.Group defaultValue={contentType} buttonStyle="solid" onChange={(e) => {
           this.props.history.push("/reservation-service/global-errands?contentType=" + e.target.value);
           this.setState({contentType: e.target.value})
