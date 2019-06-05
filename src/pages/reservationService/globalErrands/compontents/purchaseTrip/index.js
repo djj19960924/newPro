@@ -241,15 +241,19 @@ class PurchaseTrip extends React.Component {
       },
     ];
     return (
-      <div className="purchase-trip">
-        <Table bordered
-               columns={columns}
-               dataSource={tripList}
-               loading={tableLoading}
-               pagination={false}
-               rowKey={(record, index) => `${record.id}`}
-               scroll={{x: 500, y: 800}}
-        />
+      <div className="purchase-trip ">
+        <div className="tableMain">
+          <Table className="tableList"
+                 bordered
+                 columns={columns}
+                 dataSource={tripList}
+                 loading={tableLoading}
+                 pagination={false}
+                 rowKey={(record, index) => `${record.id}`}
+                 scroll={{x: 960, y: 800}}
+          />
+        </div>
+
         <Modal title="编辑该行程"
                visible={editVisible}
                closable={false}
