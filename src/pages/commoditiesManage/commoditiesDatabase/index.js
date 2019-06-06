@@ -699,7 +699,7 @@ class commoditiesDataBase extends React.Component {
         </div>
 
         {/*导出用表单*/}
-        {record === 2 && <Table className="tableListForExport"
+        {(record === 2 || record === 5) && <Table className="tableListForExport"
                                 id="tableList"
                                 columns={columnsForExport}
                                 dataSource={dataList}
