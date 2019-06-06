@@ -304,6 +304,24 @@ const menus = [
       }
     ]
   },
+  {
+    title: '基础设置',
+    id: 99,
+    icon: 'setting',
+    key: '/foundation-setup',
+    testType: 'localTest',
+    subs: [
+      {
+        title: '汇率',
+        id: 100,
+        icon: 'strikethrough',
+        key: '/foundation-setup/exchange-rate',
+        components: [
+          {name: 'ExchangeRate', path: '/foundation-setup/exchange-rate'}
+        ]
+      }
+    ]
+  },
   // 本地专用
   {
     title: '开发人员专用',
