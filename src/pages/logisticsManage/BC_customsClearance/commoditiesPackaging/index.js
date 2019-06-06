@@ -495,7 +495,11 @@ class commoditiesPackaging extends React.Component{
         if (r.status === 10000) {
           let dataList = boxesList;
           dataList.splice(Num,1);
-          this.setState({boxesList: dataList});
+          this.setState({
+            boxesList: dataList,
+            // 恢复箱子选择
+            selectBox: dataList.length === 0 ? '' : dataList[dataList.length-1].parcelNo
+          });
           message.success(`${r.msg}`);
         } else if (r.status > 10000) {
           message.error(`${r.msg} 错误码:${r.status}`);
