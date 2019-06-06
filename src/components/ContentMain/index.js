@@ -15,6 +15,9 @@ import roles from '@pages/users/roles/';
 import accounts from '@pages/users/accounts/';
 // 权限列表
 import permissions from '@pages/users/permissions/';
+//基础设置
+//汇率
+import ExchangeRate from '@pages/foundationSetup/exchangeRate/';
 // 物流管理
 // bc清关
 // bc商品打包
@@ -75,7 +78,7 @@ import commoditiesImgList from '@pages/commoditiesManage/commoditiesDatabase/com
 
 import menus from "../SiderNav/menus";
 
-const componentsList = { Home, importExcel, roles, accounts, permissions, commoditiesPackaging, customerLogin, YTO, BCUploadOrder, orderMatched, orderUnmatched, orderPushed, orderNotPushed, globalTranshipmentArrived, globalTranshipmentNotArrived, airportTransfer, appointmentInfo, GlobalErrands, EditProgress, adoptExaminePaid, adoptExamineUnpaid, rejectExamine, updateQRCode, awaitingExamine, setRebate, countBillList, appointmentTeamManage, commoditiesDataBase, commoditiesCreateAndEdit, commoditiesImgList, };
+const componentsList = { Home, importExcel, roles, accounts, permissions, commoditiesPackaging, customerLogin, YTO, BCUploadOrder, orderMatched, orderUnmatched, orderPushed, orderNotPushed, globalTranshipmentArrived, globalTranshipmentNotArrived, airportTransfer, appointmentInfo, GlobalErrands, EditProgress, adoptExaminePaid, adoptExamineUnpaid, rejectExamine, updateQRCode, awaitingExamine, setRebate, countBillList, appointmentTeamManage, commoditiesDataBase, commoditiesCreateAndEdit, commoditiesImgList, ExchangeRate};
 
 @withRouter
 // @inject('appStore') @observer
