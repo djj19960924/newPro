@@ -204,47 +204,51 @@ class commoditiesPackaging extends React.Component{
   entryProductInfo(productCode) {
     const { selectBox, unionId, nickname, boxesList, boxesIsLoading, } = this.state;
     if (!boxesIsLoading) {
-      this.setState({boxesIsLoading: true});
-      fetch(`${window.fandianUrl}/productManagement/entryProductInfo`,{
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          parcelNo: selectBox,
-          productCode: productCode,
-          unionId: unionId,
-          wechatName: nickname,
-        })
-      }).then(r => r.json()).then(r => {
-        // console.log(r);
-        if (!r.data && !r.msg) {
-          message.error(`后端返回数据错误`)
-        } else {
-          if (r.status === 10000) {
-            for (let n in boxesList) if (boxesList[n].parcelNo === selectBox) {
-              let dataList = boxesList;
-              dataList[n].parcelProductVoList = r.data;
-              this.setState({boxesList: dataList});
-              message.success(`商品已成功录入 ${parseInt(n)+1}号箱`,5)
+      if (selectBox) {
+        this.setState({boxesIsLoading: true});
+        fetch(`${window.fandianUrl}/productManagement/entryProductInfo`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            parcelNo: selectBox,
+            productCode: productCode,
+            unionId: unionId,
+            wechatName: nickname,
+          })
+        }).then(r => r.json()).then(r => {
+          // console.log(r);
+          if (!r.data && !r.msg) {
+            message.error(`后端返回数据错误`)
+          } else {
+            if (r.status === 10000) {
+              for (let n in boxesList) if (boxesList[n].parcelNo === selectBox) {
+                let dataList = boxesList;
+                dataList[n].parcelProductVoList = r.data;
+                this.setState({boxesList: dataList});
+                message.success(`商品已成功录入 ${parseInt(n) + 1}号箱`, 5)
+              }
+            } else if (r.status < 10000) {
+              if (r.status === 9999) {
+                message.warn(`扫码失败或商品未备案, 请尝试重新扫描该条码`)
+              } else {
+                message.warn(`${r.msg}`)
+              }
+            } else if (r.status === 10002) {
+              // 单独提示 货值超过2000
+              this.showWarningModal(r.msg);
+            } else if (r.status > 10000) {
+              message.error(`${r.msg}`)
             }
-          } else if (r.status < 10000) {
-            if (r.status === 9999) {
-              message.warn(`扫码失败或商品未备案, 请尝试重新扫描该条码`)
-            } else {
-              message.warn(`${r.msg}`)
-            }
-          } else if (r.status === 10002) {
-            // 单独提示 货值超过2000
-            this.showWarningModal(r.msg);
-          } else if (r.status > 10000) {
-            message.error(`${r.msg}`)
           }
-        }
-        this.setState({boxesIsLoading: false});
-        this.calcAll();
-      }).catch(() => {
-        message.error(`前端商品录入接口调取失败`);
-        this.setState({boxesIsLoading: false});
-      })
+          this.setState({boxesIsLoading: false});
+          this.calcAll();
+        }).catch(() => {
+          message.error(`前端商品录入接口调取失败`);
+          this.setState({boxesIsLoading: false});
+        })
+      } else {
+        message.warn('请先扫描箱号面单, 录入箱子')
+      }
     } else {
       message.error(`操作过快, 请稍后再试`)
     }
