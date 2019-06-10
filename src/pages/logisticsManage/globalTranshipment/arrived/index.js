@@ -82,7 +82,7 @@ class globalTranshipmentArrived extends React.Component {
     return (
       <div className="globalTranshipmentArrived">
         <div className="title">
-          <div className="titleMain">全球转运 - 已到仓</div>
+          <div className="titleMain">全球转运 - 货物已到仓</div>
           <div className="titleLine" />
         </div>
         <div className="btnLine">

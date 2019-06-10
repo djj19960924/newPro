@@ -1,9 +1,10 @@
 import React from 'react';
-import { Table, Button, Pagination, message, Input, } from 'antd';
+import {Button, Input, message, Pagination, Table,} from 'antd';
 import moment from 'moment';
-
+import {inject, observer} from 'mobx-react';
 import './index.less';
 
+@inject('appStore') @observer
 class globalTranshipmentNotArrived extends React.Component {
   constructor(props) {
     super(props);
@@ -27,78 +28,61 @@ class globalTranshipmentNotArrived extends React.Component {
       pageSizeOptions: [`50`,`100`,`200`,`300`]
     }
   }
+  allow = this.props.appStore.getAllow.bind(this);
   componentDidMount() {
     this.isWareHouseParcelMessage();
   }
   // 后台根据仓库是否收货以及物流单号模糊查询
-  isWareHouseParcelMessage(
-    pageNum = this.state.pageNum,
-    pageSize = this.state.pageSize,
-    logistics = this.state.searchParam
-  ) {
-    this.setState({tableIsLoading: true});
-    let clearTable = () => this.setState({tableIsLoading:false,selectedIds:[],selectedList:[]});
-    fetch(`${window.fandianUrl}/parcelMessage/isWareHouseParcelMessage`,{
-      method: 'POST',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body:`pageNum=${pageNum}&pageSize=${pageSize}&isWareHouse=0&logistics=${logistics.trim()}`
-    }).then(r => r.json()).then(r => {
-      // console.log(r);
-      if (!r.msg && !r.data) {
-        message.error(`后端数据错误`);
-      } else {
-        if (r.status === 10000) {
-          this.setState({
-            tableDataList: r.data.list, pageTotal: r.data.total,
-            pageSizeOptions: [`50`,`100`,`200`,`${r.data.total > 300 ? r.data.total : 300}`]
-          })
-        } else if (r.status === 10001) {
-          message.warn(`${r.msg}`);
-          this.setState({
-            tableDataList: [], pageTotal: 0,
-            pageSizeOptions: [`50`,`100`,`200`,`300`]
-          })
-        } else {
-          message.error(`${r.msg} 错误码:${r.status}`)
-        }
+  isWareHouseParcelMessage() {
+    const {pageNum, pageSize, searchParam} = this.state;
+    const showLoading = Is => {this.setState({tableIsLoading: Is})};
+    showLoading(true);
+    const data = {
+      pageNum: pageNum,
+      pageSize: pageSize,
+      logistics: searchParam,
+      isWarehouse: 0
+    };
+    this.ajax.post('/parcelMessage/isWareHouseParcelMessage', data).then(r => {
+      if (r.data.status === 10000) {
+        const {data} = r.data;
+        this.setState({
+          tableDataList: data.list, pageTotal: data.total,
+          pageSizeOptions: [`50`,`100`,`200`,`${data.total > 300 ? data.total : 300}`]
+        })
       }
-      clearTable();
-    }).catch(()=>{
-      message.error(`前端接口调取失败`);
-      clearTable();
-    })
+      showLoading(false);
+      r.showError();
+    }).catch(r => {
+      console.error(r);
+      showLoading(false);
+      this.ajax.isReturnLogin(r, this);
+    });
   }
   // 根据id列表修改到仓状态
   updateParcelMessage() {
-    const { selectedIds, } = this.state;
-    this.setState({updateBtnIsLoading: true});
-    fetch(`${window.fandianUrl}/parcelMessage/updateParcelMessage`,{
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body:JSON.stringify(selectedIds)
-    }).then(r => r.json()).then(r => {
-      if (!r.msg && !r.data) {
-        message.error(`后端数据错误`);
-      } else {
-        if (r.status === 10000) {
-          message.success(`${r.msg}`)
-        } else {
-          message.error(`${r.msg} 错误码:${r.status}`)
-        }
+    const {selectedIds} = this.state;
+    const showLoading = Is => {this.setState({updateBtnIsLoading: Is})};
+    showLoading(true);
+    this.ajax.post('/parcelMessage/updateParcelMessage', selectedIds).then(r => {
+      if (r.data.status === 10000) {
+        message.success(r.data.msg);
+        this.isWareHouseParcelMessage();
       }
-      this.setState({updateBtnIsLoading: false});
-      this.isWareHouseParcelMessage();
-    }).catch(()=>{
-      message.error(`前端接口调取失败`);
-      this.setState({updateBtnIsLoading: false});
-    })
+      showLoading(false);
+      r.showError();
+    }).catch(r => {
+      showLoading(false);
+      console.error(r);
+      this.ajax.isReturnLogin(r, this);
+    });
   }
   // 改变页码
   changePage(pageNum, pageSize) {
     this.setState({
       pageNum: pageNum,
       pageSize: pageSize,
-    },()=>{
+    },() => {
       this.isWareHouseParcelMessage();
     })
   }
@@ -113,22 +97,23 @@ class globalTranshipmentNotArrived extends React.Component {
       {title: `物流ID`, dataIndex: `id`, key: 'id', width: 90},
       {title: `物流单号`, dataIndex: `logistics`, key: 'logistics', width: 180},
       {title: `更新时间`, dataIndex: `updateTime`, key: 'updateTime', width: 180,
-        render: (text, record) => (
-          <div>{!!record.updateTime ?
-            moment(record.updateTime).format('YYYY-MM-DD HH:mm:ss')
-            : moment(record.createTime).format('YYYY-MM-DD HH:mm:ss')}</div>
-        )},
+        render: text => <div>{!text ? '' : moment(text).format('YYYY-MM-DD HH:mm:ss')}</div>
+      },
       {title: `包裹重量(kg)`, dataIndex: `weight`, key: 'weight', width: 90},
       {title: `微信号`, dataIndex: `wechatNo`, key: 'wechatNo'},
     ];
     return (
       <div className="globalTranshipmentNotArrived">
-        <p className="title">全球转运 - 未到仓</p>
+        <div className="title">
+          <div className="titleMain">全球转运 - 货物未到仓</div>
+          <div className="titleLine" />
+        </div>
         <div className="btnLine">
           <Button type="primary"
                   className="updateParcelMessage"
                   onClick={this.updateParcelMessage.bind(this)}
-                  disabled={selectedIds.length === 0}
+                  disabled={!this.allow(98) || selectedIds.length === 0}
+                  title={!this.allow(98) ? '没有该操作权限' : ''}
                   loading={updateBtnIsLoading}
           >点击确认到仓</Button>
           <Search placeholder="输入物流单号"
@@ -139,7 +124,9 @@ class globalTranshipmentNotArrived extends React.Component {
                   style={{width: 200,marginLeft: 10}}
           />
         </div>
-        <div className="main">
+        <div className="tableMain"
+             style={{maxWidth: 1000}}
+        >
           {/*表单主体*/}
           <Table className="tableList"
                  dataSource={tableDataList}
@@ -158,7 +145,7 @@ class globalTranshipmentNotArrived extends React.Component {
                      });
                    },
                  }}
-                 scroll={{ y: 600, x: 900 }}
+                 scroll={{ y: 550, x: 800 }}
                  rowKey={(record, index) => `${record.id}`}
           />
           {/*分页*/}
