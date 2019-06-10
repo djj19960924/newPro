@@ -274,6 +274,12 @@ class WaitPurchasing extends React.Component {
         dataIndex: "productName",
         key: "productName",
         width: 150
+      },
+      {
+        title: "跟进人",
+        dataIndex: "followUper",
+        key: "followUper",
+        width: 250,
       }
     ];
     const {dataSource, tableLoading, endVisible, pageNum, pageSize, pageSizeOptions, orderTotal, endState, noPurchased, btnLoading, followVisible, followUpper,confirmLoading} = this.state;

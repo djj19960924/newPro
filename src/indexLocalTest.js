@@ -21,6 +21,7 @@ import 'antd/dist/antd.less';
 
 import App from './App';
 //http://192.168.31.211:8000
+//http://192.168.31.60:8088
 // 本地测试
 window.testType = 'localTest';
 const testapi = 'http://testapi.maishoumiji.com';
