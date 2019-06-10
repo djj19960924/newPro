@@ -148,7 +148,7 @@ const menus = [
         key: '/logistics-manage/globalTranshipment',
         subs: [
           {
-            title: '未到货',
+            title: '货物未到仓',
             id: 38,
             icon: 'file-unknown',
             key: '/logistics-manage/globalTranshipment/not-arrived',
@@ -157,8 +157,10 @@ const menus = [
             ]
           },
           {
-            title: '已到货',
-            id: 39,
+            title: '货物已到仓',
+            id: 38,
+            // 该页面与 38 共用同一底部接口, 两个页面使用同一权限进行校验
+            // id: 39,
             icon: 'file-done',
             key: '/logistics-manage/globalTranshipment/arrived',
             components: [
