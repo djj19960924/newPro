@@ -21,8 +21,8 @@ class Ajax {
     'Content-Type': 'application/json'
   };
   // origin = window.fandianUrl;
-  // origin = '//192.168.31.60:8088';
-  origin = '//47.98.221.129:8088/quanhai';
+  // origin = '//192.168.31.60:6000';
+  origin = '//47.98.221.129:6000/quanhai';
 
   // 注入公共配置
   injectMethod(request,headers) {
