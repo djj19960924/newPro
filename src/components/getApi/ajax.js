@@ -90,11 +90,6 @@ class Ajax {
     return this.promise(request);
   }
 
-  // 判断是否为 Object
-  isObject(data) {
-    return Object.prototype.toString.call(data) === '[object Object]'
-  }
-
   // 判断是否为 XMLHttpRequest
   isXMLHttpRequest(data) {
     return Object.prototype.toString.call(data) === '[object XMLHttpRequest]'
