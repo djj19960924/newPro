@@ -165,24 +165,24 @@ class WaitPurchasing extends React.Component {
 
 //显示跟进人modal
   editFollowUp() {
-    const {followUpper,orderId}=this.state;
-    if(followUpper){
+    const {followUpper, orderId} = this.state;
+    if (followUpper) {
       this.setState({confirmLoading: true});
-      fetch(window.apiUrl+"/legworkBackend/updateFollowUper",{
-        method:"post",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({id: orderId,followUper:followUpper})
-      }).then(r=>r.json()).then(res=>{
+      fetch(window.apiUrl + "/legworkBackend/updateFollowUper", {
+        method: "post",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({id: orderId, followUper: followUpper})
+      }).then(r => r.json()).then(res => {
         this.setState({confirmLoading: false});
-        if(res.status===10000){
-          this.setState({orderId: null,followUpper: null,followVisible: false});
+        if (res.status === 10000) {
+          this.setState({orderId: null, followUpper: null, followVisible: false});
           message.success(res.msg)
           this.getOrderInfo();
-        }else{
+        } else {
           message.error(res.msg);
         }
       })
-    }else{
+    } else {
       message.warn("请先填写编辑人")
     }
 
@@ -213,7 +213,7 @@ class WaitPurchasing extends React.Component {
         key: "followUper",
         width: 250,
         render: (text, record) => (
-          <div style={{"display":"flex","justifyContent":"space-between"}}>
+          <div style={{"display": "flex", "justifyContent": "space-between"}}>
             {record.followUper !== null &&
             <span style={{"color": "#FF5406", "marginRight": 10}}>{record.followUper}</span>}
             {record.followUper === null && <span style={{"marginRight": 10}}>暂无跟进人</span>}
@@ -229,7 +229,16 @@ class WaitPurchasing extends React.Component {
         key: "updateTime",
         width: 150,
         render: (text, record) => (
-          <div>{record.updateTime ? moment(record.updateTime).format("YYYY-MM-DD HH:mm:ss") : "暂无进度" }</div>
+          <div>{record.updateTime ? moment(record.updateTime).format("YYYY-MM-DD HH:mm:ss") : "暂无更新时间"}</div>
+        )
+      },
+      {
+        title: "最新更新进度",
+        dataIndex: "scheduleInfo",
+        key: "scheduleInfo",
+        width: 150,
+        render: (text, record) => (
+          <div>{record.scheduleInfo ? record.scheduleInfo : "暂无进度"}</div>
         )
       },
       {
@@ -274,13 +283,18 @@ class WaitPurchasing extends React.Component {
         dataIndex: "productName",
         key: "productName",
         width: 150
+      },
+      {
+        title: "跟进人",
+        dataIndex: "followUper",
+        key: "followUper",
+        width: 250,
       }
     ];
-    const {dataSource, tableLoading, endVisible, pageNum, pageSize, pageSizeOptions, orderTotal, endState, noPurchased, btnLoading, followVisible, followUpper,confirmLoading} = this.state;
+    const {dataSource, tableLoading, endVisible, pageNum, pageSize, pageSizeOptions, orderTotal, endState, noPurchased, btnLoading, followVisible, followUpper, confirmLoading} = this.state;
     const Search = Input.Search;
     return (
       <div className="wait-purchasing">
-
         <div className="btnLine">
           <Button type={"primary"} disabled={dataSource.length === 0} style={{"marginLeft": 10}}
                   onClick={this.exportInfo.bind(this)}>导出等待采购信息</Button>
@@ -349,7 +363,7 @@ class WaitPurchasing extends React.Component {
                wrapClassName="globalErrandsModal"
                onOk={this.editFollowUp.bind(this)}
                onCancel={() => {
-                 this.setState({orderId: null, followVisible: false,followUpper: null})
+                 this.setState({orderId: null, followVisible: false, followUpper: null})
                }}
         >
           <Input.TextArea placeholder="请填写跟进人" value={followUpper} autosize={true} maxLength={50} onChange={(e) => {

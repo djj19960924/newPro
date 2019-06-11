@@ -39,7 +39,7 @@ class GlobalErrands extends React.Component {
           this.setState({contentType: e.target.value})
         }} className="menu-selection">
           <Radio.Button value="0">等待采购</Radio.Button>
-          <Radio.Button value="1">订单完结</Radio.Button>
+          <Radio.Button value="1">采购结束</Radio.Button>
           <Radio.Button value="2">采购行程</Radio.Button>
         </Radio.Group>
         {

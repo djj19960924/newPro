@@ -1,6 +1,7 @@
 import React from "react";
 import moment from "moment";
-import {Table, message, Pagination,Input} from "antd";
+// import XLSX from 'xlsx';
+import {Table, message, Pagination,Input,Button} from "antd";
 import "./index.less";
 
 class EndOfOrder extends React.Component {
@@ -67,7 +68,12 @@ class EndOfOrder extends React.Component {
     })
 
   }
-
+  //导出
+  // exportInfo() {
+  //   let elt = document.getElementById('exportTable');
+  //   let wb = XLSX.utils.table_to_book(elt, {raw: true, sheet: "Sheet JS"});
+  //   XLSX.writeFile(wb, `采购信息 ${moment(new Date()).format('YYYY-MM-DD_HH.mm.ss')}.xlsx`);
+  // }
   render() {
     const columns = [
       {
@@ -76,7 +82,16 @@ class EndOfOrder extends React.Component {
         key: "updateTime",
         width: 150,
         render: (text, record) => (
-          <div>{record.updateTime ? moment(record.updateTime).format("YYYY-MM-DD HH:mm:ss") : "暂无进度"}</div>
+          <div>{record.updateTime ? moment(record.updateTime).format("YYYY-MM-DD HH:mm:ss") : "暂无更新时间"}</div>
+        )
+      },
+      {
+        title: "最新更新进度",
+        dataIndex: "scheduleInfo",
+        key: "scheduleInfo",
+        width: 150,
+        render: (text, record) => (
+          <div>{record.scheduleInfo ? record.scheduleInfo : "暂无进度"}</div>
         )
       },
       {
@@ -127,6 +142,8 @@ class EndOfOrder extends React.Component {
     const Search=Input.Search;
     return (
       <div className="end-order">
+        {/*<Button type={"primary"} disabled={dataSource.length === 0} style={{"marginLeft": 10}}*/}
+                {/*onClick={this.exportInfo.bind(this)}>导出等待采购信息</Button>*/}
         <Search  className="searchInput btnLine" placeholder="输入关键字搜索"  onSearch={value => {this.getOrderInfo(undefined,undefined,value);this.setState({searchParm:value})}} />
         <div className="tableMain">
           <Table className="tableList"
