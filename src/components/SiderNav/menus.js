@@ -13,14 +13,14 @@ const menus = [
     id: 1,
     icon: 'usergroup-add',
     key: '/users',
-    testType: 'localTest',
+    testType: 'serverTest',
     subs: [
       {
         title: '权限管理',
         id: 15,
         icon: 'lock',
         key: '/users/permissions',
-        testType: 'localTest',
+        testType: 'serverTest',
         components: [
           {name: 'permissions', path: '/users/permissions'}
         ]
@@ -30,7 +30,7 @@ const menus = [
         id: 10,
         icon: 'solution',
         key: '/users/roles',
-        testType: 'localTest',
+        testType: 'serverTest',
         components: [
           {name: 'roles', path: '/users/roles'}
         ]
@@ -40,7 +40,7 @@ const menus = [
         id: 2,
         icon: 'team',
         key: '/users/accounts',
-        testType: 'localTest',
+        testType: 'serverTest',
         components: [
           {name: 'accounts', path: '/users/accounts'}
         ]
