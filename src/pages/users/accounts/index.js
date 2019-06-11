@@ -208,7 +208,10 @@ class accounts extends React.Component {
     ];
     return (
       <div className="accounts">
-        <div className="title">账户管理</div>
+        <div className="title">
+          <div className="titleMain">账户管理</div>
+          <div className="titleLine" />
+        </div>
         <div className="btnLine">
           {this.allow(3) && <Button type="primary"
                   onClick={this.showDetails.bind(this,'add')}
@@ -271,7 +274,9 @@ class accounts extends React.Component {
             </FormItem>
           </Form>
         </Modal>
-        <div className="TableMain">
+        <div className="tableMain"
+             style={{maxWidth: 1000}}
+        >
           {/*表单主体*/}
           <Table className="tableList"
                  id="tableList"
@@ -280,7 +285,7 @@ class accounts extends React.Component {
                  pagination={false}
                  loading={tableIsLoading}
                  bordered
-                 scroll={{ y: 500, x: 1050 }}
+                 scroll={{ y: 550, x: 1050 }}
                  rowKey={(record, index) => `id_${index}`}
           />
           {/*分页*/}
