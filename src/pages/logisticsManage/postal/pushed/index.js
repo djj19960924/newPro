@@ -1,8 +1,10 @@
 import React from 'react';
-import { Table, Pagination, message, Button, Modal, } from 'antd';
+import {Table, Pagination, message, Button, Modal} from 'antd';
 import XLSX from 'xlsx';
+import {inject, observer} from 'mobx-react';
 import './index.less';
 
+@inject('appStore') @observer
 class orderPushed extends React.Component{
   constructor(props) {
     super(props);
@@ -24,6 +26,7 @@ class orderPushed extends React.Component{
       pageSizeOptions: [`50`,`100`,`200`,`300`]
     }
   }
+  allow = this.props.appStore.getAllow.bind(this);
   componentDidMount() {
     // 生成导入用excel
     let input = document.createElement(`input`);
@@ -48,41 +51,38 @@ class orderPushed extends React.Component{
 
   // 根据箱号更新运单号
   updateWaybillNoByBoxCode() {
-    const { Num, fileDate, errorList, success, isImport, } =this.state;
+    const {Num, fileDate, errorList, success} = this.state;
     if (Num === fileDate.length) {
       message.success(`导入结束`);
       this.setState({isImport:false,isImportOver:true});
     } else {
-      fetch(`${window.fandianUrl}/postalManagement/updateWaybillNoByBoxCode`,{
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body:JSON.stringify({
-          boxCode: fileDate[Num].箱号,
-          waybillNo: fileDate[Num].运单号,
-        })
-      }).then(r => r.json()).then(r => {
-        console.log(r);
-        if (!r.msg && !r.data) {
+      const data = {boxCode: fileDate[Num].箱号, waybillNo: fileDate[Num].运单号};
+      this.ajax.post('/postalManagement/updateWaybillNoByBoxCode', data).then(r => {
+        const {data, msg, status} = r.data;
+        if (!msg && !data) {
           message.error(`后端数据错误, 即将退出导入功能`);
-          this.setState({importVisible: false})
-        } else {
-          if (r.status === 10000) {
-            // 静默处理成功
-            this.setState({success: (success+1)});
-          } else {
-            message.error(`${r.msg} 错误码: ${r.status}`);
-            let dataList = errorList;
-            dataList.push({msg:r.msg,status:r.status,boxCode: fileDate[Num].箱号,waybillNo: fileDate[Num].运单号,});
-            this.setState({errorList:dataList});
-          }
-          this.setState({Num:(Num+1)},()=>{
-            this.updateWaybillNoByBoxCode();
-          })
+          this.setState({importVisible: false});
+          return false;
         }
-      }).catch(()=>{
-        message.error(`前端接口调取失败, 即将退出导入功能`);
-        this.setState({importVisible: false})
-      })
+        if (status === 10000) {
+          this.setState({success: (success+1)});
+        } else {
+          errorList.push({
+            msg: msg,
+            status: status,
+            boxCode: fileDate[Num].箱号,
+            waybillNo: fileDate[Num].运单号
+          });
+          this.setState({});
+        }
+        this.setState({Num:(Num+1)},()=>{
+          this.updateWaybillNoByBoxCode();
+        });
+        r.showError();
+      }).catch(r => {
+        console.error(r);
+        this.ajax.isReturnLogin(r, this);
+      });
     }
   }
 
@@ -113,37 +113,26 @@ class orderPushed extends React.Component{
   }
 
   // 查看需要推送到邮政的包裹信息
-  getPostalLogisticInfo(
-    pageNum = this.state.pageNum,
-    pageSize = this.state.pageSize
-  ) {
+  getPostalLogisticInfo() {
+    const {pageNum, pageSize} = this.state;
     this.setState({tableIsLoading: true});
     let clearTable = () => this.setState({tableIsLoading:false});
-    fetch(`${window.fandianUrl}/postalManagement/getPostalLogisticInfo`,{
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body:JSON.stringify({pageNum:pageNum,pageSize:pageSize})
-    }).then(r => r.json()).then(r => {
-      // console.log(r);
-      if (!r.msg && !r.data) {
-        message.error(`后端数据错误`);
-      } else {
-        if (r.status === 10000) {
-          this.setState({
-            tableDataList: r.data.list, pageTotal: r.data.total,
-            pageSizeOptions: [`50`,`100`,`200`,`${r.data.total > 300 ? r.data.total : 300}`]
-          })
-        } else if (r.status < 10000) {
-          message.warn(`${r.msg}`)
-        } else {
-          message.error(`${r.msg} 错误码:${r.status}`)
-        }
+    const data = {pageNum: pageNum, pageSize: pageSize};
+    this.ajax.post('/postalManagement/getPostalLogisticInfo', data).then(r => {
+      if (r.data.status === 10000) {
+        const {data} = r.data;
+        this.setState({
+          tableDataList: data.list, pageTotal: data.total,
+          pageSizeOptions: [`50`,`100`,`200`,`${data.total > 300 ? data.total : 300}`]
+        })
       }
       clearTable();
-    }).catch(()=>{
-      message.error(`前端接口调取失败`);
+      r.showError(true);
+    }).catch(r => {
+      console.error(r);
       clearTable();
-    })
+      this.ajax.isReturnLogin(r, this);
+    });
   }
 
   changePage(pageNum, pageSize) {
@@ -162,8 +151,8 @@ class orderPushed extends React.Component{
   render() {
     const { tableDataList, tableIsLoading, pageTotal, pageSize, pageNum, pageSizeOptions, input, importVisible, fileDate, success, errorList, isImport, isImportOver, } = this.state;
     const columns = [
-      {title: `箱号`, dataIndex: `boxCode`, key: 'boxCode', width: 180},
-      {title: `运单号`, dataIndex: `waybillNo`, key: 'waybillNo', width: 140},
+      {title: `箱号`, dataIndex: `boxCode`, key: 'boxCode', width: 160},
+      {title: `运单号`, dataIndex: `waybillNo`, key: 'waybillNo', width: 160},
       {title: `收件人`, dataIndex: `recipientsName`, key: 'recipientsName', width: 140},
       {title: `收件号码`, dataIndex: `recipientsPhone`, key: 'recipientsPhone', width: 140},
       {title: `重量(KG)`, dataIndex: `boxKg`, key: 'boxKg', width: 90},
@@ -171,10 +160,15 @@ class orderPushed extends React.Component{
     ];
     return (
       <div className="orderPushed">
-        <p className="title">邮政 - 已推送订单</p>
+        <div className="title">
+          <div className="titleMain">邮政 - 已推送订单</div>
+          <div className="titleLine" />
+        </div>
         <div className="btnLine">
           <Button type="primary"
                   onClick={()=>{input.click()}}
+                  disabled={!this.allow(95)}
+                  title={!this.allow(95) ? '没有该操作权限' : null}
           >导入excel</Button>
           <Button type="primary"
                   style={{marginLeft: 10}}
@@ -195,35 +189,39 @@ class orderPushed extends React.Component{
           <div>成功数据: {success}/{fileDate.length}</div>
           <div>错误数据:</div>
           {errorList.map((item,i) => (
-            <div>{item.msg}, 错误码:{item.status}, 箱号:{item.boxCode}, 运单号:{item.waybillNo}</div>
+            <div key={i}>{item.msg}, 错误码:{item.status}, 箱号:{item.boxCode}, 运单号:{item.waybillNo}</div>
           ))}
           {errorList.length === 0 ? ''
             : <div style={{color:'rgba(255,0,0,.7)'}}>请留存错误数据, 以便处理失败单号</div>}
         </Modal>
 
-        {/*表单主体*/}
-        <Table className="tableList"
-               dataSource={tableDataList}
-               columns={columns}
-               pagination={false}
-               loading={tableIsLoading}
-               bordered
-               scroll={{ y: 600, x: 1000 }}
-               rowKey={(record, index) => `${index}`}
-        />
-        {/*分页*/}
-        <Pagination className="tablePagination"
-                    total={pageTotal}
-                    pageSize={pageSize}
-                    current={pageNum}
-                    showTotal={(total, range) =>
-                      `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`
-                    }
-                    onChange={this.changePage.bind(this)}
-                    showSizeChanger
-                    pageSizeOptions={pageSizeOptions}
-                    onShowSizeChange={this.changePage.bind(this)}
-        />
+        <div className="tableMain"
+             style={{maxWidth: 1200}}
+        >
+          {/*表单主体*/}
+          <Table className="tableList"
+                 dataSource={tableDataList}
+                 columns={columns}
+                 pagination={false}
+                 loading={tableIsLoading}
+                 bordered
+                 scroll={{ y: 550, x: 900 }}
+                 rowKey={(record, index) => `${index}`}
+          />
+          {/*分页*/}
+          <Pagination className="tablePagination"
+                      total={pageTotal}
+                      pageSize={pageSize}
+                      current={pageNum}
+                      showTotal={(total, range) =>
+                        `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`
+                      }
+                      onChange={this.changePage.bind(this)}
+                      showSizeChanger
+                      pageSizeOptions={pageSizeOptions}
+                      onShowSizeChange={this.changePage.bind(this)}
+          />
+        </div>
       </div>
     );
   }
