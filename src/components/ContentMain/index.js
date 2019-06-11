@@ -1,6 +1,5 @@
 import React from 'react';
 import {Route, Switch, withRouter} from 'react-router-dom';
-import {inject, observer} from 'mobx-react';
 // 这里引用各个组件内容, 内容为方便管理, 统一写入pages页面
 // 主页
 import Home from '@pages/Home/';
@@ -129,7 +128,7 @@ class ContentMain extends React.Component {
     const { menusList } = this.state;
     for (let obj of menusList) {
       // 添加测试判断
-      if (obj.testType) if (obj.testType !== window.testType || obj.testType !== 'localTest') continue;
+      if (obj.testType) if (obj.testType === window.testType || obj.testType === 'localTest') continue;
       // 添加权限判断
       // 这里兼容未添加 allowSideList 传参的情况
       if (allowSideList) if (!allowSideList.includes(obj.id)) continue;
