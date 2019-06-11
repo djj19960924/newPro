@@ -128,7 +128,9 @@ class ContentMain extends React.Component {
     const { menusList } = this.state;
     for (let obj of menusList) {
       // 添加测试判断
-      if (obj.testType) if (obj.testType === window.testType || obj.testType === 'localTest') continue;
+      if (obj.testType)
+        if (obj.testType !== 'localTest')
+          if (obj.testType !== window.testType) continue;
       // 添加权限判断
       // 这里兼容未添加 allowSideList 传参的情况
       if (allowSideList) if (!allowSideList.includes(obj.id)) continue;
