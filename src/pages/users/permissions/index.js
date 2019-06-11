@@ -13,8 +13,6 @@ class permissions extends React.Component {
       // 表单加载状态
       tableIsLoading: false,
       // 分页相关
-      pageTotal: 0,
-      pageNum: 1,
       pageSize: 100,
       pageSizeOptions: [`50`,`100`,`200`,`300`],
       // 显示弹窗
@@ -34,14 +32,14 @@ class permissions extends React.Component {
   getPermissionList() {
     const { pageNum, pageSize, parentIdObject, } = this.state;
     this.setState({tableIsLoading: true});
-    let dataObj = {pageNum:pageNum,pageSize:pageSize};
-    this.ajax.post('/permission/getPermissionList', dataObj).then(r => {
+    // let dataObj = {pageNum:pageNum,pageSize:pageSize};
+    this.ajax.post('/permission/getPermissionList').then(r => {
       if (r.data.status === 10000) {
         parentIdObject['0'] = '根目录';
         for (let Obj of r.data.data) parentIdObject[`${Obj.menuId}`] = Obj.name;
         this.setState({
           tableDataList: r.data.data,
-          pageTotal: r.data.data.total
+          // pageTotal: r.data.data.total
         });
       }
       r.showError(message);
@@ -68,16 +66,9 @@ class permissions extends React.Component {
     this.setState = () => { return null }
   }
   render() {
-    const { tableDataList, tableIsLoading, pageTotal, pageSize, pageNum, pageSizeOptions, detailState, showDetails, currentInfo, parentIdObject, } = this.state;
     const FormItem = Form.Item;
     const Option = Select.Option;
     const { getFieldDecorator } = this.props.form;
-    // menuId: 1
-    // name: "用户管理"
-    // order: 1
-    // parentId: 0
-    // requiredPermission: 2
-    // type: 1
     const columns = [
       {title: '权限id', dataIndex: 'menuId', key: 'menuId', width: 80},
       {title: '权限名称', dataIndex: 'name', key: 'name', width: 140},
@@ -119,9 +110,13 @@ class permissions extends React.Component {
           </div>
       },
     ];
+    const { tableDataList, tableIsLoading, pageTotal, pageSize, pageNum, pageSizeOptions, detailState, showDetails, currentInfo, parentIdObject, } = this.state;
     return (
       <div className="permissions">
-        <div className="title">权限管理</div>
+        <div className="title">
+          <div className="titleMain">权限管理</div>
+          <div className="titleLine" />
+        </div>
         <div className="btnLine">
           <Button type="primary"
                   // onClick={this.showDetails.bind(this,'add')}
@@ -186,31 +181,38 @@ class permissions extends React.Component {
           </Form>
         </Modal>
 
-        <div className="TableMain">
+        <div className="tableMain">
           {/*表单主体*/}
           <Table className="tableList"
                  id="tableList"
                  dataSource={tableDataList}
                  columns={columns}
-                 pagination={false}
+                 // pagination={false}
+                 pagination={{
+                   pageSize: pageSize,
+                   showTotal: (total, range) =>
+                     `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`,
+                   showSizeChanger: true,
+                   pageSizeOptions: pageSizeOptions,
+                 }}
                  loading={tableIsLoading}
                  bordered
                  scroll={{ y: 500, x: 950 }}
                  rowKey={(record, index) => `id_${index}`}
           />
           {/*分页*/}
-          <Pagination className="tablePagination"
-                      total={pageTotal}
-                      pageSize={pageSize}
-                      current={pageNum}
-                      showTotal={(total, range) =>
-                        `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`
-                      }
-                      onChange={this.changePage.bind(this)}
-                      showSizeChanger
-                      pageSizeOptions={pageSizeOptions}
-                      onShowSizeChange={this.changePage.bind(this)}
-          />
+          {/*<Pagination className="tablePagination"*/}
+                      {/*total={pageTotal}*/}
+                      {/*pageSize={pageSize}*/}
+                      {/*current={pageNum}*/}
+                      {/*showTotal={(total, range) =>*/}
+                        {/*`${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`*/}
+                      {/*}*/}
+                      {/*onChange={this.changePage.bind(this)}*/}
+                      {/*showSizeChanger*/}
+                      {/*pageSizeOptions={pageSizeOptions}*/}
+                      {/*onShowSizeChange={this.changePage.bind(this)}*/}
+          {/*/>*/}
         </div>
       </div>
     )

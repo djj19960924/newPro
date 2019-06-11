@@ -66,7 +66,7 @@ class accounts extends React.Component {
       if (r.data.status === 10000) {
         this.getUserList();
         let dataList = [], dataObj = {};
-        for (let obj of r.data.data.list) {
+        for (let obj of r.data.data) {
           dataList.push(<Option key={obj.roleId} value={obj.roleId}>{obj.roleName}</Option>);
           dataObj[`${obj.roleId}`] = obj.roleName;
         }
@@ -157,11 +157,11 @@ class accounts extends React.Component {
         const dataObj = {
           userName: val.userName,
           roleId: val.roleId,
-          password: val.password ? val.password : null,
           email: val.email ? val.email.trim() : '',
           userPhone: val.userPhone ? val.userPhone.trim() : '',
           company: val.company ? val.company.trim() : '',
         };
+        if (val.password) dataObj.password = val.password;
         if (detailState === 'add') {
           this.changeUser(dataObj, 'addUser');
         } else if (detailState === 'edit') {
@@ -243,7 +243,7 @@ class accounts extends React.Component {
                 getFieldDecorator('roleId', {
                   rules: [{required: true, message: '请选择角色!'}]
                 })( <Select placeholder="请选择角色" >{rolesOptions}</Select> )
-                : <div>{currentInfo.roleName}</div>
+                : <div>{rolesObject[currentInfo.roleId]}</div>
               }
             </FormItem>
             <FormItem label="密码" colon style={detailState === 'detail' ? {display: 'none'} : {}}>

@@ -14,9 +14,10 @@
   .btnLine {
     padding-top: 10px;
     padding-left: 10px;
+    margin-bottom: 10px;
   }
 
-  .TableMain {
+  .tableMain {
     max-width: 1100px;
 
     .tableList {
@@ -59,49 +60,114 @@
       width: 150px;
     }
   }
-  .detailsMain{
-    border: 1px solid #ddd;
-    overflow: hidden;
-    .menu_body {
+  .detailsMain {
+    border: 1px solid #99d;
+    border-bottom: none;
+    .menuLine {
       overflow: hidden;
-      border-left: 1px #ddd solid;
-    }
-    .menu_name,.menu_perms {
-      float: left;
-      overflow: hidden;
-    }
-    .menu_name {
-      line-height: 44px;
-      padding: 0 8px;
-      //color: #409eff;
-      //background-color: rgba(64, 158, 255, 0.1);
-    }
-    .menu_perms {
-      display: inline-block;
-      border-radius: 5px;
-      padding: 4px 8px;
-      margin: 5px 0 5px 8px;
-    }
-    .menu_perms.can_edit {
-      cursor: pointer;
-    }
-    .menu_perms.can_edit:hover {
-      color: rgba(64, 158, 255, 0.5);
-      border: 1px solid rgba(64, 158, 255, 0.2);
-    }
-    .menu_perms.own_perms {
-      color: #409eff;
-      background-color: rgba(64, 158, 255, 0.1);
-      border: 1px solid rgba(64, 158, 255, 0.2);
-    }
-    .menu_perms.not_own {
-      color: #999;
-      background-color: rgba(180, 180, 180, 0.1);
-      border: 1px solid rgba(180, 180, 180, 0.2);
-    }
-    .menu_1 {
-      color: #666;
-      font-size: 16px;
+      width: 100%;
+      border-bottom: 1px solid #99d;
+      //background-color: rgba(0,255,0,.03);
+      .menuLine:last-child {
+        border-bottom: none;
+      }
+      .menuName {
+        float: left;
+        text-align: center;
+        width: 120px;
+      }
+      .menuBody {
+        float: left;
+        overflow: hidden;
+        width: calc(100% - 120px);
+        border-left: 1px solid #99d;
+      }
+      .apiName,.menuNameTab {
+        display: inline-block;
+        border-radius: 5px;
+        padding: 4px 8px;
+        margin: 5px 0;
+      }
+      .apiName {
+        float: left;
+        margin-left: 8px;
+      }
+      .apiName.can_edit,.menuNameTab.can_edit {
+        cursor: pointer;
+      }
+      .apiName.can_edit:hover {
+        color: rgba(38, 226, 138, 0.5);
+        border: 1px solid rgba(38, 226, 138, 0.2);
+      }
+      .apiName.own {
+        color: #22c976;
+        background-color: rgba(38, 226, 138, 0.1);
+        border: 1px solid rgba(38, 226, 138, 0.2);
+      }
+      .apiName.not_own {
+        color: #999;
+        background-color: rgba(180, 180, 180, 0.1);
+        border: 1px solid rgba(180, 180, 180, 0.2);
+      }
+      .menuNameTab.can_edit:hover {
+        color: rgba(64, 158, 255, 0.5);
+        border: 1px solid rgba(64, 158, 255, 0.2);
+      }
+      .menuNameTab.own {
+        color: #409eff;
+        background-color: rgba(64, 158, 255, 0.1);
+        border: 1px solid rgba(64, 158, 255, 0.2);
+      }
+      .menuNameTab.not_own {
+        color: #999;
+        background-color: rgba(180, 180, 180, 0.1);
+        border: 1px solid rgba(180, 180, 180, 0.2);
+      }
     }
   }
+  //.detailsMain{
+  //  border: 1px solid #ddd;
+  //  overflow: hidden;
+  //  .menu_body {
+  //    overflow: hidden;
+  //    border-left: 1px #ddd solid;
+  //  }
+  //  .menu_name,.menu_perms {
+  //    float: left;
+  //    overflow: hidden;
+  //  }
+  //  .menu_name {
+  //    line-height: 44px;
+  //    padding: 0 8px;
+  //    //color: #409eff;
+  //    //background-color: rgba(64, 158, 255, 0.1);
+  //  }
+  //  .menu_perms {
+  //    display: inline-block;
+  //    border-radius: 5px;
+  //    padding: 4px 8px;
+  //    margin: 5px 0 5px 8px;
+  //  }
+  //  .menu_perms.can_edit {
+  //    cursor: pointer;
+  //  }
+  //  .menu_perms.can_edit:hover {
+  //    color: rgba(64, 158, 255, 0.5);
+  //    border: 1px solid rgba(64, 158, 255, 0.2);
+  //  }
+  //  .menu_perms.own_perms {
+  //    color: #409eff;
+  //    background-color: rgba(64, 158, 255, 0.1);
+  //    border: 1px solid rgba(64, 158, 255, 0.2);
+  //  }
+  //  .menu_perms.not_own {
+  //    color: #999;
+  //    background-color: rgba(180, 180, 180, 0.1);
+  //    border: 1px solid rgba(180, 180, 180, 0.2);
+  //  }
+  //  .menu_1 {
+  //    color: #666;
+  //    font-size: 16px;
+  //  }
+  //}
 }
