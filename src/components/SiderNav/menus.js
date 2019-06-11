@@ -158,9 +158,7 @@ const menus = [
           },
           {
             title: '货物已到仓',
-            id: 38,
-            // 该页面与 38 共用同一底部接口, 两个页面使用同一权限进行校验
-            // id: 39,
+            id: 39,
             icon: 'file-done',
             key: '/logistics-manage/globalTranshipment/arrived',
             components: [
