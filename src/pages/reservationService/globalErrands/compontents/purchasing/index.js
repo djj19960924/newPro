@@ -289,6 +289,15 @@ class WaitPurchasing extends React.Component {
         dataIndex: "followUper",
         key: "followUper",
         width: 250,
+      },
+      {
+        title: "最新更新进度",
+        dataIndex: "scheduleInfo",
+        key: "scheduleInfo",
+        width: 150,
+        render: (text, record) => (
+          <div>{record.scheduleInfo ? record.scheduleInfo : "暂无进度"}</div>
+        )
       }
     ];
     const {dataSource, tableLoading, endVisible, pageNum, pageSize, pageSizeOptions, orderTotal, endState, noPurchased, btnLoading, followVisible, followUpper, confirmLoading} = this.state;
