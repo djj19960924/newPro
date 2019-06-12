@@ -34,10 +34,11 @@ class Login extends React.Component {
             message.success(r.data.msg);
             // 置登陆状态
             window.setCookie('isLogin','true',3600 * 10);
+            let historyPath = window.getQueryString('historyPath');
+            if (!!historyPath || localStorage.historyUserName !== values.userName) historyPath = '/';
             // 登陆时单独保存登陆名
             saveUserData({userName: values.userName});
-            let historyPath = window.getQueryString('historyPath');
-            push(historyPath ? historyPath : '/');
+            push(historyPath);
           }
           r.showError();
         }).catch(r => {
