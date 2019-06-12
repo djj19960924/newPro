@@ -13,6 +13,7 @@ class AppStore {
   @action saveUserData = (data) => {
     this.userData = data;
     localStorage.userData = JSON.stringify(data);
+    localStorage.historyUserName = data.userName;
   };
 
   @action clearAllData = () => {
