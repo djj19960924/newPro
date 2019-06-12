@@ -13,7 +13,7 @@ const menus = [
     id: 1,
     icon: 'usergroup-add',
     key: '/users',
-    testType: 'serverTest',
+    // testType: 'serverTest',
     subs: [
       {
         title: '权限管理',
