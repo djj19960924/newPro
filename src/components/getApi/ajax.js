@@ -20,9 +20,7 @@ class Ajax {
   headers = {
     'Content-Type': 'application/json'
   };
-  // origin = window.fandianUrl;
-  // origin = '//192.168.31.60:8001';
-  origin = '//47.98.221.129:8001';
+  origin = window.ajaxUrl;
 
   // 注入公共配置
   injectMethod(request,headers) {

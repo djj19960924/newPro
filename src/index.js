@@ -24,6 +24,7 @@ import App from './App';
 // 线上正式版:
 window.apiUrl = '//api.maishoumiji.com';
 window.fandianUrl = '//fandian.maishoumiji.com';
+window.ajaxUrl = '//backend.maishoumiji.com';
 
 ReactDOM.render(
   <BrowserRouter>

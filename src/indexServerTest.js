@@ -23,6 +23,7 @@ import App from './App';
 
 // 线上测试:
 window.testType = 'serverTest'; // 服务端测试版开口
+window.ajaxUrl = '//47.98.221.129:8001/';
 window.apiUrl = window.fandianUrl = 'http://testapi.maishoumiji.com';
 document.getElementsByTagName("title")[0].innerText = `后台管理系统 - 测试版`;
 
