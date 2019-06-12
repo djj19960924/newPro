@@ -120,19 +120,20 @@ class resolveResponse {
   }
   // 处理错误
   showError(warnShowNoStatus) {
-    if (!this.data.msg && !this.data.data) {
+    const {data} = this;
+    if (!data.msg && !data.data) {
       // 后端未处理报错, 返回为后端错误
       message.error('服务器接口处理错误, 请联系管理员')
     } else {
       // 后端成功处理该接口
-      if (this.data.status === 10000) {
+      if (data.status === 10000) {
         // 如成功, 则默认静默不做处理
-      } else if (this.data.status > 10000) {
+      } else if (data.status > 10000) {
         // 后端约定: 大于 10000 做报错处理
-        message.error(`${this.data.msg} 状态码:${this.data.status}`)
-      } else if (this.data.status < 10000) {
+        message.error(`${data.msg} 状态码:${data.status}`)
+      } else if (data.status < 10000) {
         // 后端约定: 小于 10000 做警告处理
-        message.warn(`${this.data.msg}${warnShowNoStatus === true ? '' : ` 状态码:${this.data.status}`}`)
+        message.warn(`${data.msg}${warnShowNoStatus === true ? '' : ` 状态码:${data.status}`}`)
       }
     }
   }
