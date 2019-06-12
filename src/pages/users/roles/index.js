@@ -263,7 +263,10 @@ class roles extends React.Component {
     ];
     return (
       <div className="roles">
-        <div className="title">角色管理</div>
+        <div className="title">
+          <div className="titleMain">角色管理</div>
+          <div className="titleLine" />
+        </div>
         <div className="btnLine">
           <Button type="primary"
                   onClick={this.showDetailsModal.bind(this, undefined, 'add')}
