@@ -22,6 +22,12 @@ class Home extends React.Component {
 
         <div className="main">
           <div className="updateInfo">
+            <div className="infoTitle">2019-6-12 更新</div>
+            <div className="dividingLine shot"/>
+            <p style={{color: `rgba(255,0,0,.7)`}}>后台管理系统: 权限系统植入, 页面全面升级</p>
+          </div>
+
+          <div className="updateInfo">
             <div className="infoTitle">2019-6-3 更新</div>
             <div className="dividingLine shot"/>
             <p>全球跑腿: 增加跟进人编辑功能</p>
