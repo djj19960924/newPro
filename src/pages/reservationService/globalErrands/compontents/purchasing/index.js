@@ -203,7 +203,7 @@ class WaitPurchasing extends React.Component {
               "backgroundColor": "#e2bc14",
               "color": "#fff",
               "borderColor": "transparent"
-            }}>订单完结</Button>
+            }}>采购结束</Button>
           </div>
         )
       },
