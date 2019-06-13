@@ -243,7 +243,7 @@ class appointmentTeamManage extends React.Component {
   // 展示详细信息
   showDetail(record) {
     this.setState({currentInfo:record,userInfoModal:true});
-    fetch(record.passport).then(r => r.blob()).then(r => {
+    fetch(`//${record.passport.split('//')[1]}`).then(r => r.blob()).then(r => {
       // console.log(r);
       let fileReader = new FileReader();
       fileReader.onload = (e) => {
@@ -395,16 +395,16 @@ class appointmentTeamManage extends React.Component {
                wrapClassName="appointmentTeamManageUserDetail"
                visible={userInfoModal}
                onCancel={() => {
-                 this.setState({userInfoModal:false,},() => {
+                 this.setState({userInfoModal: false}, () => {
                    // 优化关闭形式
-                   this.setState({currentInfo:{}, passportUrl: ''})
-                 })
+                   this.setState({currentInfo: {}, passportUrl: ''})
+                 });
                }}
                footer={<div><Button onClick={() => {
-                 this.setState({userInfoModal:false,},() => {
+                 this.setState({userInfoModal: false}, () => {
                    // 优化关闭形式
-                   this.setState({currentInfo:{}, passportUrl: ''})
-                 })
+                   this.setState({currentInfo: {}, passportUrl: ''})
+                 });
                }}>确定</Button></div>}
         >
           <div style={{width: 300, margin: '0 auto'}}>
@@ -419,7 +419,7 @@ class appointmentTeamManage extends React.Component {
             <div><div className="label">航班号: </div>{currentInfo.flightNo}</div>
             <div><div className="label">机场: </div>{currentInfo.airportTerminal}</div>
             <div>
-              <Button href={`//${passportUrl.split('//')}`}
+              <Button href={passportUrl}
                       download={
                         currentInfo.passport ? `${currentInfo.passportNum}.${currentInfo.passport.split('.')[currentInfo.passport.split('.').length-1]}` : ''
                       }
@@ -428,7 +428,7 @@ class appointmentTeamManage extends React.Component {
               >下载护照图片</Button>
             </div>
           </div>
-          <div><img src={`//${passportUrl.split('//')}`} alt=""/></div>
+          <div><img src={currentInfo.passport} alt=""/></div>
         </Modal>
         {/*驳回*/}
         <Modal
