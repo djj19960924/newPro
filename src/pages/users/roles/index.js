@@ -239,21 +239,22 @@ class roles extends React.Component {
               <Button type="primary"
                       onClick={this.showDetailsModal.bind(this, record, 'detail')}
               >查看</Button>
+              <Button type="primary"
+                      style={{marginLeft: 10}}
+                      onClick={this.showDetailsModal.bind(this, record, 'edit')}
+              >修改</Button>
             </div>
           } else {
             return <div>
               <Button type="primary"
-                      // disabled={true}
                       onClick={this.showDetailsModal.bind(this, record, 'detail')}
               >查看</Button>
               <Button type="primary"
                       style={{marginLeft: 10}}
-                      // disabled={true}
                       onClick={this.showDetailsModal.bind(this, record, 'edit')}
               >修改</Button>
               <Button type="danger"
                       style={{marginLeft: 10}}
-                      // disabled={true}
                       onClick={this.deleteRole.bind(this, record.roleId)}
               >删除</Button>
             </div>
