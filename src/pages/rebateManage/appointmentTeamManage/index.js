@@ -243,7 +243,7 @@ class appointmentTeamManage extends React.Component {
   // 展示详细信息
   showDetail(record) {
     this.setState({currentInfo:record,userInfoModal:true});
-    fetch(record.passport).then(r => r.blob()).then(r => {
+    fetch(`//${record.passport.split('//')[1]}`).then(r => r.blob()).then(r => {
       // console.log(r);
       let fileReader = new FileReader();
       fileReader.onload = (e) => {
@@ -395,16 +395,16 @@ class appointmentTeamManage extends React.Component {
                wrapClassName="appointmentTeamManageUserDetail"
                visible={userInfoModal}
                onCancel={() => {
-                 this.setState({userInfoModal:false,},() => {
+                 this.setState({userInfoModal: false}, () => {
                    // 优化关闭形式
-                   this.setState({currentInfo:{}, passportUrl: ''})
-                 })
+                   this.setState({currentInfo: {}, passportUrl: ''})
+                 });
                }}
                footer={<div><Button onClick={() => {
-                 this.setState({userInfoModal:false,},() => {
+                 this.setState({userInfoModal: false}, () => {
                    // 优化关闭形式
-                   this.setState({currentInfo:{}, passportUrl: ''})
-                 })
+                   this.setState({currentInfo: {}, passportUrl: ''})
+                 });
                }}>确定</Button></div>}
         >
           <div style={{width: 300, margin: '0 auto'}}>
