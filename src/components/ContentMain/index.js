@@ -18,6 +18,8 @@ import permissions from '@pages/users/permissions/';
 //汇率
 import ExchangeRate from '@pages/foundationSetup/exchangeRate/';
 // 物流管理
+//线下支付
+import OfflinePayment from "@pages/logisticsManage/offlinePayment/";
 // bc清关
 // bc商品打包
 import commoditiesPackaging from "@pages/logisticsManage/BC_customsClearance/commoditiesPackaging/";
@@ -77,7 +79,7 @@ import commoditiesImgList from '@pages/commoditiesManage/commoditiesDatabase/com
 
 import menus from "../SiderNav/menus";
 
-const componentsList = { Home, importExcel, roles, accounts, permissions, commoditiesPackaging, customerLogin, YTO, BCUploadOrder, orderMatched, orderUnmatched, orderPushed, orderNotPushed, globalTranshipmentArrived, globalTranshipmentNotArrived, airportTransfer, appointmentInfo, GlobalErrands, EditProgress, adoptExaminePaid, adoptExamineUnpaid, rejectExamine, updateQRCode, awaitingExamine, setRebate, countBillList, appointmentTeamManage, commoditiesDataBase, commoditiesCreateAndEdit, commoditiesImgList, ExchangeRate};
+const componentsList = { Home, importExcel, roles, accounts, permissions, commoditiesPackaging, customerLogin, YTO, BCUploadOrder, orderMatched, orderUnmatched, orderPushed, orderNotPushed, globalTranshipmentArrived, globalTranshipmentNotArrived, airportTransfer, appointmentInfo, GlobalErrands, EditProgress, adoptExaminePaid, adoptExamineUnpaid, rejectExamine, updateQRCode, awaitingExamine, setRebate, countBillList, appointmentTeamManage, commoditiesDataBase, commoditiesCreateAndEdit, commoditiesImgList, ExchangeRate,OfflinePayment};
 
 @withRouter
 // @inject('appStore') @observer

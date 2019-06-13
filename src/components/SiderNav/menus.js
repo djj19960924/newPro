@@ -54,6 +54,16 @@ const menus = [
     key: '/logistics-manage',
     subs: [
       {
+        title: '线下支付',
+        id: 103,
+        icon: 'global',
+        key: '/logisticsManage/offlinePayment',
+        testType: 'localTest',
+        components: [
+          {name: 'OfflinePayment', path: '/logisticsManage/offlinePayment'}
+        ]
+      },
+      {
         title: 'BC清关',
         id: 27,
         icon: 'global',
@@ -86,7 +96,7 @@ const menus = [
             components: [
               {name: 'BCUploadOrder', path: '/logistics-manage/BC-customsClearance/upload-order'}
             ]
-          },
+          }
         ]
       },
       {
@@ -166,7 +176,24 @@ const menus = [
             ]
           },
         ]
-      }
+      },
+      // {
+      //   title: '速跨通',
+      //   id: 33,
+      //   icon: 'file-excel',
+      //   key: '/logistics-manage/BC-customsClearance/upload-order',
+      //   subs: [
+      //     {
+      //       title: '圆通物流',
+      //       id: 39,
+      //       icon: 'file-done',
+      //       key: '',
+      //       components: [
+      //         {name: '', path: ''}
+      //       ]
+      //     }
+      //   ]
+      // }
     ]
   },
   {
