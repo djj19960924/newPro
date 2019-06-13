@@ -428,7 +428,7 @@ class appointmentTeamManage extends React.Component {
               >下载护照图片</Button>
             </div>
           </div>
-          <div><img src={currentInfo.passport} alt=""/></div>
+          <div><img src={passportUrl} alt=""/></div>
         </Modal>
         {/*驳回*/}
         <Modal
