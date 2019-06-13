@@ -419,7 +419,7 @@ class appointmentTeamManage extends React.Component {
             <div><div className="label">航班号: </div>{currentInfo.flightNo}</div>
             <div><div className="label">机场: </div>{currentInfo.airportTerminal}</div>
             <div>
-              <Button href={passportUrl}
+              <Button href={`//${passportUrl.split('//')}`}
                       download={
                         currentInfo.passport ? `${currentInfo.passportNum}.${currentInfo.passport.split('.')[currentInfo.passport.split('.').length-1]}` : ''
                       }
@@ -428,7 +428,7 @@ class appointmentTeamManage extends React.Component {
               >下载护照图片</Button>
             </div>
           </div>
-          <div><img src={passportUrl} alt=""/></div>
+          <div><img src={`//${passportUrl.split('//')}`} alt=""/></div>
         </Modal>
         {/*驳回*/}
         <Modal
