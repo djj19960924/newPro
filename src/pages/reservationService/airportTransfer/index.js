@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, DatePicker, message, Modal, Pagination, Radio, Table,} from 'antd';
+import {Button, DatePicker, Modal, Pagination, Radio, Table,} from 'antd';
 import moment from 'moment';
 
 import './index.less';
@@ -31,61 +31,31 @@ class airportTransfer extends React.Component {
 
   // 获取接送机用户信息
   // infoType: 0 - 送机, 1 - 接机
-  getAirportInfo(infoType = this.state.infoType, pageNum=this.state.pageNum, pageSize=this.state.pageSize,) {
-    const { startTime, endTime, } = this.state;
+  getAirportInfo() {
+    const { startTime, endTime, pageNum, pageSize, infoType } = this.state;
     this.setState({tableIsLoading: {spinning:true,tip:`正在加载中...`}});
-    fetch(`${window.fandianUrl}/airportManagement/${infoType === 0 ? `getAirportDropInfo` : `getAirportPickInfo`}`,{
-      method:"POST",
-      headers:{'Content-Type': 'application/json'},
-      body:JSON.stringify({
-        pageNum: pageNum,
-        pageSize: pageSize,
-        startTime: startTime ? `${moment(startTime).format('YYYY-MM-DD')} 00:00:00` : null,
-        endTime: endTime ? `${moment(endTime).format('YYYY-MM-DD')} 23:59:59` : null,
-      })
-    }).then(r => r.json()).then(r => {
-      // 这里成功调取后端服务器
-      if (r.status) {
-        // 后端成功处理请求
-        if (r.status === 10000) {
-          // 请求结果状态码为10000(成功)
-          if (r.msg) {
-            // 成功获取数据, 但结果为空
-            message.warn(`${r.msg}`);
-            this.resetTableDataList();
-          } else {
-            // 成功获取数据, 处理表单
-            this.setState({
-              tableIsLoading: false,
-              tableDataList: r.data.list,
-              pageTotal: r.data.total,
-              pageSizeOptions: ['30','50','80',`${r.data.total > 100 ? r.data.total : 100}`],
-            })
-          }
-        } else {
-          // 请求结果状态码不为10000, 进行报错提示
-          message.error(`${r.msg}, 错误码:${r.status}`); this.resetTableDataList();
-        }
-      } else {
-        // 后端处理请求失败, 返回结果有误
-        message.error(`后端数据错误`); this.resetTableDataList();
+    const dataObj = {
+      pageNum: pageNum,
+      pageSize: pageSize,
+      startTime: startTime ? `${moment(startTime).format('YYYY-MM-DD')} 00:00:00` : null,
+      endTime: endTime ? `${moment(endTime).format('YYYY-MM-DD')} 23:59:59` : null,
+    };
+    this.ajax.post(`/airportManagement/${infoType === 0 ? `getAirportDropInfo` : `getAirportPickInfo`}`,dataObj).then(r => {
+      if (r.data.status === 10000) {
+        const { data } = r.data;
+        // 成功获取数据, 处理表单
+        this.setState({
+          tableIsLoading: false,
+          tableDataList: data.list,
+          pageTotal: data.total,
+          pageSizeOptions: ['30','50','80',`${data.total > 100 ? data.total : 100}`],
+        })
       }
-    }).catch(() => {
-      // 前端未能成功调取后端数据, 或处理接收数据方法出错, 需检查前端部分代码执行
-      message.error(`前端接口调用错误: 获取用户信息接口调取失败`); this.resetTableDataList();
-    })
-  }
-
-  // 复位数据
-  resetTableDataList() {
-    this.setState({
-      tableIsLoading: false,
-      tableDataList: [],
-      pageTotal: 0,
-      pageSizeOptions: ['30','50','80',`100`],
-      pageNum: 1,
-      pageSize: 30,
-    })
+      this.setState({tableIsLoading: false});
+      r.showError(true);
+    }).catch(r => {
+      this.ajax.isReturnLogin(r,this)
+    });
   }
 
   // 起始时间校验
@@ -104,55 +74,101 @@ class airportTransfer extends React.Component {
 
   // 翻页事件
   changePage(pageNum,pageSize) {
-    this.setState({pageNum:pageNum,pageSize:pageSize});
-    this.getAirportInfo(undefined,pageNum,pageSize)
+    this.setState({pageNum:pageNum,pageSize:pageSize},() => {
+      this.getAirportInfo();
+    });
+  }
+  // 详情
+  showDetail(record) {
+    const {infoType} = this.state;
+    const style = {float:'left',width:'120px'}, hidden = {overflow:'hidden'};
+    Modal.info({
+      title: '查看订单信息',
+      okText: '确定',
+      okType: 'default',
+      maskClosable: true,
+      width: 400,
+      content: <div style={hidden}>
+        <div style={hidden}><div style={style}>创建时间: </div>{record.createTime}</div>
+        <div style={hidden}><div style={style}>微信号: </div>{record.wechatNum}</div>
+        <div style={hidden}>
+          <div style={style}>{infoType === 0 ? `送机时间` : `接机时间`}: </div>
+          {infoType === 0 ? record.takeoffTime : record.arrivalTime}
+        </div>
+        <div style={hidden}><div style={style}>用车人数: </div>{record.carMember}</div>
+        <div style={hidden}><div style={style}>行李数: </div>{record.bagNum}</div>
+        <div style={hidden}><div style={style}>用车类型: </div>{record.carChoice === 0 ? `拼车` : `专车(包车)`}</div>
+        {infoType === 0
+          ? <div style={hidden}><div style={style}>所在地址: </div>{record.location}</div>
+          : <div style={hidden}>
+            <div style={hidden}><div style={style}>目的地1: </div>{record.location1}</div>
+            <div style={hidden}><div style={style}>目的地2: </div>{record.location2}</div>
+            <div style={hidden}><div style={style}>目的地3: </div>{record.location3}</div>
+          </div>
+        }
+      </div>
+    });
   }
 
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
+  }
   render() {
     const RadioButton = Radio.Button, RadioGroup = Radio.Group;
     const { pageTotal, pageSize, pageNum, tableDataList, infoType, previewVisible, previewImage, pageSizeOptions, tableIsLoading, startTime, endTime, } = this.state;
     const columns = [
-      {title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 140,
+      {title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 160,
         render: (text, record) => (
-          <div>{moment(record.createTime).format('YYYY-MM-DD HH:mm:ss')}</div>
+          <div>{text? moment(text).format('YYYY-MM-DD HH:mm:ss') : ''}</div>
         )
       },
       {title: '微信号', dataIndex: 'wechatNum', key: 'wechatNum', width: 140},
-      {title: '机票照片', dataIndex: `${infoType === 0 ? `airportDropoffUrl` : `airportPickupUrl`}`, key: `${infoType === 0 ? `airportDropoffUrl` : `airportPickupUrl`}`, width: 160,
+      {title: '机票照片', dataIndex: `${infoType === 0 ? `airportDropoffUrl` : `airportPickupUrl`}`, key: `${infoType === 0 ? `airportDropoffUrl` : `airportPickupUrl`}`, width: 140,
         render: (text, record) => (
           <Button type="default"
-                  onClick={() => {this.setState({ previewVisible: true,
-                    previewImage: (infoType === 0 ? record[`airportDropoffUrl`] : record[`airportPickupUrl`]) })}}
+                  onClick={() => {
+                    this.setState({
+                      previewVisible: true,
+                      previewImage: infoType === 0
+                        // 自适应http/https协议
+                        ? `//${record[`airportDropoffUrl`].split('//')[1]}`
+                        : `//${record[`airportPickupUrl`].split('//')[1]}`
+                    })
+                  }}
           >点击查看</Button>
         ),},
-      {title: `${infoType === 0 ? `送机时间` : `接机时间`}`, dataIndex: `${infoType === 0 ? `takeoffTime` : `arrivalTime`}`, key: `${infoType === 0 ? `takeoffTime` : `arrivalTime`}`, width: 140},
-      {title: '用车人数', dataIndex: 'carMember', key: 'carMember', width: 90},
-      {title: '行李件数', dataIndex: 'bagNum', key: 'bagNum', width: 90},
-      {title: '用车类型', dataIndex: 'carChoice', key: 'carChoice', width: 140,
+      {title: `${infoType === 0 ? `送机时间` : `接机时间`}`, dataIndex: `${infoType === 0 ? `takeoffTime` : `arrivalTime`}`, key: `${infoType === 0 ? `takeoffTime` : `arrivalTime`}`},
+      {title: '行李数', dataIndex: 'bagNum', key: 'bagNum', width: 80},
+      {title: '操作', dataIndex: '操作', key: '操作', width: 100, fixed: 'right',
         render: (text, record) => (
-          <div>{record.carChoice === 0 ? `拼车` : `专车(包车)`}</div>
+          <div>
+            <Button type="primary"
+                    onClick={this.showDetail.bind(this, record)}
+            >查看</Button>
+          </div>
         ),
-      },
+      }
     ];
-    const dropColumns = columns.concat([
-      {title: '所在地址', dataIndex: 'location', key: 'location', width: 140},
-    ]);
-    const pickColumns = columns.concat([
-      {title: '目的地1', dataIndex: 'location1', key: 'location1', width: 140},
-      {title: '目的地2', dataIndex: 'location2', key: 'location2', width: 140},
-      {title: '目的地3', dataIndex: 'location3', key: 'location3', width: 140},
-    ]);
     return (
       <div className="airportTransfer">
+        <div className="title">
+          <div className="titleMain">预约接送机</div>
+          <div className="titleLine"/>
+        </div>
         <RadioGroup buttonStyle="solid"
                     className="radioBtn"
                     value={infoType}
-                    onChange={(e)=> { this.setState({infoType: e.target.value}); this.getAirportInfo(e.target.value) }}
+                    onChange={(e) => {
+                      this.setState({infoType: e.target.value}, () => {
+                        this.getAirportInfo()
+                      })
+                    }}
         >
           <RadioButton value={0}>送机用户信息</RadioButton>
           <RadioButton value={1}>接机用户信息</RadioButton>
         </RadioGroup>
-        <div className="datePickerLine">
+        <div className="btnLine">
           <span>开始时间: </span>
           <DatePicker value={startTime}
                       onChange={(date, dateString) => this.setState({startTime: date})}
@@ -165,16 +181,17 @@ class airportTransfer extends React.Component {
           />
           <Button type="primary"
                   style={{marginLeft: 10}}
-                  onClick={this.getAirportInfo.bind(this,infoType,undefined,undefined)}
+                  onClick={this.getAirportInfo.bind(this, infoType, undefined, undefined)}
           >查询</Button>
         </div>
-        <div style={{maxWidth: 1400}}>
+        <div className="tableMain"
+             style={{maxWidth: 1000}}>
           <Table className="tableList"
                  dataSource={tableDataList}
-                 columns={infoType === 0 ? dropColumns : pickColumns }
+                 columns={columns}
                  pagination={false}
                  bordered
-                 scroll={{ x:1300, y: 500 }}
+                 scroll={{x: 800, y: 550}}
                  rowKey={(record, index) => `id_${index}`}
                  loading={tableIsLoading}
           />
@@ -182,8 +199,8 @@ class airportTransfer extends React.Component {
                       total={pageTotal}
                       pageSize={pageSize}
                       current={pageNum}
-                      showTotal={(total, range) => `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`}
-                      style={{float:'right',marginRight:'20px',marginTop:'10px'}}
+                      showTotal={(total, range) =>
+                        `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 `}共 ${total} 条记录`}
                       onChange={this.changePage.bind(this)}
                       showSizeChanger
                       pageSizeOptions={pageSizeOptions}
@@ -193,14 +210,16 @@ class airportTransfer extends React.Component {
 
         {/*图片预览弹窗*/}
         <Modal visible={previewVisible}
-               width={800}
+               width={600}
                footer={null}
-               onCancel={()=>{this.setState({previewVisible: false,previewImage: ``})}}
+               onCancel={() => {
+                 this.setState({previewVisible: false, previewImage: ``})
+               }}
         >
-          <img alt="example" style={{ width: '100%' }} src={previewImage} />
+          <img alt="example" style={{width: '100%'}} src={previewImage}/>
         </Modal>
       </div>
-    )
+    );
   }
 }
 

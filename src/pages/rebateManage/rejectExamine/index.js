@@ -19,7 +19,7 @@ class rejectExamine extends React.Component{
       // 商场列表
       shopList: [],
       pageNum: 1,
-      pageSize: 10,
+      pageSize: 100,
       pageSizeOptions: ['50', '100', '200', '300'],
       //总条数
       pageTotal: 0,
@@ -43,25 +43,6 @@ class rejectExamine extends React.Component{
       pageTotal: 0,
       mallName: undefined
     });
-    fetch(window.fandianUrl + '/mall/getMallList', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body:'nationName='+val
-    }).then(r => r.json()).then(r => {
-      if (r.retcode.status === '10000') {
-        // message.success(r.retcode.msg)
-        let dataList = [];
-        for (let i of r.data) {
-          dataList.push(<Option key={i.mallId} value={i.mallName}>{i.mallName}</Option>)
-        }
-        this.setState({
-          shopList: dataList
-        })
-      } else {
-        message.error(`${r.retcode.msg},状态码为:${r.retcode.status}`)
-      }
-    });
-    return false;
     this.ajax.post('/mall/getMallListByNationName',{nationName:val}).then(r => {
       if (r.data.status === 10000) {
         const { data } = r.data;
@@ -71,7 +52,6 @@ class rejectExamine extends React.Component{
       }
       r.showError();
     }).catch(r => {
-      console.error(r);
       this.ajax.isReturnLogin(r, this);
     });
   }
@@ -84,31 +64,19 @@ class rejectExamine extends React.Component{
   //根据商场获取驳回小票
   rejectByMall() {
     const {mallName, pageNum, pageSize} = this.state;
-    fetch(window.fandianUrl + '/recipt/getReciptOfRejected', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      // 这里给出搜索的页码与当前页数
-      body: 'mallName=' + mallName+'&pageNum='+pageNum+'&pageSize='+pageSize
-    }).then(r => r.json()).then(r => {
-      if (r.retcode.status === '10000') {
-        this.setState({dataSource: r.data.list,  pageTotal: r.data.total});
-      }
-    });
-    return false;
     this.ajax.post('/recipt/getReciptOfRejected', {
       mallName: mallName,
       pageNum: pageNum,
       pageSize: pageSize
     }).then(r => {
-      const {data} = r.data;
       if (r.data.status === 10000) {
+        const {data} = r.data;
         this.setState({dataSource: data.list, pageTotal: data.total});
       } else if (r.data.status < 10000) {
         this.setState({dataSource: [], pageTotal: 0});
       }
-      r.showError();
+      r.showError(true);
     }).catch(r => {
-      console.error(r);
       this.ajax.isReturnLogin(r, this);
     });
   }
@@ -141,6 +109,10 @@ class rejectExamine extends React.Component{
     this.setState({mask: 'unShow',pictureUrl:'',ticketUrl:'unShow'})
   }
 
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
+  }
   render() {
     const columns = [
       {title: '商场名称', dataIndex: 'mallName', key: 'mallName', width: 160},
@@ -180,7 +152,10 @@ class rejectExamine extends React.Component{
     const {countries, shopList, country, mallName, pageTotal, pageSize, pageSizeOptions, pageNum, dataSource} = this.state;
     return (
       <div className="rejectExamine">
-        <div className="title">驳回小票</div>
+        <div className="title">
+          <div className="titleMain">已驳回小票</div>
+          <div className="titleLine" />
+        </div>
         <div className="shopSelect">
           <span>所属国家: </span>
           <Select className="selectShops"
@@ -222,7 +197,6 @@ class rejectExamine extends React.Component{
                       pageSize={pageSize}
                       current={pageNum}
                       showTotal={(total, range) => `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 `}共 ${total} 条记录`}
-                      style={{float: 'right', marginRight: '20px'}}
                       onChange={this.changePage.bind(this)}
                       showSizeChanger
                       pageSizeOptions={pageSizeOptions}

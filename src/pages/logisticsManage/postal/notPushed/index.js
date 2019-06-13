@@ -2,8 +2,10 @@ import React from 'react';
 import { Table, Button, Pagination, message, } from 'antd';
 import XLSX from 'xlsx';
 import moment from 'moment';
+import {inject, observer} from 'mobx-react';
 import './index.less';
 
+@inject('appStore') @observer
 class orderNotPushed extends React.Component{
   constructor(props) {
     super(props);
@@ -24,9 +26,8 @@ class orderNotPushed extends React.Component{
       pageSize: 100,
       pageSizeOptions: [`50`,`100`,`200`,`300`]
     };
-    // console.log(new.target.name)
-    // window.orderNotPushed = this;
   }
+  allow = this.props.appStore.getAllow.bind(this);
   componentDidMount() {
     this.sendToPostal();
   }
@@ -36,32 +37,23 @@ class orderNotPushed extends React.Component{
     pageSize = this.state.pageSize
   ) {
     this.setState({tableIsLoading: true});
-    let clearTable = () => this.setState({tableIsLoading:false,selectedIds:[],selectedList:[]});
-    fetch(`${window.fandianUrl}/postalManagement/sendToPostal`,{
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body:JSON.stringify({pageNum:pageNum,pageSize:pageSize})
-    }).then(r => r.json()).then(r => {
-      // console.log(r);
-      if (!r.msg && !r.data) {
-        message.error(`后端数据错误`);
-      } else {
-        if (r.status === 10000) {
-          this.setState({
-            tableDataList: r.data.list, pageTotal: r.data.total,
-            pageSizeOptions: [`50`,`100`,`200`,`${r.data.total > 300 ? r.data.total : 300}`]
-          })
-        } else if (r.status < 10000) {
-          message.warn(`${r.msg}`)
-        } else {
-          message.error(`${r.msg} 错误码:${r.status}`)
-        }
+    const clearTable = () => this.setState({tableIsLoading:false,selectedIds:[],selectedList:[]});
+    const data = {pageNum: pageNum, pageSize: pageSize};
+    this.ajax.post('/postalManagement/sendToPostal', data).then(r => {
+      if (r.data.status === 10000) {
+        const {data} = r.data;
+        this.setState({
+          tableDataList: data.list, pageTotal: data.total,
+          pageSizeOptions: [`50`,`100`,`200`,`${data.total > 300 ? data.total : 300}`]
+        })
       }
       clearTable();
-    }).catch(()=>{
-      message.error(`前端接口调取失败`);
+      r.showError(true);
+    }).catch(r => {
       clearTable();
-    })
+      console.error(r);
+      this.ajax.isReturnLogin(r, this);
+    });
   }
 
   changePage(pageNum, pageSize) {
@@ -86,33 +78,27 @@ class orderNotPushed extends React.Component{
       let dataList = [];
       for (let v of selectedList) dataList.push(v.boxCode);
       // 接口调取
-      fetch(`${window.fandianUrl}/postalManagement/updateStatusByBoxCode`,{
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(dataList)
-      }).then(r => r.json()).then(r => {
-        if (!r.msg && !r.data) {
-          message.error(`后端数据错误`);
-        } else {
-          if (r.status === 10000) {
-            message.success(r.msg);
-            this.sendToPostal();
-          } else {
-            message.error(`${r.msg} 错误码:${r.status}`)
-          }
+      this.ajax.post('/postalManagement/updateStatusByBoxCode', dataList).then(r => {
+        if (r.data.status === 10000) {
+          message.success(r.data.msg);
+          this.sendToPostal();
         }
-        this.setState({updateBtnIsLoading:false});
-      }).catch(()=>{
-        message.error(`前端接口调取失败`);
-        this.setState({updateBtnIsLoading:false});
-      })
+        r.showError();
+      }).catch(r => {
+        console.error(r);
+        this.ajax.isReturnLogin(r, this);
+      });
     } else {
       message.error(`请选择订单`)
     }
   }
 
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
+  }
   render() {
-    const { tableDataList, tableIsLoading, selectedIds, pageTotal, pageSize, pageNum, pageSizeOptions, selectedList, updateBtnIsLoading, } = this.state;
+    const {tableDataList, tableIsLoading, selectedIds, pageTotal, pageSize, pageNum, pageSizeOptions, selectedList, updateBtnIsLoading} = this.state;
     const columns = [
       {title: `箱号`, dataIndex: `boxCode`, key: 'boxCode', width: 180},
       {title: `收件人`, dataIndex: `recipientsName`, key: 'recipientsName', width: 140},
@@ -122,12 +108,16 @@ class orderNotPushed extends React.Component{
     ];
     return (
       <div className="orderNotPushed">
-        <p className="title">邮政 - 未推送订单</p>
+        <div className="title">
+          <div className="titleMain">邮政 - 未推送订单</div>
+          <div className="titleLine" />
+        </div>
 
         <div className="btnLine">
           <Button type="primary"
                   onClick={this.updateStatusByBoxCode.bind(this)}
-                  disabled={selectedList.length === 0}
+                  disabled={selectedList.length === 0 || !this.allow(94)}
+                  title={!this.allow(94) ? '没有该操作权限' : null}
                   loading={updateBtnIsLoading}
           >推送所选订单</Button>
         </div>
@@ -142,41 +132,42 @@ class orderNotPushed extends React.Component{
                rowKey={(record, index) => `${index}`}
         />
 
-        {/*表单主体*/}
-        <Table className="tableList"
-               dataSource={tableDataList}
-               columns={columns}
-               pagination={false}
-               loading={tableIsLoading}
-               bordered
-               rowSelection={{
-                 selectedRowKeys: selectedIds,
-                 // 选择框变化时触发
-                 onChange: (selectedRowKeys, selectedRows) => {
-                   console.log(selectedRowKeys, selectedRows);
-                   this.setState({
-                     selectedIds: selectedRowKeys,
-                     selectedList: selectedRows,
-                   });
-                 },
-               }}
-               scroll={{ y: 600, x: 900 }}
-               rowKey={(record, index) => `${index}`}
-        />
-        {/*分页*/}
-        <Pagination className="tablePagination"
-                    total={pageTotal}
-                    pageSize={pageSize}
-                    current={pageNum}
-                    showTotal={(total, range) =>
-                      `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`
-                    }
-                    style={{float:'right',marginRight:20,marginTop:10,marginBottom: 20}}
-                    onChange={this.changePage.bind(this)}
-                    showSizeChanger
-                    pageSizeOptions={pageSizeOptions}
-                    onShowSizeChange={this.changePage.bind(this)}
-        />
+        <div className="tableMain">
+          {/*表单主体*/}
+          <Table className="tableList"
+                 dataSource={tableDataList}
+                 columns={columns}
+                 pagination={false}
+                 loading={tableIsLoading}
+                 bordered
+                 rowSelection={{
+                   selectedRowKeys: selectedIds,
+                   // 选择框变化时触发
+                   onChange: (selectedRowKeys, selectedRows) => {
+                     console.log(selectedRowKeys, selectedRows);
+                     this.setState({
+                       selectedIds: selectedRowKeys,
+                       selectedList: selectedRows,
+                     });
+                   },
+                 }}
+                 scroll={{ y: 600, x: 900 }}
+                 rowKey={(record, index) => `${index}`}
+          />
+          {/*分页*/}
+          <Pagination className="tablePagination"
+                      total={pageTotal}
+                      pageSize={pageSize}
+                      current={pageNum}
+                      showTotal={(total, range) =>
+                        `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`
+                      }
+                      onChange={this.changePage.bind(this)}
+                      showSizeChanger
+                      pageSizeOptions={pageSizeOptions}
+                      onShowSizeChange={this.changePage.bind(this)}
+          />
+        </div>
       </div>
     );
   }

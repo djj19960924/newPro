@@ -20,11 +20,11 @@ import "./index.less";
 import 'antd/dist/antd.less';
 
 import App from './App';
-//http://192.168.31.211:8000
-//http://192.168.31.60:8088
 // 本地测试
 window.testType = 'localTest';
-const testapi = 'http://192.168.31.211:8000';
+const testapi = 'http://testapi.maishoumiji.com';
+// window.ajaxUrl = '//192.168.31.60:8001';
+window.ajaxUrl = '//47.98.221.129:8001';
 window.apiUrl = window.fandianUrl = window.testUrl = testapi;
 document.getElementsByTagName("title")[0].innerText = `后台管理系统 - 本地版`;
 

@@ -1,6 +1,5 @@
 import React from 'react';
 import {Route, Switch, withRouter} from 'react-router-dom';
-import {inject, observer} from 'mobx-react';
 // 这里引用各个组件内容, 内容为方便管理, 统一写入pages页面
 // 主页
 import Home from '@pages/Home/';
@@ -131,7 +130,7 @@ class ContentMain extends React.Component {
     const { menusList } = this.state;
     for (let obj of menusList) {
       // 添加测试判断
-      if (obj.testType) if (obj.testType !== window.testType || obj.testType !== 'localTest') continue;
+      if (obj.testType) if (window.testType !== 'localTest') if (obj.testType !== window.testType) continue;
       // 添加权限判断
       // 这里兼容未添加 allowSideList 传参的情况
       if (allowSideList) if (!allowSideList.includes(obj.id)) continue;
@@ -141,6 +140,10 @@ class ContentMain extends React.Component {
     // 不直接使用 setState, 是因为该方法会在组件卸载时重复渲染, 造成内存负载, 会导致 react 报错
     // this.setState({routesList: dataList})
     this.state.routesList = dataList;
+  }
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
   }
 
   render() {

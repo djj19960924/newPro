@@ -1,7 +1,9 @@
 import React from 'react';
 import { message, Button, Upload, Icon, Modal, } from 'antd';
+import {inject, observer} from 'mobx-react/index';
 import './index.less';
 
+@inject('appStore') @observer
 class updateQRCode extends React.Component {
   constructor(props) {
     super(props);
@@ -14,28 +16,22 @@ class updateQRCode extends React.Component {
       previewVisible: false,
       previewImage: '',
     };
-    window.updateQRCode = this;
   }
+  allow = this.props.appStore.getAllow.bind(this);
+
   componentDidMount() {
-    this.selectMaxRebateByRebateDate()
+    this.getQrCode()
   }
 
   // 获取当前日上二维码图片
-  selectMaxRebateByRebateDate() {
-    this.setState({previewImage: ``});
-    fetch(`${window.fandianUrl}/rebate/selectMaxRebateByRebateDate`,{
-      method: `POST`,
-      headers:{'Content-Type': 'application/x-www-form-urlencoded'},
-      body: `nationName=${encodeURIComponent(`中国`)}`
-    }).then(r => r.json()).then(r => {
-      if (r.data) {
-        if (!!r.data[0]) this.setState({imgUrl: r.data[0].mallImgUrl})
-      } else {
-        message.error(`后端数据类型错误`)
-      }
-    }).catch(()=>{
-      message.error(`前端错误: 调取接口失败`)
-    })
+  getQrCode() {
+    this.ajax.post('/rebate/getQrCode').then(r => {
+      if (r.data.status === 10000) this.setState({imgUrl: r.data.data});
+      r.showError();
+    }).catch(r => {
+      console.error(r);
+      this.ajax.isReturnLogin(r, this);
+    });
   }
 
   // 上传图片
@@ -46,27 +42,17 @@ class updateQRCode extends React.Component {
       let formData = new FormData();
       formData.append(`file`,fileList[0].originFileObj);
       // 上传接口
-      fetch(`${window.fandianUrl}/upimg/mallImgUpload`,{
-        method: 'POST',
-        body: formData
-      }).then(r=>r.json()).then(r=>{
-        if (r.status) {
-          if (r.status === 10000) {
-            message.success(`${r.msg}`);
-            this.setState({fileList: [],uploadLoading: false});
-            this.selectMaxRebateByRebateDate();
-          } else {
-            message.error(`${r.msg}, 错误码: ${r.status}`);
-            this.setState({uploadLoading: false})
-          }
-        } else {
-          message.error('后端数据格式错误');
-          this.setState({ uploadLoading: false });
+      this.ajax.post('/upimg/mallImgUpload', formData, {}, true).then(r => {
+        if (r.data.status === 10000) {
+          message.success(r.data.msg);
+          this.setState({fileList: [], uploadLoading: false});
+          this.getQrCode();
         }
-      }).catch(() => {
-        message.error('前端错误: 图片上传接口调取失败!');
-        this.setState({ uploadLoading: false });
-      })
+        r.showError();
+      }).catch(r => {
+        console.error(r);
+        this.ajax.isReturnLogin(r, this);
+      });
     } else if (fileList.length === 0) {
       message.error(`请选择图片文件`)
     } else{
@@ -74,12 +60,19 @@ class updateQRCode extends React.Component {
     }
   }
 
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
+  }
   render() {
     const { imgUrl, previewVisible, previewImage, fileList, uploadLoading, } = this.state;
     const uploadButton = <div><Icon type="plus" /><div className="ant-upload-text">添加图片</div></div>;
     return (
       <div className="updateQRCode">
-        <h1 className="title">当前日上二维码图片</h1>
+        <div className="title">
+          <div className="titleMain">上传日上二维码图片</div>
+          <div className="titleLine" />
+        </div>
         <div>
           {imgUrl ? <img className="QRCodeImg"
                           src={imgUrl}
@@ -94,10 +87,11 @@ class updateQRCode extends React.Component {
                   // 预览类型
                   listType="picture-card"
                   accept="image/jpeg,image/png"
-                  onPreview={(f) => { this.setState({ previewImage: f.url || f.thumbUrl, previewVisible: true, })} }
+                  onPreview={(f) => {
+                    this.setState({previewImage: f.url || f.thumbUrl, previewVisible: true})
+                  }}
                   onChange={(f) => { this.setState({fileList:f.fileList})} }
-          >
-            {fileList.length > 0 ? null : uploadButton}
+          >{fileList.length > 0 ? null : uploadButton}
           </Upload>
         </div>
 
@@ -105,6 +99,8 @@ class updateQRCode extends React.Component {
           <Button type="primary"
                   onClick={this.uploadFunction.bind(this)}
                   loading={uploadLoading}
+                  disabled={!this.allow(73)}
+                  title={!this.allow(73) ? '没有该操作权限' : null}
           >上传图片</Button>
         </div>
 

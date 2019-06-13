@@ -120,6 +120,10 @@ class BCUploadOrder extends React.Component {
     })
   }
 
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
+  }
   render() {
     const columns = [
       // 商品名称	数量	成本价	库存地	商品规格	品牌	净重	毛重	原产国
@@ -199,7 +203,6 @@ class BCUploadOrder extends React.Component {
           showTotal={(total, range) =>
           `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`
           }
-          style={{float:'right',marginRight:20,marginTop:10,marginBottom: 20}}
           onChange={this.changePage.bind(this)}
           showSizeChanger
           pageSizeOptions={pageSizeOptions}

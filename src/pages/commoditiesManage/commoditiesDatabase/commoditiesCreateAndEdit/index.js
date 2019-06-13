@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Form, Select, Input, InputNumber, message, Icon, Modal, Radio, } from 'antd';
-import {inject, observer} from 'mobx-react/index';
+import { inject, observer } from 'mobx-react/index';
 
 import './index.less';
 
@@ -45,36 +45,22 @@ class commoditiesCreateAndEdit extends React.Component {
       submitLoading: false,
       record: null,
     };
-    window.commoditiesCreateAndEdit = this;
-
   }
+
   componentDidMount() {
-    const type = window.getQueryString('type');
-    const skuId = window.getQueryString('skuId');
-    const record = window.getQueryString('record');
-    // 延时控制message删除
-    // 用于上传大文件时给出loading的提示
-    // message.loading('loading...',0,() => {console.log('关闭啦!')});
-    // setTimeout(() => {
-    //   message.destroy()
-    // },3000);
+    const { type, skuId, record } = window.getAllQueryString();
     // 获取所有品类列表,以及数量单位
-    fetch(`${window.fandianUrl}/sku/getAllProductCategory`, {
-      method: 'POST'
-    }).then(r => r.json()).then(r => {
-      if (r.status === 10000) {
-        let dataList = [];
-        for (let i in r.data) {
-          // 这里的value会作为选择框的搜索字段, 所以需求同时可以根据Id或者Name查询, 则在value值中同时插入Id和Name
-          // 但是注意最终传值时不要取value
-          dataList.push(<Option value={r.data[i].name} key={i}>{r.data[i].name}</Option>)
-        }
-        this.setState({categoryList: dataList, productCategoryList: r.data,record: record});
-        this.setForm(type,skuId)
-      } else {
-        // 错误,并返回错误码
-        message.error(`${r.msg} 错误码:${r.status}`);
+    this.ajax.post('/sku/getAllProductCategory').then(r => {
+      if (r.data.status === 10000) {
+        const { data } = r.data, dataList = [];
+        // 这里的value会作为选择框的搜索字段, 所以需求同时可以根据Id或者Name查询, 则在value值中同时插入Id和Name
+        // 但是注意最终传值时不要取value
+        for (let i in data) dataList.push(<Option value={data[i].name} key={i}>{data[i].name}</Option>);
+        this.setState({categoryList:dataList, productCategoryList:data, record:record});
+        this.setForm(type,skuId);
       }
+    }).catch(r => {
+      this.ajax.isReturnLogin(r,this);
     });
   }
   // 根据 type 填写表单
@@ -107,19 +93,15 @@ class commoditiesCreateAndEdit extends React.Component {
         type: type,
         skuId: parseInt(skuId),
       });
-      fetch(`${window.fandianUrl}/sku/selectEditSkuBySkuId`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body:`skuId=${skuId}`
-      }).then(r => r.json()).then(r => {
+      this.ajax.post('/sku/selectEditSkuBySkuId',{skuId:skuId}).then(r => {
         // 关闭loading
         this.setState({
           isLoading: false,
           loadingTxt: 'Loading...'
         });
-        if (r.status === 10000) {
+        if (r.data.status === 10000) {
           // 成功
-          const d = r.data;
+          const d = r.data.data;
           // 将图片地址保存在本地缓存
           localStorage.imgList = JSON.stringify({imgList: d.imgList});
           const dataList = [];
@@ -136,19 +118,37 @@ class commoditiesCreateAndEdit extends React.Component {
           });
           // 获取单位
           let pCL = this.state.productCategoryList;
-          for (let i in pCL) {
-            if (pCL[i].name === d.category) this.setState({unitName:pCL[i].modelNumber});
-          }
+          for (let i in pCL) if (pCL[i].name === d.category) this.setState({unitName:pCL[i].modelNumber});
           // 这里设置表单默认值
           this.props.form.setFieldsValue({
-            skuCode: d.skuCode, category: d.category, name: d.name, netWeight: d.netWeight, costPrice:d.costPrice, brand: d.brand, sugPostway: d.sugPostway, specificationType: d.specificationType, stock: d.stock, sugPrice: d.sugPrice, recordPrice: d.recordPrice, taxRate: d.taxRate, purchaseArea: d.purchaseArea,modelNumber: d.modelNumber,isRecord: d.isRecord,originalPrice: d.originalPrice,customsCode: d.customsCode,
+            skuCode: d.skuCode,
+            category: d.category,
+            name: d.name,
+            netWeight: d.netWeight,
+            costPrice:d.costPrice,
+            brand: d.brand,
+            sugPostway: d.sugPostway,
+            specificationType: d.specificationType,
+            stock: d.stock,
+            sugPrice: d.sugPrice,
+            recordPrice: d.recordPrice,
+            taxRate: d.taxRate,
+            purchaseArea: d.purchaseArea,
+            modelNumber: d.modelNumber,
+            isRecord: d.isRecord,
+            originalPrice: d.originalPrice,
+            customsCode: d.customsCode,
           });
-          this.setState({costType: d.costType,originalType: d.originalType,postcode: d.postcode,});
-        } else {
-          // 错误,并返回错误码
-          message.error(`${r.msg} 错误码:${r.status}`);
+          this.setState({
+            costType: d.costType,
+            originalType: d.originalType,
+            postcode: d.postcode
+          });
         }
-      })
+      }).catch(r => {
+        console.error(r);
+        this.ajax.isReturnLogin(r,this)
+      });
     } else {
       message.error('错误的商品处理类型, 即将返回商品库页面!');
       this.backTo();
@@ -158,21 +158,20 @@ class commoditiesCreateAndEdit extends React.Component {
   componentDidUpdate(prevProps, prevState, snapshot) {
     this.showImg();
   }
-  // 渲染预览图片时间
+  // 渲染预览图片事件
   showImg() {
     const { imgList, } = this.state;
     for (let i in imgList) {
       let item = document.getElementById(`goodsImg_${i}`);
       item.onload = (e) => {
-        let the = window.commoditiesCreateAndEdit;
         let pI = document.getElementById(`goodsImg_${i}`);
-        const dataList = the.state.previewImageWH;
+        const dataList = this.state.previewImageWH;
         if ((pI.width / pI.height) < (2 / 3)) {
           dataList[i] = 'height'
         } else if ((pI.width / pI.height) >= (2 / 3)) {
           dataList[i] = 'width'
         }
-        the.setState({
+        this.setState({
           previewImageWH: dataList
         },() => {
           pI.style.visibility = `visible`;
@@ -244,12 +243,10 @@ class commoditiesCreateAndEdit extends React.Component {
   submitForm(type) {
     const { skuId, costType, postcode, imgList, originalType, } = this.state;
     this.props.form.validateFields((err, val) => {
-      let the = this.state;
       if (!err) {
         this.setState({submitLoading: true});
         // 重置数据
-        let data = {};
-        data = this.props.form.getFieldsValue();
+        let data = val;
         data.costType = costType;
         data.originalType = originalType;
         if (this.props.form.getFieldsValue().sugPostway === 1) {
@@ -270,24 +267,23 @@ class commoditiesCreateAndEdit extends React.Component {
           data.skuId = skuId;
           skuUrl = `/sku/editSku`;
         }
-        fetch(`${window.fandianUrl}${skuUrl}`, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(data)
-        }).then(r => r.json()).then(r => {
-          if (r.status === 10000) {
-            message.success(`${r.msg}`);
+        this.ajax.post(skuUrl,data).then(r => {
+          if (r.data.status === 10000) {
+            message.success(`${r.data.msg}`);
             this.setState({submitLoading: false});
             this.backTo();
-          } else {
-            message.error(`${r.msg} 错误码:${r.status}`);
-            this.setState({submitLoading: false});
           }
+          r.showError(message);
+        }).catch(r => {
+          this.setState({submitLoading: false});
+          this.ajax.isReturnLogin(r,this);
         });
-        // console.log(`上传参数: `);
-        // console.log(data)
       }
     })
+  }
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
   }
   render() {
     const { getFieldDecorator, getFieldValue } = this.props.form;
@@ -353,21 +349,21 @@ class commoditiesCreateAndEdit extends React.Component {
                       className="imgList"
             >
               {imgList.length === 0 ? '' :
-              imgList.map((item,i) => (
-                <div className="imgDiv"
-                     key={`id_${i}`}
-                >
-                  <img src={item}
-                       id={`goodsImg_${i}`}
-                       style={{
-                         width: previewImageWH[i] === 'width' ? '100%' : 'auto',
-                         height: previewImageWH[i] === 'height' ? '100%' : 'auto',
-                         visibility: `hidden`,
-                       }}
-                       onClick={this.imagePreview.bind(this,item)}
-                  />
-                </div>
-              ))}
+                imgList.map((item,i) => (
+                  <div className="imgDiv"
+                       key={`id_${i}`}
+                  >
+                    <img src={item}
+                         id={`goodsImg_${i}`}
+                         style={{
+                           width: previewImageWH[i] === 'width' ? '100%' : 'auto',
+                           height: previewImageWH[i] === 'height' ? '100%' : 'auto',
+                           visibility: `hidden`,
+                         }}
+                         onClick={this.imagePreview.bind(this,item)}
+                    />
+                  </div>
+                ))}
               <Button type="primary"
                       onClick={this.gotoEditImg.bind(this)}
               >编辑商品照片</Button>
@@ -476,8 +472,8 @@ class commoditiesCreateAndEdit extends React.Component {
               {/*选择货币类型*/}
               <Select className="costTypeSelect"
                       style={{width: 100,marginLeft: 10}}
-                      // 当存在 defaultValue 时, 则无需 placeholder
-                      // defaultValue={costType}
+                // 当存在 defaultValue 时, 则无需 placeholder
+                // defaultValue={costType}
                       value={costType}
                       onChange={(v) => this.setState({costType: v})}
               >
@@ -641,7 +637,8 @@ class commoditiesCreateAndEdit extends React.Component {
             </FormItem>
 
             {/*选择商品品类*/}
-            {getFieldValue('sugPostway') === 1 && <FormItem label="品类"
+            {getFieldValue('sugPostway') === 1 &&
+            <FormItem label="品类"
                       colon
                       labelCol={{span: 4}}
                       wrapperCol={{span: 15}}

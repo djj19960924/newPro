@@ -116,6 +116,10 @@ class YTO extends React.Component {
       }
     })
   }
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
+  }
   render() {
     var columns = [
       {title: "箱号", dataIndex: "parcelNo", key: "parcelNo",width:130},
@@ -172,7 +176,6 @@ class YTO extends React.Component {
                     showTotal={(total, range) =>
                       `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`
                     }
-                    style={{float:'right',marginRight:20,marginTop:10,marginBottom: 20}}
                     onChange={this.changePage.bind(this)}
                     showSizeChanger
                     pageSizeOptions={this.state.pageSizeOptions}

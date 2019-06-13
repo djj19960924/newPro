@@ -6,7 +6,6 @@ import './index.less';
 import countryList from '@js/country';
 const FormItem = Form.Item;
 const Option = Select.Option;
-const confirm = Modal.confirm;
 
 // 正则小计(中文+韩文+英文+数字+()（）_/):
 //
@@ -24,9 +23,10 @@ class setRebate extends React.Component{
     super(props);
     this.state = {
       // 分页相关
-      pageSize: 20,
+      pageSize: 100,
       pageNum: 1,
       pageTotal: 0,
+      pageSizeOptions: [`50`, `100`, `200`, `300`],
       //选择的国家
       country:'',
       //国家列表
@@ -49,68 +49,72 @@ class setRebate extends React.Component{
       currentRecord: {},
       // 删除弹框
       deleteModalVisible: false,
+      tableIsLoading: false,
     };
   }
+  allow = this.props.appStore.getAllow.bind(this);
   componentDidMount() {
     let countries = [];
-    for (let i of countryList) {
-      countries.push(<Option key={i.id} value={i.nationName}>{i.nationName}</Option>)
-    }
-    this.setState({
-      countries: countries
-    })
+    for (let i of countryList) countries.push(<Option key={i.id} value={i.nationName}>{i.nationName}</Option>);
+    this.setState({countries: countries})
   }
   // 监听选择国家事件
-  selectCountry(val, option) {
-    this.setState({country:val})
-    this.setState({country:val,tableDataList: [],  pageTotal: null,mallName:'',currentShop:undefined});
-    fetch(window.fandianUrl + '/mall/getMallList', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body:'nationName='+val,
-    }).then(r => r.json()).then(r => {
-      if (r.retcode.status === '10000') {
-        // message.success(r.retcode.msg)
-        let dataList = [];
-        for (let i of r.data) {
-          dataList.push(<Option key={i.mallId} value={i.mallName}>{i.mallName}</Option>)
-        }
-        this.setState({
-          shopList: dataList
-        })
-        // 成功静默处理
-        // message.success(`${r.retcode.msg},状态码为:${r.retcode.status}`)
-      } else {
-        message.error(`${r.retcode.msg},状态码为:${r.retcode.status}`)
-      }
+  selectCountry(nationName) {
+    this.setState({
+      country: nationName,
+      tableDataList: [],
+      pageTotal: 0,
+      mallName: '',
+      currentShop: undefined
+    }, () => {
+      this.getMallListByNationName();
     });
   }
+  // 根据国家名称获取商场列表
+  getMallListByNationName() {
+    const {country} = this.state;
+    this.ajax.post('/mall/getMallListByNationName',{nationName:country}).then(r => {
+      if (r.data.status === 10000) {
+        const dataList = [];
+        for (let i of r.data.data) dataList.push(<Option key={i.mallId} value={i.mallName}>{i.mallName}</Option>);
+        this.setState({shopList: dataList})
+      }
+      r.showError();
+    }).catch(r => {
+      this.ajax.isReturnLogin(r,this);
+    });
+    return false;
+  }
   // 选择商场触发
-  selectShop(shopName,target) {
-    let {pageSize} = this.state;
-    this.selectAllRebateByMallName(1,pageSize,shopName)
-    this.props.form.setFieldsValue({
-      'mallName':shopName
+  selectShop(shopName) {
+    this.props.form.setFieldsValue({mallName:shopName});
+    this.setState({currentShop:shopName},() => {
+      this.selectAllRebateByMallName();
     })
   }
   // 根据商场获取品牌列表
-  selectAllRebateByMallName(pageNum=this.state.pageNum,pageSize=this.state.pageSize,shopName=this.state.currentShop) {
-    fetch(window.fandianUrl + '/rebate/selectAllRebateByMallName', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      // 这里给出搜索的页码与当前页数
-      body: `mallName=${shopName}&pageSize=${pageSize}&pageNum=${pageNum}`
-    }).then(r => r.json()).then(r => {
-      if (r.status === 10000) {
+  selectAllRebateByMallName() {
+    const {pageNum, pageSize, currentShop} = this.state;
+    this.setState({tableIsLoading:true});
+    this.ajax.get('/rebate/selectAllRebateByMallName', `mallName=${currentShop}&pageSize=${pageSize}&pageNum=${pageNum}`).then(r => {
+      if (r.data.status === 10000) {
+        const {data} = r.data;
         this.setState({
-          currentShop: shopName,
-          pageTotal: r.data.total,
-          pageSize: r.data.pageSize,
-          pageNum: r.data.pageNum,
-          tableDataList: r.data.list,
+          pageTotal: data.total,
+          tableDataList: data.list,
+        })
+      } else if (r.data.status < 10000) {
+        this.setState({
+          pageTotal: 0,
+          tableDataList: []
         })
       }
-    })
+      this.setState({tableIsLoading:false});
+      r.showError(true);
+    }).catch(r => {
+      this.setState({tableIsLoading:false});
+      this.ajax.isReturnLogin(r, this);
+    });
   }
   // 分页操作
   changePage(pageNum,pageSize) {
@@ -230,19 +234,15 @@ class setRebate extends React.Component{
           dataList.brandId = modalEditData.brandId;
           dataList.rebateId = modalEditData.rebateId
         }
-        // 品牌名放开空格, 去头尾空格
-        fetch(window.fandianUrl+'/rebate/insertOrUpdateRebate',{
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(dataList)
-        }).then(r=>r.json()).then(r=>{
-          if (r.status===10000) {
-            message.success(r.msg)
+        this.ajax.post('/rebate/insertOrUpdateRebate', dataList).then(r => {
+          if (r.data.status === 10000) {
+            message.success(r.data.msg);
             // 关闭弹窗
             this.closeModal();
-          } else {
-            message.error(`${r.msg},状态码${r.status}`)
           }
+          r.showError();
+        }).catch(r => {
+          this.ajax.isReturnLogin(r,this);
         });
       }
     })
@@ -250,34 +250,29 @@ class setRebate extends React.Component{
   // 删除
   delete() {
     // console.log(record.rebateId);
-    const { currentRecord } = this.state;
-    fetch(`${window.fandianUrl}/rebate/deleteBrandByRebateId`,{
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({rebateId: currentRecord.rebateId})
-    }).then(r=>r.json()).then(r=>{
-      if (!r.data && !r.msg) {
-        message.error('后端数据错误')
-      } else {
-        if (r.status === 10000) {
-          message.success(`${r.msg}`);
-          this.selectAllRebateByMallName();
-          this.setState({deleteModalVisible:false,currentRecord:{}})
-        } else {
-          message.error(`${r.msg}, 错误码: ${r.status}`)
-        }
+    const {currentRecord} = this.state;
+    const data = {rebateId: currentRecord.rebateId};
+    this.ajax.post('/rebate/deleteBrandByRebateId', data).then(r => {
+      if (r.data.status === 10000) {
+        message.success(`${r.data.msg}`);
+        this.selectAllRebateByMallName();
+        this.setState({deleteModalVisible: false, currentRecord: {}});
       }
-    }).catch(r=>{
-      console.error(r);
-      console.log('前端接口调取错误')
-    })
+      r.showError();
+    }).catch(r => {
+      this.ajax.isReturnLogin(r, this);
+    });
+  }
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
   }
   render() {
     // 表单标题
     const columns=[
       {title: '商场', dataIndex: 'mallName', key: 'mallName', width: 160},
       {title: '品牌', dataIndex: 'brandName', key: 'brandName', },
-      {title: '商品码', dataIndex: 'productCode', key: 'productCode', width: 200},
+      {title: '商品码', dataIndex: 'productCode', key: 'productCode', width: 160},
       {title: '最近更新时间', dataIndex: 'updateTime', key: 'updateTime', width: 200,
       render: (text, record) => (
           <div>{!!record.updateTime ?
@@ -292,19 +287,32 @@ class setRebate extends React.Component{
             <Button type="primary"
                     style={{'margin':0}}
                     onClick={this.openEdit.bind(this,record)}
+                    disabled={!this.allow(74)}
+                    title={this.allow(74) ? null : '没有该操作权限'}
             >编辑</Button>
             <Button type="danger"
                     style={{'marginLeft':8}}
-                    onClick={()=>{this.setState({deleteModalVisible: true,currentRecord: record})}}
+                    onClick={()=>{
+                      this.setState({
+                        deleteModalVisible: true,
+                        currentRecord: record
+                      }
+                    )}}
+                    disabled={!this.allow(72)}
+                    title={this.allow(72) ? null : '没有该操作权限'}
             >删除</Button>
           </div>
         ),
       }
     ];
-    const {shopList, currentShop, country,tableDataList, pageTotal, pageSize, pageNum, deleteModalVisible, currentRecord, modalVisible, modalType,  } = this.state;
+    const {shopList, currentShop, country, tableDataList, pageTotal, pageSize, pageSizeOptions, pageNum, deleteModalVisible, currentRecord, modalVisible, modalType, tableIsLoading} = this.state;
     const {getFieldDecorator} = this.props.form;
     return (
       <div className="setRebate">
+        <div className="title">
+          <div className="titleMain">设置返点</div>
+          <div className="titleLine" />
+        </div>
         <div className="shopSelect">
           <span>所属国家: </span>
           <Select className="selectShops"
@@ -313,9 +321,7 @@ class setRebate extends React.Component{
           >
             {this.state.countries}
           </Select>
-        </div>
-        <div className="shopSelect">
-          <span>所属商场: </span>
+          <span style={{marginLeft: 20}}>所属商场: </span>
           <Select className="selectShops"
                   placeholder="请选择商场"
                   value={currentShop}
@@ -326,39 +332,43 @@ class setRebate extends React.Component{
         </div>
 
         <div className="btnLine">
-          <Button className="createNew" type="primary"
+          {this.allow(74) && <Button className="createNew" type="primary"
                   onClick={this.openCreate.bind(this)}
-          >新增品牌</Button>
+          >新增品牌</Button>}
         </div>
 
-        {/*表单*/}
-        <Table className="tableList"
-               dataSource={tableDataList}
-               columns={columns}
-               pagination={false}
-               bordered
-               scroll={{ y: 600, x: 1000 }}
-               rowKey={(record, index) => `id_${index}`}
-               locale={{
-                 emptyText: <div className="noShop">
-                   {!country && <div className="noShopDiv"><Icon type="shop" className="iconShop"/><span>请选择国家</span></div>}
-                   {country && !currentShop && <div className="noShopDiv"><Icon type="shop" className="iconShop"/><span>请选择商场</span></div>}
-                 </div>,
-               }}
-        />
+        <div className="tableMain"
+             style={{maxWidth: 1200}}
+        >
+          {/*表单*/}
+          <Table className="tableList"
+                 dataSource={tableDataList}
+                 columns={columns}
+                 pagination={false}
+                 loading={tableIsLoading}
+                 bordered
+                 scroll={{ y: 500, x: 1000 }}
+                 rowKey={(record, index) => `id_${index}`}
+                 locale={{
+                   emptyText: <div className="noShop">
+                     {!country && <div className="noShopDiv"><Icon type="shop" className="iconShop"/><span>请选择国家</span></div>}
+                     {country && !currentShop && <div className="noShopDiv"><Icon type="shop" className="iconShop"/><span>请选择商场</span></div>}
+                   </div>,
+                 }}
+          />
 
-        {/*分页*/}
-        <Pagination className="tablePagination"
-                    total={pageTotal}
-                    pageSize={pageSize}
-                    current={pageNum}
-                    showTotal={(total, range) => `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`}
-                    style={{float:'right',marginRight:'20px',marginTop:'10px'}}
-                    onChange={this.changePage.bind(this)}
-                    showSizeChanger
-                    pageSizeOptions={['10','20','30','40']}
-                    onShowSizeChange={this.changePageSize.bind(this)}
-        />
+          {/*分页*/}
+          <Pagination className="tablePagination"
+                      total={pageTotal}
+                      pageSize={pageSize}
+                      current={pageNum}
+                      showTotal={(total, range) => `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`}
+                      onChange={this.changePage.bind(this)}
+                      showSizeChanger
+                      pageSizeOptions={pageSizeOptions}
+                      onShowSizeChange={this.changePageSize.bind(this)}
+          />
+        </div>
 
         {/*删除弹窗*/}
         <Modal title="删除品牌"

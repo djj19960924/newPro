@@ -13,7 +13,6 @@ class customerLogin extends React.Component{
       // 加载显示
       loadingShow: false,
     };
-    // window.customerLogin = this;
   }
 
   componentDidMount() {
@@ -89,6 +88,7 @@ class customerLogin extends React.Component{
       // console.log(`获得焦点!`);
     // };
 
+    // 注释原因: 为防止客户/工作人员混乱, 故不开放多余授权扫码入口
     // let isTest = false;
     // if (window.isServerTest) isTest = true;
     // if (window.isLocalTest) isTest = true;
@@ -106,9 +106,15 @@ class customerLogin extends React.Component{
 
   componentWillUnmount() {
     // 组件关闭以后, 卸载window事件
-    window.onkeyup = window.onkeydown = window.onblur = window.onfocus = null
+    window.onkeyup = window.onkeydown = window.onblur = window.onfocus = null;
+    // 卸载异步操作设置状态
+    this.setState = () => { return null }
   }
 
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
+  }
   render() {
     const { isFocusOnWindow, loadingShow, } = this.state;
     return (

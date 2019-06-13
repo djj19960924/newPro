@@ -2,9 +2,11 @@ import React from 'react';
 import {Radio, Table, Button, Modal, message, Pagination, Icon,} from 'antd';
 import moment from 'moment';
 import JsZip from 'jszip';
+import { inject, observer } from 'mobx-react';
 
 import './index.less';
 
+@inject('appStore') @observer
 class countBillList extends React.Component {
   constructor(props) {
     super(props);
@@ -65,8 +67,9 @@ class countBillList extends React.Component {
       btnIsLoading: false,
       tableIsLoading: false,
     };
-    // window.countBillList = this;
   }
+
+  allow = this.props.appStore.getAllow.bind(this);
 
   // 默认读取表格
   componentDidMount() {
@@ -87,66 +90,28 @@ class countBillList extends React.Component {
   }
 
   // 根据发送状态获取对账表
-  getReciptByVerify(n = this.state.verifyStatus, pageNum = this.state.pageNum, pageSize = this.state.pageSize) {
+  getReciptByVerify() {
+    const {verifyStatus, pageNum, pageSize} = this.state;
     this.setState({tableIsLoading: true});
-    fetch(`${window.fandianUrl}/recipt/getReciptByVerify`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: `verifyStatus=${n}&pageNum=${pageNum}&pageSize=${pageSize}`,
-    }).then(r => r.json()).then(r => {
-      if (r.status === 10000) {
-        if (r.data) {
-          if (this.state.pageSize >= r.data.total) {
-            for (let i in r.data.list) {
-              r.data.list[i].id = (parseInt(i) + 1)
-            }
-            this.setState({
-              tableDataList: r.data.list,
-              pageTotal: r.data.total,
-              pageSizeOptions: [`100`, `200`, `300`, `${r.data.total > 500 ? r.data.total : 500}`],
-              selectedList: [],
-              selectedIds: [],
-            })
-          } else {
-            this.setState({pageSize: r.data.total}, () => {
-              this.getReciptByVerify()
-            })
-          }
-        } else {
-          message.warn(`${r.msg}`);
-          this.setState({tableDataList: [],
-            pageTotal: 0,
-            selectedList: [],
-            selectedIds: [],
-          })
-        }
-      } else {
-        if (r.state) {
-          message.error(`${r.msg}, 错误码: ${r.status}`);
-          this.setState({tableDataList: [],
-            pageTotal: 0,
-            selectedList: [],
-            selectedIds: [],
-          })
-        } else {
-          message.error(`后端数据错误`);
-          this.setState({tableDataList: [],
-            pageTotal: 0,
-            selectedList: [],
-            selectedIds: [],
-          })
-        }
+    let data = {verifyStatus: verifyStatus, pageNum: pageNum, pageSize};
+    this.ajax.post('/recipt/getReciptByVerify',data).then(r => {
+      if (r.data.status === 10000) {
+        const {data} = r.data;
+        for (let i in data.list) data.list[i].id = (parseInt(i) + 1);
+        this.setState({
+          tableDataList: data.list,
+          pageTotal: data.total,
+          pageSizeOptions: [`100`, `200`, `300`, `${data.total > 500 ? data.total : 500}`],
+          selectedList: [],
+          selectedIds: [],
+        })
       }
       this.setState({tableIsLoading: false});
-    }).catch(() => {
-      message.error(`前端错误: 对账表信息接口调取失败`);
-      this.setState({tableDataList: [],
-        pageTotal: 0,
-        tableIsLoading: false,
-        selectedList: [],
-        selectedIds: [],
-      })
-    })
+      r.showError();
+    }).catch(r => {
+      this.setState({tableIsLoading: false});
+      this.ajax.isReturnLogin(r, this);
+    });
   }
 
   // 打开图片预览弹窗
@@ -177,7 +142,7 @@ class countBillList extends React.Component {
 
   // 发送所选小票接口
   sendReciptInSelected() {
-    const { ticketSuccessIdList, ticketSuccessList, } = this.state;
+    const {ticketSuccessIdList, ticketSuccessList} = this.state;
     let data = {};
     data.list = [];
     data.reciptIdList = ticketSuccessIdList;
@@ -189,27 +154,18 @@ class countBillList extends React.Component {
       });
     }
     if (data.list.length > 0 && data.reciptIdList.length > 0) {
-      fetch(`${window.fandianUrl}/recipt/sendReciptInSelected`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(data),
-      }).then(r => r.json()).then(r => {
-        if (!r.data && !r.message) {
-          message.error(`后端数据错误`);
-        } else {
-          if (r.status === 10000) {
-            message.success(r.data);
-            this.setState({textType: 2});
-            this.getReciptByVerify();
-          } else {
-            message.error(`${r.data} 错误码: ${r.status}`);
-          }
+      this.ajax.post('/recipt/sendReciptInSelected', data).then(r => {
+        if (r.data.status === 10000) {
+          message.success(r.data.data);
+          this.setState({textType: 2});
+          this.getReciptByVerify();
         }
         this.setState({isOkLoading: false, closeIsAllowed: true});
-      }).catch(() => {
-        message.error(`前端错误: 请求发送失败`);
+        r.showError();
+      }).catch(r => {
         this.setState({isOkLoading: false, closeIsAllowed: true});
-      })
+        this.ajax.isReturnLogin(r, this);
+      });
     } else {
       message.error('小票下载成功列表为空')
     }
@@ -293,7 +249,6 @@ class countBillList extends React.Component {
             this.sendReciptInSelected();
           });
         }).catch(r=>{
-          console.error(r);
           message.error(`前端错误: 下载/压缩失败`);
           this.setState({isOkLoading: false,textType: 0});
         });
@@ -302,6 +257,10 @@ class countBillList extends React.Component {
     downloadPic();
   }
 
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
+  }
   render() {
     const RadioButton = Radio.Button, RadioGroup = Radio.Group;
     // 表单头
@@ -323,6 +282,10 @@ class countBillList extends React.Component {
     const {tableDataList, verifyStatus, previewVisible, previewImage, selectedList, selectedIds, pageTotal, pageSize, pageNum, pageSizeOptions, tableIsLoading, downloadModalVisible, isOkLoading, textInfoList, textType, ticketSuccessList, passportSuccessList, closeIsAllowed, loadingTextList, ticketErrorList, passportErrorList, } = this.state;
     return (
       <div className="countBillList">
+        <div className="title">
+          <div className="titleMain">对账管理</div>
+          <div className="titleLine" />
+        </div>
         {/*查询条件单选行*/}
         <RadioGroup buttonStyle="solid"
                     className="radioBtn"
@@ -337,7 +300,7 @@ class countBillList extends React.Component {
 
         {/*执行行*/}
         <div className="btnLine" style={{marginLeft: 10}}>
-          {verifyStatus === 0 &&
+          {this.allow(76) && verifyStatus === 0 &&
             <Button type="primary"
                     onClick={()=>{this.setState({ downloadModalVisible: true, textType: 0})}}
                     disabled={selectedList.length === 0}
@@ -352,7 +315,14 @@ class countBillList extends React.Component {
                onOk={this.clickOkBtn.bind(this)}
                confirmLoading={isOkLoading}
                onCancel={() => {
-                 closeIsAllowed ? this.setState({downloadModalVisible: false})
+                 closeIsAllowed ? this.setState({
+                         downloadModalVisible: false,
+                         ticketSuccessList: [],
+                         ticketSuccessIdList: [],
+                         ticketErrorList: [],
+                         passportSuccessList: [],
+                         passportErrorList: []
+                      })
                    : message.warn(`图片下载中, 请勿关闭`)
                }}
         >
@@ -392,38 +362,39 @@ class countBillList extends React.Component {
           <img alt="example" style={{width: '100%'}} src={previewImage}/>
         </Modal>
 
-        {/*表单主体*/}
-        <Table className="tableList"
-               dataSource={tableDataList}
-               columns={verifyStatus === 0 ? columns : columns.concat(columnsAdd)}
-               pagination={false}
-               loading={tableIsLoading}
-               bordered
-               rowSelection={verifyStatus === 0 ? {
-                 selectedRowKeys: selectedIds,
-                 // 选择框变化时触发
-                 onChange: (selectedRowKeys, selectedRows) => {
-                   this.setState({selectedList: selectedRows, selectedIds: selectedRowKeys});
-                 },
-               } : null}
-               scroll={{y: 500, x: 800}}
-               rowKey={(record, index) => `${record.reciptId}`}
-        />
+        <div className="tableMain">
+          {/*表单主体*/}
+          <Table className="tableList"
+                 dataSource={tableDataList}
+                 columns={verifyStatus === 0 ? columns : columns.concat(columnsAdd)}
+                 pagination={false}
+                 loading={tableIsLoading}
+                 bordered
+                 rowSelection={verifyStatus === 0 ? {
+                   selectedRowKeys: selectedIds,
+                   // 选择框变化时触发
+                   onChange: (selectedRowKeys, selectedRows) => {
+                     this.setState({selectedList: selectedRows, selectedIds: selectedRowKeys});
+                   },
+                 } : null}
+                 scroll={{y: 500, x: 800}}
+                 rowKey={(record, index) => `${record.reciptId}`}
+          />
 
-        {/*分页*/}
-        <Pagination className="tablePagination"
-                    total={pageTotal}
-                    pageSize={pageSize}
-                    current={pageNum}
-                    showTotal={(total, range) =>
-                      `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 `}共 ${total} 条记录`
-                    }
-                    style={{float: 'right', marginRight: 20, marginTop: 10, marginBottom: 20}}
-                    onChange={this.changePage.bind(this)}
-                    showSizeChanger
-                    pageSizeOptions={pageSizeOptions}
-                    onShowSizeChange={this.changePage.bind(this)}
-        />
+          {/*分页*/}
+          <Pagination className="tablePagination"
+                      total={pageTotal}
+                      pageSize={pageSize}
+                      current={pageNum}
+                      showTotal={(total, range) =>
+                        `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 `}共 ${total} 条记录`
+                      }
+                      onChange={this.changePage.bind(this)}
+                      showSizeChanger
+                      pageSizeOptions={pageSizeOptions}
+                      onShowSizeChange={this.changePage.bind(this)}
+          />
+        </div>
       </div>
     )
   }

@@ -25,38 +25,31 @@ class globalTranshipmentArrived extends React.Component {
     this.isWareHouseParcelMessage();
   }
   // 后台根据仓库是否收货以及物流单号模糊查询
-  isWareHouseParcelMessage(
-    pageNum = this.state.pageNum,
-    pageSize = this.state.pageSize,
-    logistics = this.state.searchParam
-  ) {
-    this.setState({tableIsLoading: true});
-    let clearTable = () => this.setState({tableIsLoading:false});
-    fetch(`${window.fandianUrl}/parcelMessage/isWareHouseParcelMessage`,{
-      method: 'POST',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body:`pageNum=${pageNum}&pageSize=${pageSize}&isWareHouse=1&logistics=${logistics.trim()}`
-    }).then(r => r.json()).then(r => {
-      // console.log(r);
-      if (!r.msg && !r.data) {
-        message.error(`后端数据错误`);
-      } else {
-        if (r.status === 10000) {
-          this.setState({
-            tableDataList: r.data.list, pageTotal: r.data.total,
-            pageSizeOptions: [`50`,`100`,`200`,`${r.data.total > 300 ? r.data.total : 300}`]
-          })
-        } else if (r.status === 10001) {
-          message.warn(`${r.msg}`)
-        } else {
-          message.error(`${r.msg} 错误码:${r.status}`)
-        }
+  isWareHouseParcelMessage() {
+    const {pageNum, pageSize, searchParam} = this.state;
+    const showLoading = (Is) => {this.setState({tableIsLoading: Is})};
+    showLoading(true);
+    const data = {
+      pageNum: pageNum,
+      pageSize: pageSize,
+      logistics: searchParam,
+      isWarehouse: 1
+    };
+    this.ajax.post('/parcelMessage/isWareHouseParcelMessage', data).then(r => {
+      if (r.data.status === 10000) {
+        const {data} = r.data;
+        this.setState({
+          tableDataList: data.list, pageTotal: data.total,
+          pageSizeOptions: [`50`,`100`,`200`,`${data.total > 300 ? data.total : 300}`]
+        })
       }
-      clearTable();
-    }).catch(()=>{
-      message.error(`前端接口调取失败`);
-      clearTable();
-    })
+      showLoading(false);
+      r.showError(true);
+    }).catch(r => {
+      console.error(r);
+      showLoading(false);
+      this.ajax.isReturnLogin(r, this);
+    });
   }
   // 改变页码
   changePage(pageNum, pageSize) {
@@ -66,6 +59,10 @@ class globalTranshipmentArrived extends React.Component {
     },()=>{
       this.isWareHouseParcelMessage();
     })
+  }
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
   }
   render() {
     const { tableDataList, tableIsLoading, pageTotal, pageSize, pageNum, pageSizeOptions, searchParam,} = this.state;
@@ -84,7 +81,10 @@ class globalTranshipmentArrived extends React.Component {
     ];
     return (
       <div className="globalTranshipmentArrived">
-        <p className="title">全球转运 - 已到仓</p>
+        <div className="title">
+          <div className="titleMain">全球转运 - 货物已到仓</div>
+          <div className="titleLine" />
+        </div>
         <div className="btnLine">
           <Search placeholder="输入物流单号"
                   className="searchInput"
@@ -94,7 +94,9 @@ class globalTranshipmentArrived extends React.Component {
                   style={{width: 200}}
           />
         </div>
-        <div className="main">
+        <div className="tableMain"
+             style={{maxWidth: 1000}}
+        >
           {/*表单主体*/}
           <Table className="tableList"
                  dataSource={tableDataList}
@@ -102,7 +104,7 @@ class globalTranshipmentArrived extends React.Component {
                  pagination={false}
                  loading={tableIsLoading}
                  bordered
-                 scroll={{ y: 600, x: 900 }}
+                 scroll={{ y: 550, x: 800 }}
                  rowKey={(record, index) => `${index}`}
           />
           {/*分页*/}
@@ -113,7 +115,6 @@ class globalTranshipmentArrived extends React.Component {
                       showTotal={(total, range) =>
                         `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`
                       }
-                      style={{float:'right',marginRight:20,marginTop:10,marginBottom: 20}}
                       onChange={this.changePage.bind(this)}
                       showSizeChanger
                       pageSizeOptions={pageSizeOptions}

@@ -3,7 +3,7 @@ import { Route, Switch, Redirect } from 'react-router-dom';
 import Login from './routes/Login/index';
 import ForgotPassWord from './routes/ForgotPasswd/index';
 import Index from './routes/Index/index';
-import Ajax from '@components/getApi/';
+import Ajax from '@components/getApi/ajax/';
 import './App.less';
 
 // import { observer, inject, } from 'mobx-react';

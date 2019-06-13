@@ -7,6 +7,10 @@ class Home extends React.Component {
     this.state = {};
   }
 
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
+  }
   render() {
     return (
       <div className="Home">
@@ -17,6 +21,12 @@ class Home extends React.Component {
         <div className="dividingLine"/>
 
         <div className="main">
+          <div className="updateInfo">
+            <div className="infoTitle">2019-6-12 更新</div>
+            <div className="dividingLine shot"/>
+            <p style={{color: `rgba(255,0,0,.7)`}}>后台管理系统: 权限系统植入, 页面全面升级</p>
+          </div>
+
           <div className="updateInfo">
             <div className="infoTitle">2019-6-3 更新</div>
             <div className="dividingLine shot"/>

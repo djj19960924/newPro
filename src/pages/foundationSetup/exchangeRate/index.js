@@ -1,12 +1,14 @@
 import React from "react";
-import "./index.less";
-import {Table, Button, Modal, message, Input} from "antd"
+import {Table, Button, Modal, message, Input} from "antd";
+import { inject, observer } from 'mobx-react';
+import './index.less';
 
+@inject('appStore') @observer
 class ExchangeRate extends React.Component {
   constructor(props) {
     super(props);
-
     this.state = {
+      tableList: [],
       editRateVisible: false,
       //使用币种
       currency: null,
@@ -21,80 +23,56 @@ class ExchangeRate extends React.Component {
       //表格加载
       tableLoading: false
     };
-
   }
-
+  allow = this.props.appStore.getAllow.bind(this);
   componentWillMount() {
-    this.getCurrencyRate();
+    this.getRateList();
   }
-
-//获取汇率列表
-  getCurrencyRate() {
-    this.setState({tableLoading: true});
-    fetch(window.apiUrl + "/backendRate/getRateList", {
-      method: "post",
-      headers: {"Content-Type": "application/json"},
-    }).then(r => r.json()).then(res => {
-      this.setState({tableLoading: false});
-      if (res.status === 10000) {
-        this.setState({dataSource: res.data})
-      } else if (res.status) {
-        message.error(res.msg);
-      } else {
-        message.error("后端数据错误");
+  // 获取汇率列表
+  getRateList() {
+    const showLoading = Is => this.setState({tableLoading: Is});
+    showLoading(true);
+    this.ajax.post('/backendRate/getRateList').then(r => {
+      if (r.data.status === 10000) {
+        this.setState({tableList: r.data.data})
       }
+      showLoading(false);
+      r.showError();
     }).catch(r => {
-      message.error(`前端错误: 获取汇率接口调取错误`);
-    })
+      showLoading(false);
+      console.error(r);
+      this.ajax.isReturnLogin(r, this);
+    });
   }
-
-//修改汇率
-  editRate() {
+  // 修改汇率
+  updateRate() {
     const {rateId, rate} = this.state;
-    this.setState({editConfirmLoading: true});
-    fetch(window.apiUrl + "/backendRate/updateRate", {
-      method: "post",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({id: rateId, rate: rate})
-    }).then(r => r.json()).then(res => {
-      this.setState({editConfirmLoading: false})
-      if (res.status === 10000) {
-        this.getCurrencyRate();
+    const showLoading = Is => this.setState({editConfirmLoading: Is});
+    showLoading(true);
+    const data = {id: rateId, rate: rate};
+    this.ajax.post('/backendRate/updateRate', data).then(r => {
+      if (r.data.status === 10000) {
+        message.success(r.data.msg);
         this.setState({currency: "", rateCurrency: "", rate: "", rateId: "", editRateVisible: false})
-      } else if (res.status) {
-        message.error(res.msg)
-      } else {
-        message.error("后端数据错误")
+        this.getRateList();
       }
+      showLoading(false);
+      r.showError();
     }).catch(r => {
-      message.error(`前端错误: 修改汇率接口调取错误`);
-    })
+      showLoading(false);
+      console.error(r);
+      this.ajax.isReturnLogin(r, this);
+    });
   }
 
   render() {
-    const columns = [{
-      title: "使用币种",
-      dataIndex: "currency",
-      key: "currency",
-      width: 150
-    }, {
-      title: "兑换币种",
-      dataIndex: "rateCurrency",
-      key: "rateCurrency",
-      width: 150
-    }, {
-      title: "汇率",
-      dataIndex: "rate",
-      key: "rate",
-      width: 150
-    }, {
-      title: "编辑",
-      dataIndex: "id",
-      key: "id",
-      width: 150,
-      render: (text, record) => (
-        <div>
-          <Button type={"primary"}
+    const columns = [
+      {title: "使用币种",dataIndex: "currency",key: "currency",width: 120},
+      {title: "兑换币种",dataIndex: "rateCurrency",key: "rateCurrency",width: 120},
+      {title: "汇率",dataIndex: "rate",key: "rate",width: 100},
+      {title: "编辑",dataIndex: "id",key: "id",width: 100,
+        render: (text, record) => <div>
+          <Button type="primary"
                   onClick={() => {
                     this.setState({
                       editRateVisible: true,
@@ -103,27 +81,30 @@ class ExchangeRate extends React.Component {
                       rate: record.rate,
                       rateId: record.id
                     })
-                  }}>编辑</Button>
+                  }}
+                  disabled={record.id === 1 || !this.allow(104)}
+                  title={record.id === 1 ? '人民币汇率恒定为1' : (!this.allow(104) ? '无该操作权限' : null)}
+          >编辑</Button>
         </div>
-      )
     }];
-    const {dataSource, editRateVisible, currency, rateCurrency, rate,editConfirmLoading,tableLoading} = this.state;
+    const {tableList, editRateVisible, currency, rateCurrency, rate,editConfirmLoading,tableLoading} = this.state;
     return (
       <div className="exchange-rate">
         <div className="title">
           <div className="titleMain">汇率</div>
-          <div className="titleLine"></div>
+          <div className="titleLine"/>
         </div>
-        <Button type={"primary"} className="add-rate-btn">新增汇率</Button>
-        <div className="tableMain">
+        <div className="tableMain"
+             style={{maxWidth: 600, paddingTop: 10}}
+        >
           <Table className="tableList"
                  bordered
-                 dataSource={dataSource}
+                 dataSource={tableList}
                  columns={columns}
                  loading={tableLoading}
                  pagination={false}
-                 scroll={{x: 550, y: 800}}
-                 rowKey={(record, index) => `${record.id}`}/>
+                 scroll={{x: 550, y: 500}}
+                 rowKey={(record, index) => index}/>
         </div>
 
         <Modal title="是否修改汇率"
@@ -133,7 +114,7 @@ class ExchangeRate extends React.Component {
                confirmLoading={editConfirmLoading}
                visible={editRateVisible}
                wrapClassName="exchange-rate-modal"
-               onOk={this.editRate.bind(this)}
+               onOk={this.updateRate.bind(this)}
                onCancel={() => {
                  this.setState({currency: "", rateCurrency: "", rate: "", rateId: "", editRateVisible: false})
                }}>

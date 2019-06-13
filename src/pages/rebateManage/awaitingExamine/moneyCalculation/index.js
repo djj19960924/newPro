@@ -14,7 +14,6 @@ class MoneyCalculation extends React.Component {
       number: null,
       mainDataList: [],
     };
-    // window.MoneyCalculation = this;
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -79,42 +78,35 @@ class MoneyCalculation extends React.Component {
   }
 
   // 获取当日返点率
-  getRebateRate(name, No, date = this.props.ticketDate, mallName = this.props.currentShop) {
-    let data = {
-      mallName: mallName,
+  getRebateRate(name, No) {
+    const {ticketDate, currentShop} = this.props;
+    const data = {
+      mallName: currentShop,
       brandName: name,
-      rebateDate: date,
+      rebateDate: ticketDate,
     };
-    fetch(window.fandianUrl + '/rebate/getRebateByDate', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(data)
-    }).then(r => r.json()).then(r => {
-      // console.log(this.state.mainDataList);
-      if (r.retcode.status === `10000`) {
-        if (!r.data) {
-          message.error(`未查询到 ${name} 在 ${date} 的返点率`)
-        } else {
-          let { mainDataList } = this.state;
-          if (No === `default`) this.setState({defaultBrandRebate: r.data.rebateRate});
-          mainDataList[(No === `default` ? '0' : No)].brandRebate = r.data.rebateRate;
-          // 当获取新的返点率以后, 实时改变返点率最后的计算值
-          this.setState({mainDataList: mainDataList},() => {
-            this.props.changeReciptMoney(this.state.mainDataList)
-          })
-        }
-      } else {
-        if (r.retcode) {
-          message.error(`${r.retcode.msg}, 状态码:${r.retcode.status}`)
-        } else {
-          message.error(`后端数据错误`)
-        }
+    this.ajax.post('/rebate/getRebateByDate', data).then(r => {
+      if (r.data.status === 10000) {
+        const {data} = r.data;
+        const {mainDataList} = this.state;
+        if (No === `default`) this.setState({defaultBrandRebate: data.rebateRate});
+        mainDataList[(No === `default` ? '0' : No)].brandRebate = data.rebateRate;
+        // 当获取新的返点率以后, 实时改变返点率最后的计算值
+        this.setState({},() => {
+          this.props.changeReciptMoney(mainDataList)
+        })
       }
-    }).catch(() => {
-      message.error(`根据品牌,日期获取返点率接口调取失败`)
-    })
+      r.showError(true);
+    }).catch(r => {
+      console.error(r);
+      this.ajax.isReturnLogin(r, this);
+    });
   }
 
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
+  }
   render() {
     const { brandList, mainDataList, defaultBrand, defaultBrandRebate, } = this.state;
     const { country, changeReciptMoney, repeatList, emptyList, } = this.props;

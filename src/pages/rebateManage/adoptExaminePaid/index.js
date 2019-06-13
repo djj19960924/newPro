@@ -11,9 +11,10 @@ class adoptExaminePaid extends React.Component {
       payment: null,
       searchValue: ``,
       pageNum: 1,
-      pageSize: 30,
+      pageSize: 100,
       pageTotal: 0,
-      pageSizeOptions: ['10', '20', '30', '40'],
+      pageSizeOptions: ['50', '100', '200', '300'],
+      tableIsLoading: false,
     };
   }
 
@@ -22,14 +23,11 @@ class adoptExaminePaid extends React.Component {
   }
 
   // 获取已打款信息
-  getProgramUserPaied(pageNum = this.state.pageNum, pageSize = this.state.pageSize, payment = this.state.payment) {
-    const {searchValue} = this.state;
+  getProgramUserPaied() {
+    const {searchValue, pageNum, pageSize, payment} = this.state;
+    this.setState({tableIsLoading:true});
     let dataObj = {
-      wechatName: "",
       payWay: payment,
-      wechatNo: "",
-      alipayNo: "",
-      cardNo: "",
       pageNum: pageNum,
       pageSize: pageSize
     };
@@ -46,107 +44,83 @@ class adoptExaminePaid extends React.Component {
       default:
         dataObj.wechatName = searchValue;
     }
-    fetch(window.fandianUrl + '/programUser/getAllReciptAccount', {
-      method: "post",
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(dataObj)
-    }).then(r => r.json()).then(r => {
-      if (r.status) {
-        if (r.status === 10000) {
-          this.setState({
-            dataList: r.data.list,
-            pageTotal: r.data.total,
-          })
-        } else if (r.status === 10001) {
-          if (searchValue === ``) {
-            message.warn(`${r.msg}`);
-          } else {
-            message.warn(`未查找到符合条件的信息`)
-          }
-          this.setState({dataList: [], pageTotal: 0})
-        } else {
-          message.error(`${r.msg}, 错误码:${r.status}`);
-          this.setState({dataList: [], pageTotal: 0})
-        }
-      } else {
-        message.error(`后端数据错误`);
-        this.setState({dataList: [], pageTotal: 0})
+    this.ajax.post('/programUser/getAllReciptAccount',dataObj).then(r => {
+      if (r.data.status === 10000) {
+        const {data} = r.data;
+        this.setState({
+          dataList: data.list,
+          pageTotal: data.total,
+        })
+      } else if (r.data.status < 10000) {
+        this.setState({
+          dataList: [],
+          pageTotal: 0
+        })
       }
-    }).catch(() => {
-      message.error(`前端错误: 已打款信息接口调取错误`);
-      this.setState({dataList: [], pageTotal: 0})
-    })
+      this.setState({tableIsLoading:false});
+      r.showError(true);
+    }).catch(r => {
+      this.setState({tableIsLoading:false});
+      this.ajax.isReturnLogin(r, this);
+    });
   }
 
   // 翻页事件
   changePage(pageNum, pageSize) {
-    // console.log(pageNum,pageSize);
-    this.getProgramUserPaied(pageNum, pageSize)
+    this.setState({
+      pageNum:pageNum,
+      pageSize:pageSize
+    },() => {
+      this.getProgramUserPaied()
+    })
   }
 
   // 根据收款账号类型显示
   accountType(record) {
     switch (record.payWay) {
-      case 0:
-        return `此次转账余额`;
-        break;
-      case 1:
-        return `银行卡号： ${record.cardNo}`;
-        break;
-      case 2:
-        return `支付宝账号： ${record.alipayNo}`;
-        break;
-      case 3:
-        return `微信号： ${record.wechatNo}`;
-        break;
-      default:
-        return `未知支付方式`;
+      case 0: return `余额`;
+      case 1: return `银行卡号： ${record.cardNo}`;
+      case 2: return `支付宝账号： ${record.alipayNo}`;
+      case 3: return `微信号： ${record.wechatNo}`;
+      default: return `未知支付方式`;
     }
   }
 
   // 改变支付方式
   changePayment(v) {
-    this.setState({payment: v, searchValue: ``, pageNum: 1, pageSize: 30}, () => {
+    this.setState({payment: v, searchValue: ``, pageNum: 1, pageSize: 100}, () => {
       this.getProgramUserPaied();
     });
   }
 
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
+  }
   render() {
     const Option = Select.Option;
     const columns = [
-      {
-        title: '申请人',
-        dataIndex: 'wechatName',
-        key: 'wechatName',
-      },
-      {
-        title: '收款账户',
-        dataIndex: 'account',
-        key: 'account',
-        width: 260,
+      {title: '申请人', dataIndex: 'wechatName', key: 'wechatName'},
+      {title: '收款账户', dataIndex: 'account', key: 'account', width: 260,
         render: (text, record) => (
           <div>{this.accountType(record)}</div>
         )
       },
+      {title: '到账金额', dataIndex: 'payMoney', key: 'payMoney', width: 150},
       {
-        title: '到账金额',
-        dataIndex: 'payMoney',
-        key: 'payMoney',
-        width: 150,
-      },
-      {
-        title: '到账时间',
-        dataIndex: 'updateTime',
-        key: 'updateTime',
-        width: 200,
+        title: '到账时间', dataIndex: 'updateTime', key: 'updateTime', width: 200,
         render: (text, record) => (  //塞入内容
           <div>{record.createTime ? moment(record.createTime).format('YYYY-MM-DD HH:mm:ss') : `数据错误`}</div>
         ),
       }
     ];
-    const {dataList, pageSizeOptions, pageTotal, pageSize, pageNum, payment, searchValue,} = this.state;
+    const {dataList, pageSizeOptions, pageTotal, pageSize, pageNum, payment, searchValue, tableIsLoading} = this.state;
     return (
       <div className="adoptExaminePaid">
+        <div className="title">
+          <div className="titleMain">已返款</div>
+          <div className="titleLine" />
+        </div>
         <div className="btnLine">
           {/*支付方式*/}
           <span>支付方式：</span>
@@ -182,31 +156,35 @@ class adoptExaminePaid extends React.Component {
               />
               <Button type="primary"
                       style={{marginLeft: 10}}
-                      onClick={this.getProgramUserPaied.bind(this, undefined, undefined, undefined)}
+                      onClick={this.getProgramUserPaied.bind(this)}
               >搜索</Button>
             </div>
           }
 
         </div>
-        <Table className="tableList"
-               dataSource={dataList}
-               columns={columns}
-               pagination={false}
-               bordered
-               scroll={{y: 600}}
-               rowKey={(record, index) => `id_${index}`}
-        />
-        <Pagination className="tablePagination"
-                    total={pageTotal}
-                    pageSize={pageSize}
-                    current={pageNum}
-                    showTotal={(total, range) => `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 `}共 ${total} 条记录`}
-                    style={{float: 'right', marginRight: '20px', marginTop: '10px'}}
-                    onChange={this.changePage.bind(this)}
-                    showSizeChanger
-                    pageSizeOptions={pageSizeOptions}
-                    onShowSizeChange={this.changePage.bind(this)}
-        />
+        <div className="tableMain"
+             style={{maxWidth:1000}}
+        >
+          <Table className="tableList"
+                 loading={tableIsLoading}
+                 dataSource={dataList}
+                 columns={columns}
+                 pagination={false}
+                 bordered
+                 scroll={{y: 600}}
+                 rowKey={(record, index) => `id_${index}`}
+          />
+          <Pagination className="tablePagination"
+                      total={pageTotal}
+                      pageSize={pageSize}
+                      current={pageNum}
+                      showTotal={(total, range) => `${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 `}共 ${total} 条记录`}
+                      onChange={this.changePage.bind(this)}
+                      showSizeChanger
+                      pageSizeOptions={pageSizeOptions}
+                      onShowSizeChange={this.changePage.bind(this)}
+          />
+        </div>
       </div>
     )
   }

@@ -418,7 +418,9 @@ class commoditiesPackaging extends React.Component{
 
   componentWillUnmount() {
     // 组件关闭以后, 卸载window事件
-    window.onkeyup = window.onkeydown = window.onblur = window.onfocus = null
+    window.onkeyup = window.onkeydown = window.onblur = window.onfocus = null;
+    // 卸载异步操作设置状态
+    this.setState = () => { return null }
   }
 
   // 计算方法
@@ -577,6 +579,10 @@ class commoditiesPackaging extends React.Component{
     this.setState({elementQRCode:qrcode})
   }
 
+  // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
+  componentWillUnmount() {
+    this.setState = () => { return null }
+  }
   render() {
     const { isFocusOnWindow, loadingShow, nickname, boxesList, selectBox, isOnFocusInput, boxesIsLoading, orderMoney, productNum, showPayQRCode, needToPay, } = this.state;
     return (
