@@ -13,7 +13,6 @@ class App extends Component {
     super(props);
     // 这里注入原生 ajax 方法至 React.Component
     Component.prototype.ajax = new Ajax();
-    window.app = this;
   }
   render() {
     return (
