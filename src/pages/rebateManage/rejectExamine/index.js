@@ -104,14 +104,10 @@ class rejectExamine extends React.Component{
       )
     });
   }
-  //取消小票图片 遮罩层
-  removeMask() {
-    this.setState({mask: 'unShow',pictureUrl:'',ticketUrl:'unShow'})
-  }
 
   // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
   componentWillUnmount() {
-    this.setState = () => { return null }
+    this.setState = () => null
   }
   render() {
     const columns = [

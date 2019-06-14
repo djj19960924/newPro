@@ -404,7 +404,7 @@ class commoditiesImgList extends React.Component {
 
   // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
   componentWillUnmount() {
-    this.setState = () => { return null }
+    this.setState = () => null
   }
   render() {
     const { fileList, cameraModalVisible, previewVisible, previewImage, hasCamera, isLoading, loadingTxt, } = this.state;

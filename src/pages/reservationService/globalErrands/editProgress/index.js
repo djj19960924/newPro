@@ -160,9 +160,7 @@ class EditProgress extends React.Component {
   }
 
   componentWillUnmount() {
-    this.setState = () => {
-      return null
-    }
+    this.setState = () => null
   }
 
   render() {

@@ -22,9 +22,7 @@ class GlobalErrands extends React.Component {
   }
 
   componentWillUnmount() {
-    this.setState = () => {
-      return null
-    }
+    this.setState = () => null
   }
   render() {
     const {contentType} = this.state;

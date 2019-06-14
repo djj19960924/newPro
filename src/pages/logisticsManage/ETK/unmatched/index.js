@@ -106,13 +106,9 @@ class orderUnmatched extends React.Component{
     const wb = XLSX.utils.table_to_book(elt, {raw: true, sheet:"Sheet JS"});
     XLSX.writeFile(wb, (`未匹配订单_${moment(new Date()).format('YYYY-MM-DD_HH.mm.ss')}.xlsx`));
   }
-  onSelectChange(selectedRowKeys) {
-    console.log('selectedRowKeys changed: ', selectedRowKeys);
-    this.setState({ selectedRowKeys });
-  }
   // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
   componentWillUnmount() {
-    this.setState = () => { return null }
+    this.setState = () => null
   }
   render() {
     const columns = [

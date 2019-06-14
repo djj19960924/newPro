@@ -105,7 +105,7 @@ class MoneyCalculation extends React.Component {
 
   // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
   componentWillUnmount() {
-    this.setState = () => { return null }
+    this.setState = () => null
   }
   render() {
     const { brandList, mainDataList, defaultBrand, defaultBrandRebate, } = this.state;

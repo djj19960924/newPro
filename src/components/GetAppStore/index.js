@@ -9,7 +9,7 @@ class GetAppStore extends React.Component {
   }
   // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
   componentWillUnmount() {
-    this.setState = () => { return null }
+    this.setState = () => null
   }
   // 这里进行说明:
   // 由于 @inject('appStore') @observer ,主要是由于 @observer(观察器) 的原因,

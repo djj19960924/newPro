@@ -39,12 +39,15 @@ import orderUnmatched from '@pages/logisticsManage/ETK/unmatched/';
 import orderPushed from '@pages/logisticsManage/postal/pushed/';
 // 未推送
 import orderNotPushed from '@pages/logisticsManage/postal/notPushed/';
-//速跨通
-//待录入列表
-import SktListToBeEntered from '@pages/logisticsManage/SKT/listToBeEntered/';
-import SktCommoditiesInput from '@pages/logisticsManage/SKT/commoditiesInput/';
-import SktUploadOrder from '@pages/logisticsManage/SKT/uploadOrder/';
-import SktYto from '@pages/logisticsManage/SKT/YTO/';
+// 速跨通
+// 待录入列表
+import SKTListToBeEntered from '@pages/logisticsManage/SKT/listToBeEntered/';
+// 扫码录入商品
+import SKTCommoditiesInput from '@pages/logisticsManage/SKT/commoditiesInput/';
+// BC推单
+import SKTUploadOrder from '@pages/logisticsManage/SKT/uploadOrder/';
+// 圆通物流
+import SKTYto from '@pages/logisticsManage/SKT/YTO/';
 // 全球运转
 // 已收货
 import globalTranshipmentArrived from '@pages/logisticsManage/globalTranshipment/arrived/';
@@ -118,10 +121,10 @@ const componentsList = {
   commoditiesImgList,
   ExchangeRate,
   OfflinePayment,
-  SktListToBeEntered,
-  SktCommoditiesInput,
-  SktUploadOrder,
-  SktYto
+  SKTListToBeEntered,
+  SKTCommoditiesInput,
+  SKTUploadOrder,
+  SKTYto
 };
 
 @withRouter
@@ -192,9 +195,7 @@ class ContentMain extends React.Component {
 
   // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
   componentWillUnmount() {
-    this.setState = () => {
-      return null
-    }
+    this.setState = () => null
   }
 
   render() {
