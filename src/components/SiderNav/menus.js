@@ -56,12 +56,31 @@ const menus = [
       {
         title: '线下支付',
         id: 103,
-        icon: 'global',
-        key: '/logisticsManage/offlinePayment',
+        icon: 'pay-circle',
+        key: '/logistics-manage/offline-payment',
         testType: 'localTest',
         components: [
-          {name: 'OfflinePayment', path: '/logisticsManage/offlinePayment'}
+          {name: 'OfflinePayment', path: '/logistics-manage/offline-payment'}
         ]
+      },
+      {
+        title: '速跨通',
+        id: 106,
+        icon: 'global',
+        key: '/logistics-manage/SKT',
+        testType: 'localTest',
+        subs: [
+          {
+            title: '待录入',
+            id: 107,
+            icon: 'container',
+            key: '/logistics-manage/SKT/unrecorded',
+            testType: 'localTest',
+            components: [
+              {name: 'Unrecorded', path: '/logistics-manage/SKT/'}
+            ]
+          },
+        ],
       },
       {
         title: 'BC清关',
