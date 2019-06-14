@@ -177,23 +177,50 @@ const menus = [
           },
         ]
       },
-      // {
-      //   title: '速跨通',
-      //   id: 33,
-      //   icon: 'file-excel',
-      //   key: '/logistics-manage/BC-customsClearance/upload-order',
-      //   subs: [
-      //     {
-      //       title: '圆通物流',
-      //       id: 39,
-      //       icon: 'file-done',
-      //       key: '',
-      //       components: [
-      //         {name: '', path: ''}
-      //       ]
-      //     }
-      //   ]
-      // }
+      {
+        title: '速跨通',
+        id: 106,
+        icon: 'global',
+        key: '/logistics-manage/SKT/',
+        subs: [
+          {
+            title: '待录入列表',
+            id: 107,
+            icon: 'form',
+            key: '/logistics-manage/SKT/listToBeEntered',
+            components: [
+              {name: 'SktListToBeEntered', path: '/logistics-manage/SKT/listToBeEntered'}
+            ]
+          },
+          {
+            title: '扫码录入商品',
+            id: 108,
+            icon: 'gift',
+            key: '/logistics-manage/SKT/commoditiesInput',
+            components: [
+              {name: 'SktCommoditiesInput', path: '/logistics-manage/SKT/commoditiesInput'}
+            ]
+          },
+          {
+            title: '圆通物流',
+            id: 109,
+            icon: 'sync',
+            key: '/logistics-manage/SKT/uploadOrder',
+            components: [
+              {name: 'SktUploadOrder', path: '/logistics-manage/SKT/uploadOrder'}
+            ]
+          },
+          {
+            title: 'BC推单',
+            id: 110,
+            icon: 'file-excel',
+            key: '/logistics-manage/SKT/YTO',
+            components: [
+              {name: 'SktYto', path: '/logistics-manage/SKT/YTO'}
+            ]
+          }
+        ]
+      }
     ]
   },
   {

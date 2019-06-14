@@ -31,27 +31,21 @@ class LogisticsPaymented extends React.Component {
   getPaymented(pageNum = this.state.pageNum, pageSize = this.state.pageSize) {
     const {pageSizeOptions}=this.state;
     this.setState({tableLoading: true});
-    fetch(window.apiUrl + "/backendSpeedexpress/getOffLine", {
-      method: "post",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({pageNum: pageNum, pageSize: pageSize, isPay: 1})
-    }).then(r => r.json()).then(res => {
+    this.ajax.post("/backendSpeedexpress/getOffLine",{pageNum: pageNum, pageSize: pageSize, isPay: 1}).then(res=>{
       this.setState({tableLoading: false});
-      if (res.status === 10000) {
-        if(res.data.total>pageSizeOptions[pageSizeOptions.length-1]){
-          pageSizeOptions.push(res.data.total);
+      if (res.data.status === 10000) {
+        if(res.data.data.total>pageSizeOptions[pageSizeOptions.length-1]){
+          pageSizeOptions.push(res.data.data.total);
         }
-        this.setState({dataSource: res.data.list, total: res.data.total});
-      } else if (res.status === 10004) {
-        message.warn(res.msg)
-      } else if (res.status) {
-        message.error(res.msg)
-      } else {
-        message.error("后端数据错误")
+        this.setState({dataSource: res.data.data.list, total: res.data.data.total});
+      }else if(res.data.status < 10000){
+        this.setState({dataSource:[], total: 0});
       }
-    }).catch(() => {
-      message.error("前端线下支付订单接口调取失败")
-    })
+      res.showError(true);
+    }).catch(res => {
+      this.setState({tableIsLoading:false});
+      this.ajax.isReturnLogin(res, this);
+    });
   }
 
   //转换支付方式

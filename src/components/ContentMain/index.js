@@ -39,6 +39,12 @@ import orderUnmatched from '@pages/logisticsManage/ETK/unmatched/';
 import orderPushed from '@pages/logisticsManage/postal/pushed/';
 // 未推送
 import orderNotPushed from '@pages/logisticsManage/postal/notPushed/';
+//速跨通
+//待录入列表
+import SktListToBeEntered from '@pages/logisticsManage/SKT/listToBeEntered/';
+import SktCommoditiesInput from '@pages/logisticsManage/SKT/commoditiesInput/';
+import SktUploadOrder from '@pages/logisticsManage/SKT/uploadOrder/';
+import SktYto from '@pages/logisticsManage/SKT/YTO/';
 // 全球运转
 // 已收货
 import globalTranshipmentArrived from '@pages/logisticsManage/globalTranshipment/arrived/';
@@ -79,7 +85,44 @@ import commoditiesImgList from '@pages/commoditiesManage/commoditiesDatabase/com
 
 import menus from "../SiderNav/menus";
 
-const componentsList = { Home, importExcel, roles, accounts, permissions, commoditiesPackaging, customerLogin, YTO, BCUploadOrder, orderMatched, orderUnmatched, orderPushed, orderNotPushed, globalTranshipmentArrived, globalTranshipmentNotArrived, airportTransfer, appointmentInfo, GlobalErrands, EditProgress, adoptExaminePaid, adoptExamineUnpaid, rejectExamine, updateQRCode, awaitingExamine, setRebate, countBillList, appointmentTeamManage, commoditiesDataBase, commoditiesCreateAndEdit, commoditiesImgList, ExchangeRate,OfflinePayment};
+const componentsList = {
+  Home,
+  importExcel,
+  roles,
+  accounts,
+  permissions,
+  commoditiesPackaging,
+  customerLogin,
+  YTO,
+  BCUploadOrder,
+  orderMatched,
+  orderUnmatched,
+  orderPushed,
+  orderNotPushed,
+  globalTranshipmentArrived,
+  globalTranshipmentNotArrived,
+  airportTransfer,
+  appointmentInfo,
+  GlobalErrands,
+  EditProgress,
+  adoptExaminePaid,
+  adoptExamineUnpaid,
+  rejectExamine,
+  updateQRCode,
+  awaitingExamine,
+  setRebate,
+  countBillList,
+  appointmentTeamManage,
+  commoditiesDataBase,
+  commoditiesCreateAndEdit,
+  commoditiesImgList,
+  ExchangeRate,
+  OfflinePayment,
+  SktListToBeEntered,
+  SktCommoditiesInput,
+  SktUploadOrder,
+  SktYto
+};
 
 @withRouter
 // @inject('appStore') @observer
@@ -100,7 +143,11 @@ class ContentMain extends React.Component {
           if (obj1.components) {
             this.state.menusList.push({components: obj1.components, id: obj1.id, testType: obj1.testType})
           } else {
-            for (let obj2 of obj1.subs) this.state.menusList.push({components: obj2.components, id: obj2.id, testType: obj2.testType})
+            for (let obj2 of obj1.subs) this.state.menusList.push({
+              components: obj2.components,
+              id: obj2.id,
+              testType: obj2.testType
+            })
           }
         }
       }
@@ -127,37 +174,41 @@ class ContentMain extends React.Component {
   getNewRoutesList(allowSideList) {
     const dataList = [];
     this.setState({pageLoading: true});
-    const { menusList } = this.state;
+    const {menusList} = this.state;
     for (let obj of menusList) {
       // 添加测试判断
       if (obj.testType) if (window.testType !== 'localTest') if (obj.testType !== window.testType) continue;
       // 添加权限判断
       // 这里兼容未添加 allowSideList 传参的情况
       if (allowSideList) if (!allowSideList.includes(obj.id)) continue;
-      for (let obj1 of obj.components) dataList.push(<Route exact path={obj1.path} component={componentsList[obj1.name]} key={obj1.path}/>);
+      for (let obj1 of obj.components) dataList.push(<Route exact path={obj1.path} component={componentsList[obj1.name]}
+                                                            key={obj1.path}/>);
     }
     // 渲染层对 routesList 做出了判断, 被迫进行了和 setState 相同的功能
     // 不直接使用 setState, 是因为该方法会在组件卸载时重复渲染, 造成内存负载, 会导致 react 报错
     // this.setState({routesList: dataList})
     this.state.routesList = dataList;
   }
+
   // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
   componentWillUnmount() {
-    this.setState = () => { return null }
+    this.setState = () => {
+      return null
+    }
   }
 
   render() {
-    const { routesList } = this.state;
+    const {routesList} = this.state;
     return (
       <div style={{backgroundColor: '#eee', width: '100%', height: '100%', padding: '10px'}}>
         {/*这里只在 routesList 内部有数据时才渲染 Switch 标签, 以防渲染过程中出现 404*/}
         {!!routesList.length &&
-          <Switch>
-            {/*放置循环路由*/}
-            {routesList}
-            {/*404*/}
-            <Route component={page404}/>
-          </Switch>
+        <Switch>
+          {/*放置循环路由*/}
+          {routesList}
+          {/*404*/}
+          <Route component={page404}/>
+        </Switch>
         }
       </div>
     )
