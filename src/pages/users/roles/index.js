@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, Input, message, Modal, Pagination, Table, Icon} from 'antd';
+import {Button, Input, message, Modal, Table, Icon} from 'antd';
 import './index.less';
 
 class roles extends React.Component {
@@ -72,21 +72,9 @@ class roles extends React.Component {
       this.ajax.isReturnLogin(r, this);
     })
   }
-
-  // 换页刷新
-  changePage(pageNum, pageSize) {
-    this.setState({
-      pageNum: pageNum,
-      pageSize: pageSize,
-    },()=>{
-      this.getRoleList();
-    })
-  }
-
-
   // 展示详情
   showDetailsModal(record, type) {
-    const {allPermissionsList, originIdList} = this.state;
+    const {allPermissionsList} = this.state;
     let dataList = [];
     const data = {
       detailState: type,
@@ -385,7 +373,6 @@ class roles extends React.Component {
                  id="tableList"
                  dataSource={tableDataList}
                  columns={columns}
-                 // pagination={false}
                  pagination={{
                    pageSize: pageSize,
                    showTotal: (total, range) =>
@@ -398,19 +385,6 @@ class roles extends React.Component {
                  scroll={{ y: 500, x: 800 }}
                  rowKey={(record, index) => `id_${index}`}
           />
-          {/*分页*/}
-          {/*<Pagination className="tablePagination"*/}
-                      {/*total={pageTotal}*/}
-                      {/*pageSize={pageSize}*/}
-                      {/*current={pageNum}*/}
-                      {/*showTotal={(total, range) =>*/}
-                        {/*`${range[1] === 0 ? '' : `当前为第 ${range[0]}-${range[1]} 条 ` }共 ${total} 条记录`*/}
-                      {/*}*/}
-                      {/*onChange={this.changePage.bind(this)}*/}
-                      {/*showSizeChanger*/}
-                      {/*pageSizeOptions={pageSizeOptions}*/}
-                      {/*onShowSizeChange={this.changePage.bind(this)}*/}
-          {/*/>*/}
         </div>
       </div>
     )
