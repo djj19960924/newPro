@@ -26,11 +26,11 @@ class OfflinePayment extends React.Component {
       <div className="offline-payment">
         <div className="title">
           <div className="titleMain">线下支付</div>
-          <div className="titleLine"></div>
+          <div className="titleLine" />
         </div>
         <Radio.Group className="menu-selection" value={orderType} buttonStyle="solid" onChange={(e) => {
           this.setState({orderType: e.target.value});
-          this.props.history.push("/logisticsManage/offlinePayment?type="+e.target.value);
+          this.props.history.push("/logistics-manage/offline-payment?type="+e.target.value);
         }}>
           <Radio.Button value={"0"}>待支付</Radio.Button>
           <Radio.Button value={"1"}>已支付</Radio.Button>
