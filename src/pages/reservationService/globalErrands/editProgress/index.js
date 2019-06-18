@@ -280,7 +280,7 @@ class EditProgress extends React.Component {
         </Modal>
         <div>
           <Button className="return-purchasing" type="primary" size="large" onClick={() => {
-            this.props.history.goBack();
+            this.props.history.push("/reservation-service/global-errands?contentType="+window.getQueryString("contentType"))
           }}>返回等待采购页面</Button>
         </div>
       </div>
