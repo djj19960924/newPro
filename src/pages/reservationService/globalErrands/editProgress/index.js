@@ -34,7 +34,9 @@ class EditProgress extends React.Component {
       //确认更新按钮loading
       btnLoading: false,
       //删除进度id
-      deleteId: null
+      deleteId: null,
+      //订单是否完结
+      isEnd: null
     };
 
 
@@ -57,7 +59,8 @@ class EditProgress extends React.Component {
           bookingTime: data.createTime,
           wechatNo: data.wechatNo,
           commodityContent: data.productName,
-          schedules: data.legworkSchedules
+          schedules: data.legworkSchedules,
+          isEnd: data.isEnd
         });
         if (data.legworkImgList) {
           this.setState({commodityImgList: data.legworkImgList})
@@ -164,7 +167,7 @@ class EditProgress extends React.Component {
   }
 
   render() {
-    const {bookingTime, wechatNo, commodityContent, commodityImgList, schedules, addVisible, updateContent, updateImg, btnLoading, deleteVisible, showImageViewer, imgSrc} = this.state;
+    const {bookingTime, wechatNo, commodityContent, commodityImgList, schedules, addVisible, updateContent, updateImg, btnLoading, deleteVisible, showImageViewer, imgSrc,isEnd} = this.state;
     return (
       <div className="edit-progress">
         <h1>编辑采购进度</h1>
@@ -218,14 +221,20 @@ class EditProgress extends React.Component {
                     </div>
                     }
                   </div>
-                  <Button type="danger" onClick={this.deleteProgress.bind(this, item.id)}>删除</Button>
+                  {
+                    isEnd===0 &&  <Button type="danger" onClick={this.deleteProgress.bind(this, item.id)}>删除</Button>
+                  }
+
                 </div>
               )
             }
           )
         }
-        <Button className="add-progress" type="primary" ghost size={"large"}
-                onClick={this.addProgress.bind(this)}>+增加进度</Button>
+        {
+          isEnd===0 && <Button className="add-progress" type="primary" ghost size={"large"}
+                               onClick={this.addProgress.bind(this)}>+增加进度</Button>
+        }
+
         {/*增加进度*/}
         <Modal centered
                closable={false}
@@ -271,7 +280,7 @@ class EditProgress extends React.Component {
         </Modal>
         <div>
           <Button className="return-purchasing" type="primary" size="large" onClick={() => {
-            this.props.history.push("/reservation-service/global-errands")
+            this.props.history.goBack();
           }}>返回等待采购页面</Button>
         </div>
       </div>

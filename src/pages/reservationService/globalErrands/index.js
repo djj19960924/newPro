@@ -44,7 +44,7 @@ class GlobalErrands extends React.Component {
           contentType === "0" && <WaitPurchasing history={this.props.history}></WaitPurchasing>
         }
         {
-          contentType === "1" && <EndOfOrder></EndOfOrder>
+          contentType === "1" && <EndOfOrder history={this.props.history}></EndOfOrder>
         }
         {
           contentType === "2" && <PurchaseTrip></PurchaseTrip>

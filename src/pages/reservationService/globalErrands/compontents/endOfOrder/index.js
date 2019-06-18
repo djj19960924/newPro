@@ -77,6 +77,15 @@ class EndOfOrder extends React.Component {
   render() {
     const columns = [
       {
+        title: "进度详情",
+        dataIndex: "id",
+        key: "id",
+        width: 150,
+        render: (text, record) => (
+          <Button type={"primary"} onClick={()=>{this.props.history.push("/reservation-service/global-errands/edit-progress?id=" + record.id);}}>查看</Button>
+        )
+      },
+      {
         title: "最近进度更新时间",
         dataIndex: "updateTime",
         key: "updateTime",
