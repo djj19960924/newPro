@@ -68,12 +68,14 @@ const menus = [
         id: 106,
         icon: 'global',
         key: '/logistics-manage/SKT/',
+        testType: 'localTest',
         subs: [
           {
             title: '待录入列表',
             id: 107,
             icon: 'form',
             key: '/logistics-manage/SKT/list-to-be-entered',
+            testType: 'localTest',
             components: [
               {name: 'SKTListToBeEntered', path: '/logistics-manage/SKT/list-to-be-entered'}
             ]
@@ -83,6 +85,7 @@ const menus = [
             id: 108,
             icon: 'gift',
             key: '/logistics-manage/SKT/commodities-input',
+            testType: 'localTest',
             components: [
               {name: 'SKTCommoditiesInput', path: '/logistics-manage/SKT/commodities-input'}
             ]
@@ -92,6 +95,7 @@ const menus = [
             id: 109,
             icon: 'sync',
             key: '/logistics-manage/SKT/YTO',
+            testType: 'localTest',
             components: [
               {name: 'SKTYto', path: '/logistics-manage/SKT/YTO'}
             ]
@@ -101,6 +105,7 @@ const menus = [
             id: 110,
             icon: 'file-excel',
             key: '/logistics-manage/SKT/upload-order',
+            testType: 'localTest',
             components: [
               {name: 'SKTUploadOrder', path: '/logistics-manage/SKT/upload-order'}
             ]
