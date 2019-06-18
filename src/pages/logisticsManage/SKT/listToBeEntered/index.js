@@ -20,7 +20,7 @@ class SKTListToBeEntered extends React.Component {
       // 表单加载中显示
       tableIsLoading: false,
     };
-    window.SKTListToBeEntered = this;
+    // window.SKTListToBeEntered = this;
   }
   componentDidMount() {
     this.getAllSpeedexpressShop();

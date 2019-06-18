@@ -24,7 +24,6 @@ class BCUploadOrder extends React.Component {
       // BC推送状态
       BCStatus: 0,
     };
-    window.BCUploadOrder = this;
   }
 
   componentDidMount() {

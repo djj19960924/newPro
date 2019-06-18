@@ -88,9 +88,9 @@ class YTO extends React.Component {
     },function(){
       this.getOrderInfo();
     })
-
   }
-//上传
+
+  // 上传
   uploadOrder (){
     this.setState({tableIsLoading:true});
     let selectNo=[];
@@ -121,7 +121,7 @@ class YTO extends React.Component {
     this.setState = () => null
   }
   render() {
-    var columns = [
+    const columns = [
       {title: "箱号", dataIndex: "parcelNo", key: "parcelNo",width:130},
       {title: "商品名称", dataIndex: "productName", key: "productName",width:200},
       {title: "收件人姓名", dataIndex: "recipientsName", key: "recipientsName",width:100},
@@ -134,7 +134,7 @@ class YTO extends React.Component {
       {title: "数量", dataIndex: "productNum", key: "productNum",width:50},
       {title: "包裹创建时间", dataIndex: "createTime", key: "createTime",width:130}
     ];
-    var columns1 = [
+    const columns1 = [
       {title: "绑定的面单号", dataIndex: "mailNo", key: "mailNo",width:130}
     ];
     columns1.push(...columns);

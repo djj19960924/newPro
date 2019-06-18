@@ -33,7 +33,7 @@ class commoditiesPackaging extends React.Component{
       // 有未支付订单
       needToPay: false,
     };
-    window.commoditiesPackaging = this;
+    // window.commoditiesPackaging = this;
   }
 
   componentDidMount() {
