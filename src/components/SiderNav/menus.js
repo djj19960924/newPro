@@ -58,7 +58,6 @@ const menus = [
         id: 103,
         icon: 'pay-circle',
         key: '/logistics-manage/offline-payment',
-        testType: 'localTest',
         components: [
           {name: 'OfflinePayment', path: '/logistics-manage/offline-payment'}
         ]
@@ -68,14 +67,12 @@ const menus = [
         id: 106,
         icon: 'global',
         key: '/logistics-manage/SKT/',
-        testType: 'localTest',
         subs: [
           {
             title: '待录入列表',
             id: 107,
             icon: 'form',
             key: '/logistics-manage/SKT/list-to-be-entered',
-            testType: 'localTest',
             components: [
               {name: 'SKTListToBeEntered', path: '/logistics-manage/SKT/list-to-be-entered'}
             ]
@@ -85,7 +82,6 @@ const menus = [
             id: 108,
             icon: 'gift',
             key: '/logistics-manage/SKT/commodities-input',
-            testType: 'localTest',
             components: [
               {name: 'SKTCommoditiesInput', path: '/logistics-manage/SKT/commodities-input'}
             ]
