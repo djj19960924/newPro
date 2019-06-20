@@ -14,7 +14,8 @@ class SKTCommoditiesInput extends React.Component {
       parcelCode: null,
       productCode: null,
       currentBoxInfo: {},
-      isOnFocusInput: false
+      isOnFocusInput: false,
+      parcelWeight: null
     }
   }
 
@@ -24,6 +25,12 @@ class SKTCommoditiesInput extends React.Component {
       // console.log(`失去焦点!`);
       this.setState({isFocusOnWindow: true})
     };
+    const parcelCode = window.getCookie('parcelCode');
+    if (!!parcelCode) {
+      this.setState({parcelCode},() => {
+        this.getUserInfoByParcelCode();
+      });
+    }
   }
 
   // 用于卸载扫码器扫码功能
@@ -68,6 +75,7 @@ class SKTCommoditiesInput extends React.Component {
             }
         }
       } else if (e.key === `Enter`) {
+        const {parcelCode, isSelectBox} = this.state;
         if ((new Date().getTime() - onKeyDownTime) <= 12) {
           if (onKeyDownKey === e.key && (new Date().getTime() - lastInputTime) <= 50) {
             // 在这里识别所获取的value值, 当判断为箱号或商品条形码时, 进行接口调取动作
@@ -76,7 +84,6 @@ class SKTCommoditiesInput extends React.Component {
             if (ruleBox.test(inputValue)) {
               // 箱号判断, 调取接口添加箱子至该用户名下
               if (inputValue.length === 14) {
-                const {parcelCode} = this.state;
                 // message.success(`识别为箱号: ${inputValue}`);
                 // console.log(inputValue);
                 if (parcelCode !== null) {
@@ -93,9 +100,13 @@ class SKTCommoditiesInput extends React.Component {
               // 商品条码判断, 调取接口添加商品进当前箱子
               // message.success(`识别为条形码: ${inputValue}`);
               // console.log(inputValue);
-              this.setState({productCode: inputValue},() => {
-                this.entryProduct();
-              });
+              if (isSelectBox) {
+                this.setState({productCode: inputValue},() => {
+                  this.entryProduct();
+                });
+              } else {
+                message.error('请先录入箱号');
+              }
             }
             clearData();
           }
@@ -116,20 +127,22 @@ class SKTCommoditiesInput extends React.Component {
       r.showError();
     }).catch(r => {
       console.error(r);
-      this.ajax.isReturnLogin(r, );
+      this.ajax.isReturnLogin(r, this);
     });
   }
 
   // 增加/减少箱内指定商品数量
-  changeProductNumber(type, productCode) {
+  changeProductNumber(type, productCode, productPrice) {
     const {parcelCode} = this.state;
-    const data = {parcelCode, productCode};
+    const data = {parcelCode, productCode, productPrice};
     const url = (type === 'plus')
       ? '/backend/SktProductManage/cumulateProductNum'
       : '/backend/SktProductManage/decreaseProductNum';
     this.ajax.post(url, data).then(r => {
       if (r.data.status === 10000) {
-        //
+        const {data} = r.data;
+        message.success(`${type === 'plus' ? '增加' : '删除'}商品成功`);
+        this.setState({currentBoxInfo: data});
       }
       r.showError();
     }).catch(r => {
@@ -147,6 +160,8 @@ class SKTCommoditiesInput extends React.Component {
         this.setState({
           isSelectBox: true,
           currentBoxInfo: r.data.data
+        },() => {
+          window.setCookie('parcelCode', parcelCode, 3600);
         });
       } else {
         this.clearBox();
@@ -159,19 +174,8 @@ class SKTCommoditiesInput extends React.Component {
     });
   }
 
-  // 清空箱子信息
-  clearBox() {
-    this.setState({
-      isSelectBox: false,
-      parcelCode: null,
-      currentBoxInfo: null,
-      isOnFocusInput: false
-    });
-  }
-
   // 焦点进入箱重输入框触发
   onFocusBoxWeight() {
-    const { boxesList, } = this.state;
     this.setState({isOnFocusInput: true});
     this.unloadKeyListener();
     window.onkeyup = (e) => {
@@ -181,10 +185,29 @@ class SKTCommoditiesInput extends React.Component {
 
   // 离开箱重输入框触发
   onBlurBoxWeight() {
-    const { currentBoxInfo } = this.state;
     // 这里触发接口调取, 参数值为 currentBoxInfo.parcelWeight
     this.loadKeyListener();
     this.setState({isOnFocusInput: false});
+  }
+
+  // 保存重量和订单
+  saveParcel() {
+    const {parcelWeight, parcelCode} = this.state;
+    if (!parcelWeight) {
+      message.error('请输入重量');
+    } else {
+      const data = {parcelWeight, parcelCode};
+      this.ajax.post('/backend/SktProductManage/saveParcel', data).then(r => {
+        if (r.data.status === 10000) {
+          message.success(r.data.msg);
+          this.clearBox();
+        }
+        r.showError();
+      }).catch(r => {
+        console.error(r);
+        this.ajax.isReturnLogin(r, this);
+      });
+    }
   }
 
   // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
@@ -194,8 +217,22 @@ class SKTCommoditiesInput extends React.Component {
     // 卸载异步操作设置状态
     this.setState = () => null
   }
+
+  // 清空箱子信息
+  clearBox() {
+    this.setState({
+      isSelectBox: false,
+      parcelCode: null,
+      currentBoxInfo: null,
+      isOnFocusInput: false,
+      parcelWeight: undefined
+    },() => {
+      window.delCookie('parcelCode');
+    });
+  }
+
   render() {
-    const {boxesIsLoading, productNum, isFocusOnWindow, isSelectBox, currentBoxInfo, isOnFocusInput} = this.state;
+    const {boxesIsLoading, isFocusOnWindow, isSelectBox, currentBoxInfo, isOnFocusInput, parcelWeight} = this.state;
     return (
       <div className="SKTCommoditiesInput">
         <div className="title">
@@ -224,11 +261,10 @@ class SKTCommoditiesInput extends React.Component {
                                        style={!currentBoxInfo.parcelWeight ? {border:`1px solid rgba(255,0,0,.5)`} : null}
                                        max={99.9} min={0.1}
                                        precision={1}
-                                       value={currentBoxInfo.parcelWeight}
+                                       // value={currentBoxInfo.parcelWeight}
+                                       value={parcelWeight}
                                        onChange={v => {
-                                         const {currentBoxInfo} = this.state;
-                                         currentBoxInfo.parcelWeight = v;
-                                         this.setState({});
+                                         this.setState({parcelWeight: v});
                                        }}
                                        onBlur={this.onBlurBoxWeight.bind(this)}
                                        onFocus={this.onFocusBoxWeight.bind(this)}
@@ -272,11 +308,11 @@ class SKTCommoditiesInput extends React.Component {
                           <Col className="infoCol" span={10} title={Item.productName}>{Item.productName}</Col>
                           <Col className="infoCol" span={5}>
                             <div className="btnPM" style={{marginRight: 10}}
-                              onClick={this.changeProductNumber.bind(this,'minus', Item.productCode)}
+                              onClick={this.changeProductNumber.bind(this,'minus', Item.productCode, Item.productPrice)}
                             >-</div>
                             {Item.productNum}
                             <div className="btnPM" style={{marginLeft: 10}}
-                              onClick={this.changeProductNumber.bind(this,'plus', Item.productCode)}
+                              onClick={this.changeProductNumber.bind(this,'plus', Item.productCode, Item.productPrice)}
                             >+</div>
                           </Col>
                         </Row>
@@ -292,14 +328,14 @@ class SKTCommoditiesInput extends React.Component {
                   <span>物流方案: BC</span>
                 </div>
                 <div className="packInfoLine">
-                  <span>共 {productNum} 件商品, </span>
+                  <span>共 {currentBoxInfo.productNum ? currentBoxInfo.productNum : 0} 件商品, </span>
                   <Button type="danger"
                           style={{marginLeft: 10}}
                           onClick={this.clearBox.bind(this)}
                   >退出</Button>
                   <Button type="primary"
                           style={{marginLeft: 10}}
-                          // onClick={this.createOrder.bind(this)}
+                          onClick={this.saveParcel.bind(this)}
                   >完成</Button>
                 </div>
               </div>
