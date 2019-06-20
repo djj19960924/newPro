@@ -46,7 +46,6 @@ class Ajax {
             // 进入 then 方法, 并将 resolve 发送至 then
             resolve(new resolveResponse(request.response));
           } else {
-            // 进入 catch 方法, 并将 reject 发送至 catch
             reject(request);
           }
         }
@@ -102,6 +101,8 @@ class Ajax {
         const {history, location} = that.props;
         window.delCookie('isLogin');
         history.push(`/login?historyPath=${location.pathname}${encodeURIComponent(location.search)}`);
+      } else if (r.status === 500) {
+        message.error(`${r.response.message} 错误码:${r.status}`);
       } else {
         message.error('接口调取异常, 请联系管理员');
       }
