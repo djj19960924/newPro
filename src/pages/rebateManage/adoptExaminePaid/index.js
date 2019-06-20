@@ -58,7 +58,7 @@ class adoptExaminePaid extends React.Component {
         })
       }
       this.setState({tableIsLoading:false});
-      r.showError(true);
+      r.showError();
     }).catch(r => {
       this.setState({tableIsLoading:false});
       this.ajax.isReturnLogin(r, this);

@@ -75,7 +75,7 @@ class rejectExamine extends React.Component{
       } else if (r.data.status < 10000) {
         this.setState({dataSource: [], pageTotal: 0});
       }
-      r.showError(true);
+      r.showError();
     }).catch(r => {
       this.ajax.isReturnLogin(r, this);
     });

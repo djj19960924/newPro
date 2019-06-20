@@ -38,7 +38,7 @@ class SKTListToBeEntered extends React.Component {
         }
         this.setState({shopObj});
       }
-      r.showError(true);
+      r.showError();
     }).catch(r => {
       console.error(r);
       this.ajax.isReturnLogin(r, this);
@@ -64,7 +64,7 @@ class SKTListToBeEntered extends React.Component {
         this.setState({pageTotal: 0, tableList: []})
       }
       showLoading(false);
-      r.showError(true);
+      r.showError();
     }).catch(r => {
       showLoading(false);
       console.error(r);

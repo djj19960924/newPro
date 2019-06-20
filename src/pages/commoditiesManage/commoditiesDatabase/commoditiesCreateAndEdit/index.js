@@ -273,7 +273,7 @@ class commoditiesCreateAndEdit extends React.Component {
             this.setState({submitLoading: false});
             this.backTo();
           }
-          r.showError(message);
+          r.showError();
         }).catch(r => {
           this.setState({submitLoading: false});
           this.ajax.isReturnLogin(r,this);

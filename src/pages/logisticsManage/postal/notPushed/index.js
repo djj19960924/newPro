@@ -48,7 +48,7 @@ class orderNotPushed extends React.Component{
         })
       }
       clearTable();
-      r.showError(true);
+      r.showError();
     }).catch(r => {
       clearTable();
       console.error(r);

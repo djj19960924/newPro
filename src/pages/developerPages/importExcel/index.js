@@ -54,7 +54,7 @@ class importExcel extends React.Component{
     this.ajax.post('/role/getRoleList', data).then(r => {
       console.log(r);
       // 使用 showError 方法, 进行统一报错
-      r.showError(message);
+      r.showError();
     }).catch(r => {
       message.error('前端接口调取/数据处理出现错误, 请联系管理员');
     })
@@ -64,7 +64,7 @@ class importExcel extends React.Component{
     this.ajax.post('/role/addRole', data).then(r => {
       console.log(r);
       // 使用 showError 方法, 进行统一报错
-      r.showError(message);
+      r.showError();
     }).catch(r => {
       message.error('前端接口调取/数据处理出现错误, 请联系管理员');
     })

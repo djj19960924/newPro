@@ -131,7 +131,8 @@ class resolveResponse {
         message.error(`${data.msg} 状态码:${data.status}`)
       } else if (data.status < 10000) {
         // 后端约定: 小于 10000 做警告处理
-        message.warn(`${data.msg}${warnShowNoStatus === true ? '' : ` 状态码:${data.status}`}`)
+        // message.warn(`${data.msg}${warnShowNoStatus === true ? '' : ` 状态码:${data.status}`}`)
+        message.warn(data.msg);
       }
     }
   }

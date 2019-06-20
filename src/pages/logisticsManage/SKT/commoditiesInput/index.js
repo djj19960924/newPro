@@ -9,8 +9,13 @@ class SKTCommoditiesInput extends React.Component {
     this.state = {
       boxesIsLoading: false,
       productNum: 0,
-      isFocusOnWindow: true
-    };
+      isFocusOnWindow: true,
+      isSelectBox: false,
+      parcelCode: null,
+      productCode: null,
+      currentBoxInfo: {},
+      isOnFocusInput: false
+    }
   }
 
   componentDidMount() {
@@ -71,15 +76,26 @@ class SKTCommoditiesInput extends React.Component {
             if (ruleBox.test(inputValue)) {
               // 箱号判断, 调取接口添加箱子至该用户名下
               if (inputValue.length === 14) {
+                const {parcelCode} = this.state;
                 // message.success(`识别为箱号: ${inputValue}`);
-                console.log(inputValue);
+                // console.log(inputValue);
+                if (parcelCode !== null) {
+                  message.warn(`请完成当前箱子的操作再扫取新的箱号`)
+                } else {
+                  this.setState({parcelCode: inputValue},() => {
+                    this.getUserInfoByParcelCode();
+                  });
+                }
               } else {
                 message.error(`识别为箱号, 但是长度不正确, 请重新扫描`);
               }
             } else {
               // 商品条码判断, 调取接口添加商品进当前箱子
               // message.success(`识别为条形码: ${inputValue}`);
-              console.log(inputValue);
+              // console.log(inputValue);
+              this.setState({productCode: inputValue},() => {
+                this.entryProduct();
+              });
             }
             clearData();
           }
@@ -94,6 +110,25 @@ class SKTCommoditiesInput extends React.Component {
     const data = {parcelCode, productCode};
     this.ajax.post('/backend/SktProductManage/entryProduct', data).then(r => {
       if (r.data.status === 10000) {
+        message.success('成功录入商品');
+        this.setState({currentBoxInfo: r.data.data});
+      }
+      r.showError();
+    }).catch(r => {
+      console.error(r);
+      this.ajax.isReturnLogin(r, );
+    });
+  }
+
+  // 增加/减少箱内指定商品数量
+  changeProductNumber(type, productCode) {
+    const {parcelCode} = this.state;
+    const data = {parcelCode, productCode};
+    const url = (type === 'plus')
+      ? '/backend/SktProductManage/cumulateProductNum'
+      : '/backend/SktProductManage/decreaseProductNum';
+    this.ajax.post(url, data).then(r => {
+      if (r.data.status === 10000) {
         //
       }
       r.showError();
@@ -101,6 +136,55 @@ class SKTCommoditiesInput extends React.Component {
       console.error(r);
       this.ajax.isReturnLogin(r, this);
     });
+  }
+
+  // 根据包裹单号获取用户信息、商品列表
+  getUserInfoByParcelCode() {
+    const {parcelCode} = this.state;
+    const data = {parcelCode};
+    this.ajax.post('/backend/SktProductManage/getUserInfoByParcelCode', data).then(r => {
+      if (r.data.status === 10000) {
+        this.setState({
+          isSelectBox: true,
+          currentBoxInfo: r.data.data
+        });
+      } else {
+        this.clearBox();
+      }
+      r.showError();
+    }).catch(r => {
+      console.error(r);
+      this.clearBox();
+      this.ajax.isReturnLogin(r, this);
+    });
+  }
+
+  // 清空箱子信息
+  clearBox() {
+    this.setState({
+      isSelectBox: false,
+      parcelCode: null,
+      currentBoxInfo: null,
+      isOnFocusInput: false
+    });
+  }
+
+  // 焦点进入箱重输入框触发
+  onFocusBoxWeight() {
+    const { boxesList, } = this.state;
+    this.setState({isOnFocusInput: true});
+    this.unloadKeyListener();
+    window.onkeyup = (e) => {
+      if (e.key === `Enter`) document.querySelector(`#boxWeight`).blur();
+    }
+  }
+
+  // 离开箱重输入框触发
+  onBlurBoxWeight() {
+    const { currentBoxInfo } = this.state;
+    // 这里触发接口调取, 参数值为 currentBoxInfo.parcelWeight
+    this.loadKeyListener();
+    this.setState({isOnFocusInput: false});
   }
 
   // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
@@ -111,111 +195,117 @@ class SKTCommoditiesInput extends React.Component {
     this.setState = () => null
   }
   render() {
-    const {boxesIsLoading, productNum, isFocusOnWindow} = this.state;
+    const {boxesIsLoading, productNum, isFocusOnWindow, isSelectBox, currentBoxInfo, isOnFocusInput} = this.state;
     return (
       <div className="SKTCommoditiesInput">
         <div className="title">
           <div className="titleMain">扫码录入商品</div>
           <div className="titleLine" />
         </div>
-        <div className="main">
-          {/*存放加载提示图标*/}
-          {boxesIsLoading &&
-          <div className="loading">
-            <Icon type="loading" />
-          </div>
-          }
-          {/*箱子内部*/}
-          <div className="boxes">
-            <div className="box">
-              <Row className="boxTitleLine boxInfo" >
-                <Col span={8} className="boxNum">箱号: BH123456789123</Col>
-                <Col span={6} title="qqz">客户昵称: qqz</Col>
-                <Col span={10}>订单时间: 2019-06-14 13:42:13</Col>
-              </Row>
-              <Row className="boxTitleLine" >
-                <Col span={3} >
-                  <span>序号</span>
-                </Col>
-                <Col span={6} >
-                  <span>商品条码</span>
-                </Col>
-                <Col span={10} >
-                  <span>商品名称</span>
-                </Col>
-                <Col span={5} >
-                  <span>数量</span>
-                  {/*这里动态添加商品数量提示*/}
-                  {null && '这里动态添加商品数量提示'}
-                </Col>
-              </Row>
-              <div className="boxMain">
+        {isSelectBox
+          ? <div className="main">
+              {/*存放加载提示图标*/}
+              {boxesIsLoading &&
+              <div className="loading">
+                <Icon type="loading" />
+              </div>
+              }
+              {/*箱子内部*/}
+              <div className="boxes">
+                <div className="box">
+                  <Row className="boxTitleLine boxInfo" >
+                    <Col span={8} className="boxNum">箱号: {currentBoxInfo.parcelCode}</Col>
+                    <Col span={8}>
+                      <div>
+                        <div className="boxWeightLine">
+                          <span className="boxWeightInfo" style={{color:'rgba(255,0,0,.8'}}>重量: </span>
+                          <InputNumber className="boxWeight"
+                                       id="boxWeight"
+                                       style={!currentBoxInfo.parcelWeight ? {border:`1px solid rgba(255,0,0,.5)`} : null}
+                                       max={99.9} min={0.1}
+                                       precision={1}
+                                       value={currentBoxInfo.parcelWeight}
+                                       onChange={v => {
+                                         const {currentBoxInfo} = this.state;
+                                         currentBoxInfo.parcelWeight = v;
+                                         this.setState({});
+                                       }}
+                                       onBlur={this.onBlurBoxWeight.bind(this)}
+                                       onFocus={this.onFocusBoxWeight.bind(this)}
+                          />
+                          <span className="boxWeightUnit">Kg</span>
+                        </div>
+                        <div className="boxWeightWarn">
+                          {isOnFocusInput &&
+                          <p>
+                            正在编辑箱重, 暂停扫码器相关功能
+                          </p>
+                          }
+                        </div>
+                      </div>
+                    </Col>
+                    <Col span={8} title={currentBoxInfo.nickname}>客户昵称: {currentBoxInfo.nickname}</Col>
+                  </Row>
+                  <Row className="boxTitleLine" >
+                    <Col span={3} >
+                      <span>序号</span>
+                    </Col>
+                    <Col span={6} >
+                      <span>商品条码</span>
+                    </Col>
+                    <Col span={10} >
+                      <span>商品名称</span>
+                    </Col>
+                    <Col span={5} >
+                      <span>数量</span>
+                      {/*这里动态添加商品数量提示*/}
+                      {null && '这里动态添加商品数量提示'}
+                    </Col>
+                  </Row>
+                  <div className="boxMain">
+                    {currentBoxInfo.sktProductVoList.map((Item, index) => {
+                      return (
+                        <Row className={`commoditiesInfo rowLineColor_${(index + 1) % 2 !== 0 ? 'light' : 'dark'}`}
+                             key={index}>
+                          <Col className="infoCol" span={3}>{index + 1}</Col>
+                          <Col className="infoCol" span={6}>{Item.productCode}</Col>
+                          <Col className="infoCol" span={10} title={Item.productName}>{Item.productName}</Col>
+                          <Col className="infoCol" span={5}>
+                            <div className="btnPM" style={{marginRight: 10}}
+                              onClick={this.changeProductNumber.bind(this,'minus', Item.productCode)}
+                            >-</div>
+                            {Item.productNum}
+                            <div className="btnPM" style={{marginLeft: 10}}
+                              onClick={this.changeProductNumber.bind(this,'plus', Item.productCode)}
+                            >+</div>
+                          </Col>
+                        </Row>
+                      )})
+                    }
 
-                <Row className={`commoditiesInfo commoditiesInfo_0 rowLineColor_${(0 + 1) % 2 !== 0 ? 'light' : 'dark'}`}
-                >
-                  <Col className="infoCol" span={3}>1</Col>
-                  <Col className="infoCol" span={6}>BH123456789123</Col>
-                  <Col className="infoCol" span={10} title={'测试商品1'}>测试商品1</Col>
-                  <Col className="infoCol" span={5}>
-                    <div className="btnPM" style={{marginRight: 10}}
-                         // onClick={this.changeProductNumber.bind(this,'minus',commoditiesItem.productCode,boxItem.parcelNo)}
-                    >-</div>
-                    {/*{commoditiesItem.productNum}*/}
-                    3
-                    <div className="btnPM" style={{marginLeft: 10}}
-                         // onClick={this.changeProductNumber.bind(this,'plus',commoditiesItem.productCode,boxItem.parcelNo)}
-                    >+</div>
-                  </Col>
-                </Row>
-
-                <Row className={`commoditiesInfo commoditiesInfo_1  rowLineColor_${(1 + 1) % 2 !== 0 ? 'light' : 'dark'}`}
-                >
-                  <Col className="infoCol" span={3}>2</Col>
-                  <Col className="infoCol" span={6}>BH123456789124</Col>
-                  <Col className="infoCol" span={10} title={'测试商品2'}>测试商品2</Col>
-                  <Col className="infoCol" span={5}>
-                    <div className="btnPM" style={{marginRight: 10}}
-                    >-</div>
-                    12
-                    <div className="btnPM" style={{marginLeft: 10}}
-                    >+</div>
-                  </Col>
-                </Row>
-
-                <Row className={`commoditiesInfo commoditiesInfo_1  rowLineColor_${(2 + 1) % 2 !== 0 ? 'light' : 'dark'}`}
-                >
-                  <Col className="infoCol" span={3}>3</Col>
-                  <Col className="infoCol" span={6}>BH123456789125</Col>
-                  <Col className="infoCol" span={10} title={'测试商品3'}>测试商品3</Col>
-                  <Col className="infoCol" span={5}>
-                    <div className="btnPM" style={{marginRight: 10}}
-                    >-</div>
-                    4
-                    <div className="btnPM" style={{marginLeft: 10}}
-                    >+</div>
-                  </Col>
-                </Row>
-
+                  </div>
+                </div>
+              </div>
+              {/*包裹信息*/}
+              <div className="packInfo">
+                <div className="packInfoLine">
+                  <span>物流方案: BC</span>
+                </div>
+                <div className="packInfoLine">
+                  <span>共 {productNum} 件商品, </span>
+                  <Button type="danger"
+                          style={{marginLeft: 10}}
+                          onClick={this.clearBox.bind(this)}
+                  >退出</Button>
+                  <Button type="primary"
+                          style={{marginLeft: 10}}
+                          // onClick={this.createOrder.bind(this)}
+                  >完成</Button>
+                </div>
               </div>
             </div>
-          </div>
-          {/*包裹信息*/}
-          <div className="packInfo">
-            <div className="packInfoLine">
-              <span>物流方案: BC</span>
-            </div>
-            <div className="packInfoLine">
-              <span>共 {productNum} 件商品, </span>
-              <Button type="danger"
-                      style={{marginLeft: 10}}
-              >退出</Button>
-              <Button type="primary"
-                      style={{marginLeft: 10}}
-                      // onClick={this.createOrder.bind(this)}
-              >完成</Button>
-            </div>
-          </div>
-        </div>
+          : <div className="needBoxNum">请扫码录入箱号</div>
+        }
 
         {isFocusOnWindow &&
         // 遮罩层, 用于保证用户焦点停留于该页面中, 否则显示该遮罩, 并提示需要点击

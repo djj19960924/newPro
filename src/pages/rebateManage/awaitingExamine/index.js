@@ -156,7 +156,7 @@ class awaitingExamine extends React.Component {
         selectIsDisabled: false,
         selectIsLoading: false
       });
-      r.showError(true);
+      r.showError();
     }).catch(r => {
       console.error(r);
       this.ajax.isReturnLogin(r, this);
@@ -222,7 +222,7 @@ class awaitingExamine extends React.Component {
         rejectSpecificReason: null,
         ticketIsLoading: false
       });
-      r.showError(true);
+      r.showError();
     }).catch(r => {
       console.error(r);
       this.ajax.isReturnLogin(r, this);
@@ -338,7 +338,7 @@ class awaitingExamine extends React.Component {
               this.setState({defaultExchangeRate: val.exchangeRate});
               this.hasSubmit();
             }
-            r.showError(true);
+            r.showError();
           }).catch(r => {
             console.error(r);
             this.ajax.isReturnLogin(r, this);

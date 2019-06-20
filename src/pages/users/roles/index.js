@@ -64,7 +64,7 @@ class roles extends React.Component {
           tableDataList: r.data.data,
         });
       }
-      r.showError(message);
+      r.showError();
       this.setState({tableIsLoading: false});
     }).catch(r => {
       console.error(r);
@@ -156,7 +156,7 @@ class roles extends React.Component {
           this.setState({showDetails: false});
           this.getRoleList();
         }
-        r.showError(message);
+        r.showError();
       }).catch(r => {
         console.error(r);
         this.ajax.isReturnLogin(r,this);
@@ -178,7 +178,7 @@ class roles extends React.Component {
         this.setState({showDetails: false, newRoleName: ''});
         this.getRoleList();
       }
-      r.showError(message);
+      r.showError();
     }).catch(r => {
       console.error(r);
       this.ajax.isReturnLogin(r,this);
@@ -199,7 +199,7 @@ class roles extends React.Component {
             message.success(`${r.data.msg}`);
             this.getRoleList();
           }
-          r.showError(message);
+          r.showError();
         }).catch(r => {
           console.error(r);
           this.ajax.isReturnLogin(r, this);

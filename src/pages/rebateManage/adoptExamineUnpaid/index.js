@@ -42,7 +42,7 @@ class adoptExamineUnpaid extends React.Component{
         })
       }
       this.setState({tableIsLoading:false});
-      r.showError(true);
+      r.showError();
     }).catch(r => {
       this.setState({tableIsLoading:false});
       this.ajax.isReturnLogin(r, this);
@@ -76,7 +76,7 @@ class adoptExamineUnpaid extends React.Component{
           pageTotal: 0
         })
       }
-      r.showError(true);
+      r.showError();
       this.setState({tableIsLoading:false});
     }).catch(r => {
       this.setState({tableIsLoading:false});

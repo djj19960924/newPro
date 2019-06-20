@@ -44,7 +44,7 @@ class globalTranshipmentArrived extends React.Component {
         })
       }
       showLoading(false);
-      r.showError(true);
+      r.showError();
     }).catch(r => {
       console.error(r);
       showLoading(false);

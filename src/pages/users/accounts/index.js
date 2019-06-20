@@ -47,7 +47,7 @@ class accounts extends React.Component {
           pageTotal: r.data.data.total
         });
       }
-      r.showError(message);
+      r.showError();
       this.setState({tableIsLoading: false});
     }).catch(r => {
       console.error(r);
@@ -72,7 +72,7 @@ class accounts extends React.Component {
         }
         this.setState({rolesOptions: dataList,rolesObject:dataObj})
       }
-      r.showError(message);
+      r.showError();
       this.setState({tableIsLoading: false});
     }).catch(r => {
       console.error(r);
@@ -124,7 +124,7 @@ class accounts extends React.Component {
             message.success(r.data.msg);
             this.getUserList();
           }
-          r.showError(message);
+          r.showError();
         }).catch(r => {
           console.error(r);
           this.ajax.isReturnLogin(r,this);

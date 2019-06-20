@@ -96,7 +96,7 @@ class MoneyCalculation extends React.Component {
           this.props.changeReciptMoney(mainDataList)
         })
       }
-      r.showError(true);
+      r.showError();
     }).catch(r => {
       console.error(r);
       this.ajax.isReturnLogin(r, this);
