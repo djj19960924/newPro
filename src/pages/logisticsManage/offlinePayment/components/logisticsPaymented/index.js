@@ -31,7 +31,7 @@ class LogisticsPaymented extends React.Component {
   getPaymented(pageNum = this.state.pageNum, pageSize = this.state.pageSize) {
     const {pageSizeOptions}=this.state;
     this.setState({tableLoading: true});
-    this.ajax.post("/backendSpeedexpress/getOffLine",{pageNum: pageNum, pageSize: pageSize, isPay: 1}).then(res=>{
+    this.ajax.post("/backend/speedexpress/getOffLine",{pageNum: pageNum, pageSize: pageSize, isPay: 1}).then(res=>{
       this.setState({tableLoading: false});
       if (res.data.status === 10000) {
         if(res.data.data.total>pageSizeOptions[pageSizeOptions.length-1]){

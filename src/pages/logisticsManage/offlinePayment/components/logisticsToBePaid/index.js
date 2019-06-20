@@ -37,7 +37,7 @@ class LogisticsToBePaid extends React.Component {
   getToBePaid(pageNum = this.state.pageNum, pageSize = this.state.pageSize) {
     const {pageSizeOptions} = this.state;
     this.setState({tableLoading: true});
-    this.ajax.post("/backendSpeedexpress/getOffLine", {pageNum: pageNum, pageSize: pageSize, isPay: 0}).then(res => {
+    this.ajax.post("/backend/speedexpress/getOffLine", {pageNum: pageNum, pageSize: pageSize, isPay: 0}).then(res => {
       this.setState({tableLoading: false});
       if (res.data.status === 10000) {
         if (res.data.total > pageSizeOptions[pageSizeOptions.length - 1]) {
@@ -65,7 +65,7 @@ class LogisticsToBePaid extends React.Component {
     const {offLineType, orderNum, payType} = this.state;
     if (payType || payType === 0) {
       this.setState({btnLoading: true});
-      this.ajax.post("/backendSpeedexpress/updateOffLine", {
+      this.ajax.post("/backend/speedexpress/updateOffLine", {
         offLineType: offLineType,
         code: orderNum,
         payType: payType
