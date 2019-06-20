@@ -281,7 +281,7 @@ class EditProgress extends React.Component {
         <div>
           <Button className="return-purchasing" type="primary" size="large" onClick={() => {
             this.props.history.push("/reservation-service/global-errands?contentType="+window.getQueryString("contentType"))
-          }}>返回等待采购页面</Button>
+          }}>{window.getQueryString("contentType")=== "0" ? "返回等待采购页面" :"返回采购结束页面"}</Button>
         </div>
       </div>
     );
