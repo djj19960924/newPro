@@ -35,11 +35,14 @@ class permissions extends React.Component {
     // let dataObj = {pageNum:pageNum,pageSize:pageSize};
     this.ajax.post('/permission/getPermissionList').then(r => {
       if (r.data.status === 10000) {
+        
         parentIdObject['0'] = '根目录';
+        // console.log('11:',r.data.data)
         for (let Obj of r.data.data) parentIdObject[`${Obj.menuId}`] = Obj.name;
         this.setState({
           tableDataList: r.data.data,
           // pageTotal: r.data.data.total
+          parentIdObject
         });
       }
       r.showError(message);
@@ -59,6 +62,47 @@ class permissions extends React.Component {
     },()=>{
       this.getPermissionList();
     })
+  }
+
+  //展示详情
+  showDetails(type, record) {
+    const data = {
+      detailState: type,
+      currentInfo: record,
+      showDetails: true,
+    }
+    if(type == "edit"){
+      
+    }
+    this.setState(data);
+    //this.props.history.push(`/users/permissions/permissionsEdit`)
+    //修改权限
+    // if(type == "edit"){
+    //   let data = {
+    //     menuId: record.menuId,
+    //     name: record.name,
+    //     url: record.url,
+    //     requiredPermission:record.requiredPermission,
+    //     paremtId:record.paremtId
+    //   }
+    //   this.ajax.post('/permission/updatePermission',data).then(r => {
+    //     console.log('r:',r)
+    //   })
+    // }
+    
+  }
+  handleOk(e){
+    console.log(e);
+    
+    this.setState({
+      showDetails: false,
+    });
+  }
+  handleCancel(e){
+    console.log(e);
+    this.setState({
+      showDetails: false,
+    });
   }
 
   // 卸载 setState, 防止组件卸载时执行 setState 相关导致报错
@@ -94,13 +138,13 @@ class permissions extends React.Component {
         render: (text, record) =>
           <div>
             <Button type="primary"
-                    disabled={true}
-                    // onClick={this.showDetails.bind(this,'detail',record)}
+                    // disabled={true}
+                    onClick={this.showDetails.bind(this,'detail',record)}
             >查看</Button>
             <Button type="primary"
-                    disabled={true}
+                    // disabled={true}
                     style={{marginLeft: 10}}
-                    // onClick={this.showDetails.bind(this,'edit',record)}
+                    onClick={this.showDetails.bind(this,'edit',record)}
             >修改</Button>
             <Button type="danger"
                     disabled={true}
@@ -110,7 +154,7 @@ class permissions extends React.Component {
           </div>
       },
     ];
-    const { tableDataList, tableIsLoading, pageTotal, pageSize, pageNum, pageSizeOptions, detailState, showDetails, currentInfo, parentIdObject, } = this.state;
+    const { tableDataList, tableIsLoading, pageTotal, pageSize, pageNum, pageSizeOptions, detailState, showDetails, currentInfo, parentIdObject } = this.state;
     return (
       <div className="permissions">
         <div className="title">
@@ -124,60 +168,69 @@ class permissions extends React.Component {
         </div>
         <Modal className="details"
                wrapClassName="accountsDetailsModal"
-               title={detailState === 'edit' ? '修改账户' : (detailState === 'add' ? '新增账户' : '账户详情')}
+               title={detailState === 'detail' ? '查看权限' : '修改权限'}
                visible={showDetails}
                bodyStyle={{padding: 18,maxHeight: '600px',overflow: 'auto'}}
                width={500}
-               onCancel={() => this.setState({showDetails: false})}
-               // onOk={this.submitForm.bind(this)}
-               okText={detailState === 'edit' ? '修改' : (detailState === 'add' ? '新增' : '')}
-               footer={detailState === 'detail' ? null : undefined}
+               onCancel={this.handleCancel.bind(this)}
+               onOk={this.handleOk.bind(this)}
+              //  okText={detailState === 'edit' ? '修改' : (detailState === 'add' ? '新增' : '')}
+              //  footer={detailState === 'detail' ? null : undefined}
                forceRender={true}
+
         >
           {/* 用户名称/邮箱/电话/公司/角色 */}
           <Form className=""
                 labelCol={{span: 8}}
                 wrapperCol={{span: 16}}
           >
-            <FormItem label="账户名称" colon >
+            <FormItem label="权限名称" colon >
               {detailState !== 'detail' ?
-                getFieldDecorator('userName', {
+                getFieldDecorator('name', {
                   rules: [{required: true, message: '请输入账户名称!'}],
                 })( <Input placeholder="请输入账户名称" /> )
-                : <div>{currentInfo.userName}</div>
+                : <div>{currentInfo.name}</div>
               }
             </FormItem>
-            <FormItem label="角色名称" colon >
+            <FormItem label="权限类型" colon >
               {detailState !== 'detail' ?
-                getFieldDecorator('roleId', {
+                getFieldDecorator('type', {
                   rules: [{required: true, message: '请选择角色!'}]
-                })( <Select placeholder="请选择角色" ><Option key="test">test</Option></Select> )
-                : <div>{currentInfo.roleName}</div>
+                })( <Select placeholder="请选择角色" >
+                      <Option key="1">菜单权限</Option>
+                      <Option key="2">功能权限</Option>
+                    </Select> 
+                  ):<div>{currentInfo.roleName}</div>
               }
             </FormItem>
-            <FormItem label="密码" colon style={detailState === 'detail' ? {display: 'none'} : {}}>
-              {getFieldDecorator('password', {
-                rules: [{required: (detailState === 'add'), message: '请输入密码!'}]
-              })( <Input placeholder={`${detailState === 'add' ? '请输入密码' : '如需修改, 请输入新密码'}`} /> )}
-            </FormItem>
-            <FormItem label="邮箱" colon >
+            {
+              !currentInfo?'':(currentInfo.type==1?'':(
+                <FormItem label="是否必须" colon style={detailState === 'detail' ? {display: 'none'} : {}}>
+                  {getFieldDecorator('requiredPermission', {
+                    rules: [{message: '是否必须'}]
+                  })( <Select placeholder="是否必须">
+                        <Option key="1">是</Option>
+                        <Option key="2">否</Option>
+                      </Select> )}
+                </FormItem>
+              ))
+            }
+            <FormItem label="父级权限" colon >
               {detailState !== 'detail' ?
-                getFieldDecorator('email')( <Input placeholder="请输入邮箱" /> )
-                : <div>{currentInfo.email}</div>
-              }
+                getFieldDecorator('parentId', {
+                  rules: [{required: true, message: '请选择父级权限!'}]
+                })( <Select>
+                      {tableDataList.map((item)=><Option key={item.menuId}>{item.name}</Option>)}
+                    </Select> ):<div>{parentIdObject[currentInfo.parentId]}</div>}
             </FormItem>
-            <FormItem label="电话" colon >
-              {detailState !== 'detail' ?
-                getFieldDecorator('userPhone')( <Input placeholder="请输入电话" /> )
-                : <div>{currentInfo.userPhone}</div>
-              }
-            </FormItem>
-            <FormItem label="公司" colon >
-              {detailState !== 'detail' ?
-                getFieldDecorator('company')( <Input placeholder="请输入公司名称" /> )
-                : <div>{currentInfo.company}</div>
-              }
-            </FormItem>
+            {
+              // <FormItem label="父级权限" colon style={detailState === 'detail' ? {display: 'none'} : {}}>
+              //   {getFieldDecorator('password', {
+              //     rules: [{required: (detailState === 'add'), message: '请输入密码!'}]
+              //   })( <Input placeholder={`${detailState === 'add' ? '请输入密码' : '如需修改, 请输入新密码'}`} /> )}
+              // </FormItem>
+            }
+            
           </Form>
         </Modal>
 

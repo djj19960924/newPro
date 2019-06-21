@@ -22,7 +22,8 @@ const menus = [
         key: '/users/permissions',
         // testType: 'serverTest',
         components: [
-          {name: 'permissions', path: '/users/permissions'}
+          {name: 'permissions', path: '/users/permissions'},
+          {name: 'permissionsEdit', path: '/users/permissions/permissionsEdit'}
         ]
       },
       {
